@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Fitness Coach",
+    "slug": "fitness-coach",
+    "version": "0.0.0",
+    "scheme": "fitness-coach",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fitnesscoach.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "需要摄像头以实时分析您的健身动作"
+      }
+    },
+    "android": {
+      "package": "com.fitnesscoach.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["android.permission.CAMERA"],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

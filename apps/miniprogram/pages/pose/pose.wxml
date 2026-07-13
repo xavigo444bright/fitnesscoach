@@ -1,0 +1,31 @@
+<view class="page">
+  <camera
+    wx:if="{{cameraOn}}"
+    id="poseCamera"
+    class="camera"
+    device-position="front"
+    flash="off"
+    frame-size="small"
+    binderror="onCameraError"
+  />
+
+  <canvas
+    type="2d"
+    id="overlay"
+    class="overlay"
+  />
+
+  <view class="hud">
+    <view class="title">M0-T6 · MoveNet Spike</view>
+    <view>状态: {{status}}</view>
+    <view>关键点: {{landmarkCount}}（目标 ≥17）</view>
+    <view>FPS: {{fps}}（目标 ≥10）</view>
+    <view class="err" wx:if="{{errorMsg}}">{{errorMsg}}</view>
+    <view class="actions">
+      <button size="mini" type="primary" bindtap="toggleDetect" disabled="{{!modelReady && !detecting}}">
+        {{detecting ? '停止检测' : '开始检测'}}
+      </button>
+    </view>
+    <view class="tip">请用真机预览；需先在开发者工具「工具 → 构建 npm」</view>
+  </view>
+</view>

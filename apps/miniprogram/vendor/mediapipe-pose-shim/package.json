@@ -1,0 +1,6 @@
+{
+  "name": "@mediapipe/pose",
+  "version": "0.0.0-shim",
+  "description": "Shim for WeChat miniprogram — MoveNet does not need real MediaPipe Pose",
+  "main": "index.js"
+}

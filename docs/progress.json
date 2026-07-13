@@ -1,0 +1,76 @@
+{
+  "version": "0.3.1",
+  "plan": "module-based",
+  "last_updated": "2026-07-11T23:25:00+08:00",
+  "status": "blocked",
+  "blocker": "M0-T6 需真机验证 MoveNet：npm install + 微信开发者工具「构建 npm」后，真机打开「姿态 Spike」记录关键点与 FPS。回复「姿态小程序 OK，关键点 X，FPS Y」或失败现象。",
+  "loop": {
+    "interval": "20m",
+    "mode": "human-in-loop",
+    "started_at": "2026-07-07T23:10:00+08:00"
+  },
+  "current_module": "M0",
+  "modules": {
+    "M0": { "name": "工程基建", "status": "in_progress", "depends_on": [] },
+    "MU": { "name": "UI 设计基础", "status": "pending", "depends_on": ["M0"] },
+    "M1": { "name": "Core 引擎", "status": "pending", "depends_on": ["M0"] },
+    "M2A": { "name": "Pose App", "status": "pending", "depends_on": ["M1"] },
+    "M2B": { "name": "Pose 小程序", "status": "pending", "depends_on": ["M0", "M1"] },
+    "M3": { "name": "渲染与反馈", "status": "pending", "depends_on": ["M1", "MU", "M2A"] },
+    "M4": { "name": "App 壳", "status": "pending", "depends_on": ["M3", "MU"] },
+    "M5": { "name": "小程序壳", "status": "pending", "depends_on": ["M2B", "M3", "MU"] },
+    "M6": { "name": "质量与交付", "status": "pending", "depends_on": ["M4", "M5"] }
+  },
+  "next_task": {
+    "id": "M0-T6",
+    "module": "M0",
+    "title": "小程序姿态 Spike + spike-report",
+    "verification": ["VT-P0B-003", "VT-P0B-004", "VT-P0B-005"],
+    "human_required": true,
+    "notes": "方案 A MoveNet 页面已加；待构建 npm + 真机测 FPS"
+  },
+  "queue": [
+    { "id": "M0-T6", "module": "M0", "human_required": true },
+    { "id": "M0-T7", "module": "M0", "human_required": false },
+    { "id": "M0-GATE", "module": "M0", "human_required": true },
+    { "id": "MU-T1", "module": "MU", "human_required": true },
+    { "id": "MU-T2", "module": "MU", "human_required": false },
+    { "id": "MU-T3", "module": "MU", "human_required": false },
+    { "id": "MU-T4", "module": "MU", "human_required": false },
+    { "id": "MU-T5", "module": "MU", "human_required": false },
+    { "id": "MU-GATE", "module": "MU", "human_required": true },
+    { "id": "M1-T1", "module": "M1", "human_required": false },
+    { "id": "M1-T2", "module": "M1", "human_required": false },
+    { "id": "M1-T3", "module": "M1", "human_required": false },
+    { "id": "M1-T4", "module": "M1", "human_required": false },
+    { "id": "M1-T5", "module": "M1", "human_required": false },
+    { "id": "M1-T6", "module": "M1", "human_required": false },
+    { "id": "M1-T7", "module": "M1", "human_required": false },
+    { "id": "M1-T8", "module": "M1", "human_required": false },
+    { "id": "M1-T9", "module": "M1", "human_required": false },
+    { "id": "M1-T10", "module": "M1", "human_required": false },
+    { "id": "M1-GATE", "module": "M1", "human_required": false }
+  ],
+  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5"],
+  "completed_gates": [],
+  "iteration_log": [
+    {
+      "at": "2026-07-11T23:15:00+08:00",
+      "module": "M0",
+      "task": "M0-T4",
+      "result": "done",
+      "summary": "真机 MediaPipe Spike 通过：关键点 33，FPS 20。",
+      "next": "M0-T5",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-11T23:25:00+08:00",
+      "module": "M0",
+      "task": "M0-T5 + M0-T6 prep",
+      "result": "partial",
+      "summary": "VT-P0B-002 通过。已加 pages/pose MoveNet Spike 与 TFJS 依赖。",
+      "next": "构建 npm + 真机测 VT-P0B-003/004",
+      "human_action_needed": true
+    }
+  ]
+}

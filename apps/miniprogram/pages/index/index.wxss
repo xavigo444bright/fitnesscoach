@@ -1,0 +1,35 @@
+.page {
+  min-height: 100vh;
+  padding: 80rpx 48rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.brand {
+  font-size: 48rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.desc {
+  color: #aaa;
+  margin-bottom: 64rpx;
+}
+
+.btn {
+  width: 100%;
+  margin-bottom: 24rpx;
+}
+
+.secondary {
+  background: #333 !important;
+  color: #fff !important;
+}
+
+.hint {
+  margin-top: 16rpx;
+  color: #888;
+  font-size: 24rpx;
+}

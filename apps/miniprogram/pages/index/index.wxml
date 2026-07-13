@@ -1,0 +1,7 @@
+<view class="page">
+  <view class="brand">Fitness Coach</view>
+  <view class="desc">M0 · 微信小程序 Spike</view>
+  <button class="btn" type="primary" bindtap="goCamera">打开摄像头预览</button>
+  <button class="btn secondary" bindtap="goPose">姿态 Spike（MoveNet）</button>
+  <view class="hint">摄像头 / 姿态请用真机预览</view>
+</view>

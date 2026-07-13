@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/camera/camera",
+    "pages/pose/pose"
+  ],
+  "window": {
+    "navigationBarTitleText": "Fitness Coach",
+    "navigationBarBackgroundColor": "#111111",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#111111"
+  },
+  "permission": {
+    "scope.camera": {
+      "desc": "需要摄像头以实时分析您的健身动作"
+    }
+  },
+  "requiredPrivateInfos": [],
+  "sitemapLocation": "sitemap.json"
+}

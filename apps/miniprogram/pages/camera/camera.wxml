@@ -1,0 +1,23 @@
+<view class="page">
+  <block wx:if="{{authorized}}">
+    <camera
+      wx:if="{{cameraVisible}}"
+      class="camera"
+      device-position="{{facing}}"
+      flash="off"
+      binderror="onCameraError"
+    />
+    <view wx:else class="camera placeholder">切换中…</view>
+
+    <view class="hud">
+      <text>M0-T5 · {{facing === 'front' ? '前置' : '后置'}}</text>
+      <button size="mini" bindtap="toggleFacing">切换摄像头</button>
+    </view>
+  </block>
+
+  <view wx:else class="center">
+    <view class="title">需要摄像头权限</view>
+    <view class="hint">{{errorMsg || '用于健身动作实时预览'}}</view>
+    <button type="primary" bindtap="requestAuth">允许使用摄像头</button>
+  </view>
+</view>

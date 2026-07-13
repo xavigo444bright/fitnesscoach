@@ -1,0 +1,16 @@
+{
+  "name": "fitness-coach",
+  "private": true,
+  "version": "0.0.0",
+  "description": "健身动作指导 — 手机 App + 微信小程序",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r exec rm -rf dist node_modules"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.expo/
+.expo-shared/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Expo / React Native
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+
+# WeChat miniprogram
+apps/miniprogram/node_modules/
+apps/miniprogram/miniprogram_npm/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json

@@ -1,0 +1,11 @@
+{
+  "name": "@fitness-coach/miniprogram",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fitness Coach WeChat miniprogram",
+  "dependencies": {
+    "@tensorflow/tfjs-backend-cpu": "^4.22.0",
+    "@tensorflow/tfjs-converter": "^4.22.0",
+    "@tensorflow/tfjs-core": "^4.22.0"
+  }
+}

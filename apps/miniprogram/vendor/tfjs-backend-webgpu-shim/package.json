@@ -1,0 +1,6 @@
+{
+  "name": "@tensorflow/tfjs-backend-webgpu",
+  "version": "0.0.0-shim",
+  "description": "Shim for WeChat miniprogram — WebGPU not used in MoveNet Spike",
+  "main": "index.js"
+}
