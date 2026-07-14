@@ -1,9 +1,9 @@
 {
-  "version": "0.3.1",
+  "version": "0.3.2",
   "plan": "module-based",
-  "last_updated": "2026-07-11T23:25:00+08:00",
-  "status": "blocked",
-  "blocker": "M0-T6 需真机验证 MoveNet：npm install + 微信开发者工具「构建 npm」后，真机打开「姿态 Spike」记录关键点与 FPS。回复「姿态小程序 OK，关键点 X，FPS Y」或失败现象。",
+  "last_updated": "2026-07-15T00:22:00+08:00",
+  "status": "in_progress",
+  "blocker": null,
   "loop": {
     "interval": "20m",
     "mode": "human-in-loop",
@@ -22,15 +22,14 @@
     "M6": { "name": "质量与交付", "status": "pending", "depends_on": ["M4", "M5"] }
   },
   "next_task": {
-    "id": "M0-T6",
+    "id": "M0-T7",
     "module": "M0",
-    "title": "小程序姿态 Spike + spike-report",
-    "verification": ["VT-P0B-003", "VT-P0B-004", "VT-P0B-005"],
-    "human_required": true,
-    "notes": "方案 A MoveNet 页面已加；待构建 npm + 真机测 FPS"
+    "title": "整理 spike-report + progress，准备 M0-GATE",
+    "verification": ["VT-P0B-005"],
+    "human_required": false,
+    "notes": "M0-T6 真机通过（webgl·nhwc-v11，关键点14-15，FPS4，350ms）。spike-report 小程序栏已填、方案选 A。"
   },
   "queue": [
-    { "id": "M0-T6", "module": "M0", "human_required": true },
     { "id": "M0-T7", "module": "M0", "human_required": false },
     { "id": "M0-GATE", "module": "M0", "human_required": true },
     { "id": "MU-T1", "module": "MU", "human_required": true },
@@ -51,7 +50,7 @@
     { "id": "M1-T10", "module": "M1", "human_required": false },
     { "id": "M1-GATE", "module": "M1", "human_required": false }
   ],
-  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5"],
+  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5", "M0-T6"],
   "completed_gates": [],
   "iteration_log": [
     {
@@ -71,6 +70,15 @@
       "summary": "VT-P0B-002 通过。已加 pages/pose MoveNet Spike 与 TFJS 依赖。",
       "next": "构建 npm + 真机测 VT-P0B-003/004",
       "human_action_needed": true
+    },
+    {
+      "at": "2026-07-15T00:22:00+08:00",
+      "module": "M0",
+      "task": "M0-T6",
+      "result": "done",
+      "summary": "小程序 MoveNet 真机通过（nhwc-v11·webgl）：关键点14-15/17，FPS~4，稳态~350ms/帧。根因串：CPU 同步 execute 假死 → 改优先 WebGL；WebGL 因微信 device_util.isBrowser()=false 未自动 registerBackend → 手动 setWebGLContext + registerBackend(MathBackendWebGL/GPGPUContext)。方案选定 A（端侧，符合 FR-033）。VT-P0B-003 通过、004 记实值通过、005 已填 spike-report。",
+      "next": "M0-T7 → M0-GATE",
+      "human_action_needed": false
     }
   ]
 }

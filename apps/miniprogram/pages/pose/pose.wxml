@@ -19,7 +19,8 @@
     <view class="title">M0-T6 · MoveNet Spike</view>
     <view>状态: {{status}}</view>
     <view>关键点: {{landmarkCount}}（目标 ≥17）</view>
-    <view>FPS: {{fps}}（目标 ≥10）</view>
+    <view>FPS: {{fps}}（目标 ≥10，Spike 节流约 1 帧/0.8s）</view>
+    <view>最近推理: {{lastInferMs}} ms</view>
     <view class="err" wx:if="{{errorMsg}}">{{errorMsg}}</view>
     <view class="actions">
       <button size="mini" type="primary" bindtap="toggleDetect" disabled="{{!modelReady && !detecting}}">

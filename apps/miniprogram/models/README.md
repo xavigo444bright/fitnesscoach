@@ -5,4 +5,4 @@
 - **不要**把 `*.bin` / `model.json` 放进小程序代码包
 - 运行时下载到 `wx.env.USER_DATA_PATH/movenet-lightning/` 并缓存
 
-相关逻辑见 `utils/poseSpike.js`（`nhwc-v8`）。
+相关逻辑见 `utils/poseSpike.js`（`nhwc-v11`，优先 WebGL）。

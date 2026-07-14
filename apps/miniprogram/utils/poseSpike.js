@@ -7,7 +7,7 @@
 
 let runtimePromise = null;
 
-const PREPROCESS_VERSION = 'nhwc-v9';
+const PREPROCESS_VERSION = 'nhwc-v11';
 /** 用户文件目录缓存（不进主包，避免 80051 超 2MB） */
 const MODEL_CACHE_DIR_NAME = 'movenet-lightning';
 const MODEL_FILES = ['model.json', 'group1-shard1of2.bin', 'group1-shard2of2.bin'];
@@ -17,6 +17,8 @@ const INPUT_SIZE = 192;
 const EXPECTED_INPUT_SHAPE = [1, INPUT_SIZE, INPUT_SIZE, 3];
 const NUM_KEYPOINTS = 17;
 const FETCH_TIMEOUT_MS = 60000;
+/** CPU 端 MoveNet 在真机常 >60s 堵死主线程；优先 WebGL */
+const PREFER_WEBGL = true;
 
 /**
  * 微信环境常见：模型 attr 字符串被解成字节数组或 "78,72,87,67" 这种伪字符串
@@ -398,6 +400,124 @@ function setupWechatPlatform(tf) {
   }
 }
 
+/**
+ * 微信无 DOM canvas；需离屏 canvas + setWebGLContext，否则 webgl backend 会抛
+ * “Cannot create a canvas in this context”。
+ */
+function createWechatWebGlContext() {
+  if (typeof wx === 'undefined' || typeof wx.createOffscreenCanvas !== 'function') {
+    throw new Error('当前基础库无 wx.createOffscreenCanvas');
+  }
+  let canvas;
+  try {
+    canvas = wx.createOffscreenCanvas({ type: 'webgl', width: 1, height: 1 });
+  } catch (e1) {
+    canvas = wx.createOffscreenCanvas(1, 1);
+  }
+  if (!canvas) throw new Error('createOffscreenCanvas 返回空');
+  // TFJS canvas_util 会调用 addEventListener；微信离屏 canvas 常无此方法
+  if (typeof canvas.addEventListener !== 'function') {
+    canvas.addEventListener = function noopAddEventListener() {};
+  }
+  if (typeof canvas.removeEventListener !== 'function') {
+    canvas.removeEventListener = function noopRemoveEventListener() {};
+  }
+  const attrs = {
+    alpha: false,
+    antialias: false,
+    premultipliedAlpha: false,
+    preserveDrawingBuffer: false,
+    depth: false,
+    stencil: false,
+    failIfMajorPerformanceCaveat: false,
+  };
+  let gl = null;
+  let version = 1;
+  if (typeof canvas.getContext === 'function') {
+    gl = canvas.getContext('webgl2', attrs);
+    if (gl) version = 2;
+    if (!gl) gl = canvas.getContext('webgl', attrs);
+    if (!gl) gl = canvas.getContext('experimental-webgl', attrs);
+  }
+  if (!gl) throw new Error('离屏 canvas 无法取得 webgl 上下文（请开开发者工具「硬件加速」）');
+  return { canvas: canvas, gl: gl, version: version };
+}
+
+async function initBackend(tf, report) {
+  if (!tryRequire('@tensorflow/tfjs-backend-cpu')) {
+    throw new Error('缺少 @tensorflow/tfjs-backend-cpu，请重新「构建 npm」');
+  }
+  let webglErr = '';
+  let webglMod = null;
+  if (PREFER_WEBGL) {
+    try {
+      // eslint-disable-next-line global-require
+      webglMod = require('@tensorflow/tfjs-backend-webgl');
+    } catch (e) {
+      webglErr = 'require(webgl)失败:' + ((e && e.message) || e);
+      console.warn('[poseSpike]', webglErr);
+    }
+  } else {
+    webglErr = 'PREFER_WEBGL=false';
+  }
+
+  if (webglMod) {
+    report('初始化 WebGL…');
+    try {
+      const ctx = createWechatWebGlContext();
+      if (typeof webglMod.setWebGLContext === 'function') {
+        webglMod.setWebGLContext(ctx.version, ctx.gl);
+      } else {
+        throw new Error('webgl 包无 setWebGLContext 导出');
+      }
+      // 强制走我们注入的 GL，避免再走 createCanvas
+      try {
+        tf.env().set('WEBGL_VERSION', ctx.version);
+      } catch (e) {
+        // ignore
+      }
+
+      // 微信 device_util.isBrowser()===false，webgl 包的自动 registerBackend
+      // 被守卫跳过（→ "backend name 'webgl' not found in registry"）。手动注册。
+      if (typeof tf.findBackendFactory !== 'function' || !tf.findBackendFactory('webgl')) {
+        if (!webglMod.MathBackendWebGL) {
+          throw new Error('webgl 包未导出 MathBackendWebGL，无法手动注册');
+        }
+        const makeBackend = function makeWebglBackend() {
+          if (webglMod.GPGPUContext) {
+            return new webglMod.MathBackendWebGL(
+              new webglMod.GPGPUContext(ctx.gl),
+            );
+          }
+          return new webglMod.MathBackendWebGL();
+        };
+        // registerBackend 已存在会返回 false（不抛错）
+        tf.registerBackend('webgl', makeBackend, 2);
+      }
+
+      const okGl = await tf.setBackend('webgl');
+      if (okGl && tf.getBackend() === 'webgl') {
+        await tf.ready();
+        return { backend: 'webgl', note: 'webgl-' + ctx.version };
+      }
+      throw new Error('setBackend(webgl) 未生效，当前=' + tf.getBackend());
+    } catch (e) {
+      webglErr = (e && e.message) || String(e);
+      console.warn('[poseSpike] WebGL 失败，回退 CPU', webglErr);
+      report('WebGL 失败，回退 CPU…');
+    }
+  }
+
+  report('设置 CPU backend…');
+  const ok = await tf.setBackend('cpu');
+  if (!ok) throw new Error('无法设置 cpu backend');
+  await tf.ready();
+  return {
+    backend: 'cpu',
+    note: 'WebGL不可用→CPU假死｜原因: ' + (webglErr || '未知'),
+  };
+}
+
 function tryRequire(name) {
   try {
     // eslint-disable-next-line global-require, import/no-dynamic-require
@@ -719,15 +839,9 @@ async function createRuntime(onProgress) {
   const tf = require('@tensorflow/tfjs-core');
   setupWechatPlatform(tf);
 
-  if (!tryRequire('@tensorflow/tfjs-backend-cpu')) {
-    throw new Error('缺少 @tensorflow/tfjs-backend-cpu，请重新「构建 npm」');
-  }
   tryRequire('@tensorflow/tfjs-converter');
 
-  report('设置 CPU backend…');
-  const ok = await tf.setBackend('cpu');
-  if (!ok) throw new Error('无法设置 cpu backend');
-  await tf.ready();
+  const backendInfo = await initBackend(tf, report);
 
   // eslint-disable-next-line global-require
   const tfconv = require('@tensorflow/tfjs-converter');
@@ -758,12 +872,13 @@ async function createRuntime(onProgress) {
 
   report('修复模型字符串属性…');
   const attrFix = fixGraphStringAttrs(model);
-  report('模型就绪');
+  report('模型就绪（' + backendInfo.backend + '）');
 
   return {
     tf,
     model,
-    backend: tf.getBackend(),
+    backend: backendInfo.backend,
+    backendNote: backendInfo.note,
     preprocessVersion: PREPROCESS_VERSION,
     attrFix: attrFix,
     modelSource: cacheInfo.downloaded ? 'download' : 'cache',
@@ -782,31 +897,107 @@ function ensureDetector(onProgress) {
   return runtimePromise;
 }
 
-async function detectPose(frame) {
-  const { tf, model } = await ensureDetector();
-  const input = frameToInputTensor(tf, frame);
+function yieldToUi() {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, 0);
+  });
+}
+
+async function detectPose(frameOrSnapshot, onProgress) {
+  const runtime = await ensureDetector();
+  const { tf, model } = runtime;
+  const backend = runtime.backend || tf.getBackend();
+
+  const report = (msg) => {
+    if (typeof onProgress === 'function') {
+      try {
+        onProgress(msg);
+      } catch (e) {
+        // ignore
+      }
+    }
+  };
+
+  let snapshot;
+  if (frameOrSnapshot && frameOrSnapshot.__copied) {
+    snapshot = frameOrSnapshot;
+  } else {
+    const frame = frameOrSnapshot;
+    const width = frame.width | 0;
+    const height = frame.height | 0;
+    const view = new Uint8Array(frame.data);
+    const expected = width * height * 4;
+    if (width <= 0 || height <= 0 || view.byteLength < expected) {
+      throw new Error(
+        `非法相机帧: ${width}x${height} bytes=${view.byteLength}`,
+      );
+    }
+    const data = new Uint8Array(expected);
+    data.set(view.subarray(0, expected));
+    snapshot = {
+      width: width,
+      height: height,
+      data: data,
+      __copied: true,
+    };
+  }
+
+  await yieldToUi();
+  report('预处理…');
+
+  const t0 = Date.now();
+  const input = frameToInputTensor(tf, snapshot);
+  const preprocessMs = Date.now() - t0;
+
+  await yieldToUi();
+  report(
+    backend === 'webgl'
+      ? 'WebGL 推理中…'
+      : 'CPU 推理中（可能极慢/假死）…',
+  );
+
   let output = null;
   try {
+    const t1 = Date.now();
     output = runMoveNet(model, input);
-    // 输出可能是 Tensor 或 Tensor[]
+    const executeMs = Date.now() - t1;
+
     const outTensor = Array.isArray(output) ? output[0] : output;
-    // 输出 [1,1,17,3] -> (y, x, score) 归一化到 0~1
-    const data = outTensor.dataSync();
+    report('读回结果…');
+    const t2 = Date.now();
+    const values =
+      outTensor && typeof outTensor.data === 'function'
+        ? await outTensor.data()
+        : outTensor.dataSync();
+    const readMs = Date.now() - t2;
+
     const keypoints = [];
+    let above15 = 0;
     for (let i = 0; i < NUM_KEYPOINTS; i += 1) {
       const base = i * 3;
-      const score = data[base + 2];
-      if (score > 0.2) {
+      const score = values[base + 2];
+      if (score > 0.15) above15 += 1;
+      if (score > 0.15) {
         keypoints.push({
           name: COCO_KEYPOINTS[i],
-          // 还原到原图坐标
-          y: data[base] * frame.height,
-          x: data[base + 1] * frame.width,
+          y: values[base] * snapshot.height,
+          x: values[base + 1] * snapshot.width,
           score: score,
         });
       }
     }
-    return { count: keypoints.length, keypoints };
+    return {
+      count: keypoints.length,
+      detectedOf17: above15,
+      keypoints: keypoints,
+      inferMs: Date.now() - t0,
+      preprocessMs: preprocessMs,
+      executeMs: executeMs,
+      readMs: readMs,
+      backend: backend,
+      frameWidth: snapshot.width,
+      frameHeight: snapshot.height,
+    };
   } finally {
     input.dispose();
     if (Array.isArray(output)) {
@@ -819,6 +1010,22 @@ async function detectPose(frame) {
   }
 }
 
+/** 在任何 await 之前同步拷贝 onCameraFrame 缓冲 */
+function snapshotCameraFrame(frame) {
+  const width = frame.width | 0;
+  const height = frame.height | 0;
+  const view = new Uint8Array(frame.data);
+  const expected = width * height * 4;
+  if (width <= 0 || height <= 0 || view.byteLength < expected) {
+    throw new Error(
+      `非法相机帧: ${width}x${height} bytes=${view.byteLength}`,
+    );
+  }
+  const data = new Uint8Array(expected);
+  data.set(view.subarray(0, expected));
+  return { width: width, height: height, data: data, __copied: true };
+}
+
 function resetDetector() {
   runtimePromise = null;
 }
@@ -826,6 +1033,7 @@ function resetDetector() {
 module.exports = {
   ensureDetector,
   detectPose,
+  snapshotCameraFrame,
   resetDetector,
   PREPROCESS_VERSION,
 };

@@ -17,11 +17,11 @@
 | M0-T3 摄像头 | ✅ | 真机 Expo Go / 后改 Dev Client |
 | M0-T4 App 姿态 | ✅ | MediaPipe；**关键点 33，FPS 20**（G4B / iPhone 14 Pro / iOS 26.5） |
 | M0-T5 小程序 camera | ✅ | 用户确认「小程序摄像头 OK」 |
-| M0-T6 小程序 MoveNet | 🔄 | 模型能加载；推理通道维/输入格式多轮修复中，**尚未记入 FPS 通过** |
-| M0-T7 / M0-GATE | ⏳ | 待 T6 + spike-report 小程序栏填完 |
+| M0-T6 小程序 MoveNet | ✅ | 真机 `nhwc-v11·webgl`：关键点 14-15/17，FPS~4，稳态~350ms |
+| M0-T7 / M0-GATE | ⏳ | T6 已过、spike-report 已填；待 M0-T7 收尾 → M0-GATE（人工） |
 
 **App 结论（已写入 `docs/spike-report.md`）**：MediaPipe + Development Build（Expo Go 不能跑原生姿态）。  
-**小程序结论**：方案 A（TFJS MoveNet）仍在 Spike；未拍板 A/D。
+**小程序结论**：**方案 A（端侧 TFJS MoveNet Lightning / WebGL backend）已拍板**，符合 `FR-033`。FPS ~4 低于后续 ≥15 目标，优化路径记于 spike-report。
 
 ## Decisions Made（保留）
 
@@ -50,6 +50,10 @@
 | missing atob/Buffer；`new Buffer` 非构造函数 | 微信无 Node/DOM | atob/btoa + **可 new 的 Buffer polyfill** |
 | fromPixels Object / depth 192≠3 | 帧格式与 cropAndResize 通道错乱 | RGBA→手动 `[1,192,192,3]` + 直载 MoveNet |
 | 真机 80051 source exceed 2MB | 主包打进 ~4.5MB 模型权重 | `nhwc-v8`：模型改下载到 `USER_DATA_PATH` 缓存；精简依赖；pack ignore models |
+| `tensor1d().reshape` 不是函数 | 微信 TFJS 包无该实例方法 | `nhwc-v9`：改 `tf.tensor(flat,[1,192,192,3],'int32')` |
+| CPU 下卡「检测中」>60s 假死 | 微信 CPU backend `execute` 同步堵主线程，setTimeout/心跳救不了 | `nhwc-v10→v11`：改**优先 WebGL**；`data()` 异步回读 |
+| `backend name 'webgl' not found in registry` | webgl 包仅在 `device_util.isBrowser()` 时 `registerBackend`，微信非浏览器 | `nhwc-v11`：`wx.createOffscreenCanvas`→`setWebGLContext`→手动 `registerBackend('webgl', ()=>new MathBackendWebGL(new GPGPUContext(gl)),2)` |
+| webgl 不在 miniprogram_npm | 上次「构建 npm」时尚未装 webgl | `npm i @tensorflow/tfjs-backend-webgl`；`sync-shims.sh` 增加拷贝 `dist/miniprogram/index.js` |
 
 ## Dead Ends（不必再试）
 
