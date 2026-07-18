@@ -1,57 +1,50 @@
 {
-  "version": "0.3.2",
+  "version": "0.4.0",
   "plan": "module-based",
-  "last_updated": "2026-07-15T00:22:00+08:00",
+  "last_updated": "2026-07-18T00:10:00+08:00",
   "status": "in_progress",
   "blocker": null,
   "loop": {
     "interval": "20m",
-    "mode": "human-in-loop",
-    "started_at": "2026-07-07T23:10:00+08:00"
+    "mode": "stopped",
+    "started_at": "2026-07-17T00:10:00+08:00",
+    "stopped_at": "2026-07-17T23:57:00+08:00",
+    "stop_reason": "用户要求下一 tick 停 loop 并 summarize"
   },
-  "current_module": "M0",
+  "current_module": "M2A",
   "modules": {
-    "M0": { "name": "工程基建", "status": "in_progress", "depends_on": [] },
-    "MU": { "name": "UI 设计基础", "status": "pending", "depends_on": ["M0"] },
-    "M1": { "name": "Core 引擎", "status": "pending", "depends_on": ["M0"] },
-    "M2A": { "name": "Pose App", "status": "pending", "depends_on": ["M1"] },
-    "M2B": { "name": "Pose 小程序", "status": "pending", "depends_on": ["M0", "M1"] },
+    "M0": { "name": "工程基建", "status": "done", "depends_on": [] },
+    "MU": { "name": "UI 设计基础", "status": "ready", "depends_on": ["M0"] },
+    "M1": { "name": "Core 引擎", "status": "done", "depends_on": ["M0"] },
+    "M2A": { "name": "Pose App", "status": "in_progress", "depends_on": ["M1"] },
+    "M2B": { "name": "Pose 小程序", "status": "ready", "depends_on": ["M0", "M1"] },
     "M3": { "name": "渲染与反馈", "status": "pending", "depends_on": ["M1", "MU", "M2A"] },
     "M4": { "name": "App 壳", "status": "pending", "depends_on": ["M3", "MU"] },
     "M5": { "name": "小程序壳", "status": "pending", "depends_on": ["M2B", "M3", "MU"] },
     "M6": { "name": "质量与交付", "status": "pending", "depends_on": ["M4", "M5"] }
   },
   "next_task": {
-    "id": "M0-T7",
-    "module": "M0",
-    "title": "整理 spike-report + progress，准备 M0-GATE",
-    "verification": ["VT-P0B-005"],
-    "human_required": false,
-    "notes": "M0-T6 真机通过（webgl·nhwc-v11，关键点14-15，FPS4，350ms）。spike-report 小程序栏已填、方案选 A。"
+    "id": "M2A-T4",
+    "module": "M2A",
+    "title": "DevPoseScreen：接 core 实时校验",
+    "verification": ["VT-P2-002"],
+    "human_required": true,
+    "notes": "调试页摄像头 → detect → filter → smooth → validate；需真机验收膝角+status。"
   },
   "queue": [
-    { "id": "M0-T7", "module": "M0", "human_required": false },
-    { "id": "M0-GATE", "module": "M0", "human_required": true },
+    { "id": "M2A-T4", "module": "M2A", "human_required": true },
+    { "id": "M2A-T5", "module": "M2A", "human_required": false },
+    { "id": "M2A-T6", "module": "M2A", "human_required": true },
+    { "id": "M2A-GATE", "module": "M2A", "human_required": true },
     { "id": "MU-T1", "module": "MU", "human_required": true },
     { "id": "MU-T2", "module": "MU", "human_required": false },
     { "id": "MU-T3", "module": "MU", "human_required": false },
     { "id": "MU-T4", "module": "MU", "human_required": false },
     { "id": "MU-T5", "module": "MU", "human_required": false },
-    { "id": "MU-GATE", "module": "MU", "human_required": true },
-    { "id": "M1-T1", "module": "M1", "human_required": false },
-    { "id": "M1-T2", "module": "M1", "human_required": false },
-    { "id": "M1-T3", "module": "M1", "human_required": false },
-    { "id": "M1-T4", "module": "M1", "human_required": false },
-    { "id": "M1-T5", "module": "M1", "human_required": false },
-    { "id": "M1-T6", "module": "M1", "human_required": false },
-    { "id": "M1-T7", "module": "M1", "human_required": false },
-    { "id": "M1-T8", "module": "M1", "human_required": false },
-    { "id": "M1-T9", "module": "M1", "human_required": false },
-    { "id": "M1-T10", "module": "M1", "human_required": false },
-    { "id": "M1-GATE", "module": "M1", "human_required": false }
+    { "id": "MU-GATE", "module": "MU", "human_required": true }
   ],
-  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5", "M0-T6"],
-  "completed_gates": [],
+  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5", "M0-T6", "M0-T7", "M1-T1", "M1-T2", "M1-T3", "M1-T4", "M1-T5", "M1-T6", "M1-T7", "M1-T8", "M1-T9", "M1-T10", "M2A-T1", "M2A-T2", "M2A-T3"],
+  "completed_gates": ["M0-GATE", "M1-GATE"],
   "iteration_log": [
     {
       "at": "2026-07-11T23:15:00+08:00",
@@ -79,6 +72,150 @@
       "summary": "小程序 MoveNet 真机通过（nhwc-v11·webgl）：关键点14-15/17，FPS~4，稳态~350ms/帧。根因串：CPU 同步 execute 假死 → 改优先 WebGL；WebGL 因微信 device_util.isBrowser()=false 未自动 registerBackend → 手动 setWebGLContext + registerBackend(MathBackendWebGL/GPGPUContext)。方案选定 A（端侧，符合 FR-033）。VT-P0B-003 通过、004 记实值通过、005 已填 spike-report。",
       "next": "M0-T7 → M0-GATE",
       "human_action_needed": false
+    },
+    {
+      "at": "2026-07-15T00:31:00+08:00",
+      "module": "M0",
+      "task": "M0-T7",
+      "result": "done",
+      "summary": "收尾：PRD 升 0.2.0（§5.3 选定方案 A + 实现约束 + 变更记录 + OQ-002 结论）；spike-report 决策勾选完成；progress 模块状态机更新。M0-T1~T7 全部完成，进入 M0-GATE（人工）。",
+      "next": "M0-GATE（人工确认）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-17T00:10:00+08:00",
+      "module": "M0",
+      "task": "M0-GATE",
+      "result": "passed",
+      "summary": "人工确认 M0-GATE 通过。解锁 MU / M2B → ready，M1 → in_progress。current_module 切至 M1（纯逻辑，可自动化）。",
+      "next": "M1-T1",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T00:10:30+08:00",
+      "module": "M1",
+      "task": "M1-T1",
+      "result": "done",
+      "summary": "创建 packages/core/src/types.ts（Landmark/Pose/LandmarkIndex/Phase/Severity/RuleDefinition/ValidationResult/PhaseState/RepCounterState/ExerciseDefinition/Fixture），依据 squat-rules.md。index.ts 导出 types。pnpm --filter core build 通过（VT-P1-001 L0 局部）。",
+      "next": "M1-T2 angles.ts + 单测（VT-P1-002）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T00:34:00+08:00",
+      "module": "M1",
+      "task": "M1-T2",
+      "result": "done",
+      "summary": "angles.ts：angleBetween(atan2 三点夹角[0,180]) + jointAngle(按索引取角，缺点返回 null)。angles.test.ts 8 用例（90/0/180/45°、顺序无关、区间、缺点 null）全绿。VT-P1-002 通过。",
+      "next": "M1-T3 fixtures/ 六组 FX-*（VT-P1-010）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T00:57:00+08:00",
+      "module": "M1",
+      "task": "M1-T3",
+      "result": "done",
+      "summary": "fixtures/index.ts：buildSquatPose(膝角+躯干角反推侧面四点) + 六组 FX-*（STAND/BOTTOM-OK/SHALLOW/VALGUS-L/LEAN/SEQ-5REPS）。fixtures.test.ts 21 用例（齐全性、必需关键点、angles 复核几何自洽、元数据）。core 全量 29/29 绿。VT-P1-010 通过。",
+      "next": "M1-T4 validate.ts + 单测（VT-P1-003）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T18:47:00+08:00",
+      "module": "M1",
+      "task": "M1-T4",
+      "result": "done",
+      "summary": "validate.ts：SQUAT_RULES（squat-depth/knee-valgus-l/r/torso-upright，与 squat-rules.md 一致）+ validate(pose,phase,rules) 相位过滤与汇总（error>warning>correct）。valgus 改用膝-踝横向偏移/小腿竖直长度，避免矢状面膝前移误判。validate.test.ts 14 用例，core 全量 43/43 绿。VT-P1-003 通过。",
+      "next": "M1-T5 phase.ts 相位状态机（VT-P1-004）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T19:16:00+08:00",
+      "module": "M1",
+      "task": "M1-T5",
+      "result": "done",
+      "summary": "phase.ts：膝角驱动状态机（stepPhase/runPhaseSequence），过渡相位 descend/ascend 立即跟随、端点 stand/bottom 需 5 帧确认；squatKneeAngle 两侧均值+单侧兜底。phase.test.ts 5 用例（FX-SEQ-5REPS 合法转移+5 次 bottom、5 帧确认、缺点保持相位、默认阈值）。core 全量 48/48 绿。VT-P1-004 通过。",
+      "next": "M1-T6 repCounter.ts（VT-P1-005）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T19:37:00+08:00",
+      "module": "M1",
+      "task": "M1-T6",
+      "result": "done",
+      "summary": "repCounter.ts：stepRep/countReps 基于 phase，周期回 stand 结算；bottom 阶段 squat-depth 触发则 counted=false 不计入。repCounter.test.ts 4 用例（FX-SEQ-5REPS=5、半蹲(95°进bottom但未达深度)不计入=3/4条、只站=0、单次=1）。core 全量 52/52 绿。VT-P1-005 通过。",
+      "next": "M1-T7 exercises/squat.ts 规则契约（VT-P1-006）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T19:57:00+08:00",
+      "module": "M1",
+      "task": "M1-T7",
+      "result": "done",
+      "summary": "exercises/squat.ts：SQUAT ExerciseDefinition（复用 validate 的 SQUAT_RULES + 相位阈值）。squat.test.ts 契约测试运行时解析 squat-rules.md 规则表，逐条比对 ID/容差/严重度/相位/文案 + 元数据，24 用例。core 全量 76/76 绿。VT-P1-006 通过。",
+      "next": "M1-T8 防抖/冷却（VT-P1-007,008）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T20:17:00+08:00",
+      "module": "M1",
+      "task": "M1-T8",
+      "result": "done",
+      "summary": "feedback.ts：pushFeedback(注入时钟) 防抖(持续 debounceMs=300 才确认)+冷却(cooldownMs=2000 内不重复)，各规则独立轨道。feedback.test.ts 6 用例（单帧不触发/300ms 触发/中断重计时/2s 冷却/多规则独立/默认值）。core 全量 82/82 绿。VT-P1-007、VT-P1-008 通过。",
+      "next": "M1-T9 覆盖率 ≥80%（VT-P1-009）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T22:37:00+08:00",
+      "module": "M1",
+      "task": "M1-T9",
+      "result": "done",
+      "summary": "配 vitest v8 coverage（vitest.config.ts，阈值 80%，排除 types/index/fixtures/test）+ test:coverage 脚本。实测 All 98.33% stmts / 92.23% branch / 100% funcs，全部核心文件 ≥80%。VT-P1-009 通过。",
+      "next": "M1-T10 可选调试工具（最小 Node CLI）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T22:58:00+08:00",
+      "module": "M1",
+      "task": "M1-T10",
+      "result": "done",
+      "summary": "tools/dev-cli.ts：runDevReport 喂夹具打印 phase/knee/status/issues 与 SEQ 相位转移+rep（不依赖 web/摄像头）。dev-cli.test.ts 1 用例。顺带修 phase.test.ts 未使用 import 致 tsc build 失败。build 绿 + 83/83 测试通过。",
+      "next": "M1-GATE",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T23:18:00+08:00",
+      "module": "M1",
+      "task": "M1-GATE",
+      "result": "passed",
+      "summary": "M1-GATE 通过（自动门禁）：build 绿、83/83 测试全绿、覆盖率 All 98.01% 且核心文件≥80%、squat.ts≡squat-rules.md 契约通过、无需真机。VT-P1-001~010 全部满足。M1 → done，解锁 M2A（M2B 已 ready）。current_module 切至 M2A。",
+      "next": "M2A-T1 pose-native 接口契约（VT-P2-001）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T23:40:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T1",
+      "result": "done",
+      "summary": "pose-native：PoseFrame + PoseDetector.detect(frame): Pose|Promise<Pose>，Landmark/Pose 复用 @fitness-coach/core；MockPoseDetector 作契约样例。types.test.ts 3 用例。build 绿 + 3/3 测试。VT-P2-001 通过。",
+      "next": "M2A-T2 One Euro Filter（VT-P2-003）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-17T23:57:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T2",
+      "result": "done",
+      "summary": "oneEuro.ts：OneEuroFilter1D + PoseSmoother；单测静止+噪声方差下降（VT-P2-003）。pose-native 5/5 测试通过。用户要求本 tick 后停 loop + summarize。",
+      "next": "M2A-T3 visibility 过滤；loop 已停止",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T00:10:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T3",
+      "result": "done",
+      "summary": "visibility.ts：filterByVisibility / isVisible，阈值 0.5（FR-032）；低 visibility → undefined，validate 不参与。visibility.test.ts 5 用例（含遮挡一腿→knee-valgus-l 不再触发）。pose-native 10/10。VT-P2-004 通过。停在 T4 前（需真机）。",
+      "next": "M2A-T4 DevPoseScreen（human_required）",
+      "human_action_needed": true
     }
   ]
 }

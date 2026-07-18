@@ -14,9 +14,11 @@
   "scripts": {
     "build": "tsc -b",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "lint": "tsc -b --noEmit"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "2.1.9",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

@@ -1,9 +1,9 @@
 ---
 document: PRD
 product: fitness-coach
-version: 0.1.0
+version: 0.2.0
 status: draft
-last_updated: 2026-07-07
+last_updated: 2026-07-15
 owner: xavigo4bright
 target_platforms:
   - mobile_app
@@ -23,6 +23,7 @@ primary_language: zh-CN
 | 0.1.1 | 2026-07-07 | — | 新增检验手册引用 `docs/VERIFICATION.md` |
 | 0.1.2 | 2026-07-07 | — | 新增 §9 UI/UX 三层、UI 需求 ID、MU 模块引用 |
 | 0.1.3 | 2026-07-11 | — | App Spike：选定 MediaPipe Pose + Development Build；真机 33 点 / 20 FPS |
+| 0.2.0 | 2026-07-15 | — | 小程序 Spike 结束：选定**方案 A（端侧 TFJS MoveNet / WebGL）**；真机 14-15 点 / ~4 FPS / ~350ms（记实值，见 `spike-report.md`）。Phase 0 MVP 决策门达成 |
 
 ## 1. 文档目的
 
@@ -197,18 +198,27 @@ primary_language: zh-CN
 
 > **AI Agent 注意**：业务逻辑（`FR-040`–`FR-053`）必须写在**平台无关**的 `packages/core` 中，禁止在 UI 层硬编码规则。
 
-### 5.3 微信小程序推理方案（待 Spike 敲定）
+### 5.3 微信小程序推理方案（已 Spike 敲定：方案 A）
 
-按优先级尝试：
+**决策（Phase 0，2026-07-15）：选定方案 A —— 端侧 TFJS MoveNet Lightning，WebGL backend。** 符合 `FR-033`（视频本地处理、不上传云端），无需云端隐私授权。
 
-| 方案 | 描述 | 优点 | 风险 |
-|------|------|------|------|
-| **A** | TFJS + MoveNet + 微信 TFJS 插件 | 纯端侧、隐私好 | 帧率可能不足 |
-| **B** | ONNX Runtime 小程序版 | 模型可控 | 集成复杂、包体限制 |
-| **C** | 轻量化端侧 + 关键帧云端兜底 | 平衡体验 | 弱网体验差 |
-| **D** | 全云端推理（腾讯云人体分析等） | 开发快 | 延迟、成本、隐私；违背 `FR-033` 时需产品签字 |
+| 方案 | 描述 | 优点 | 风险 | 结论 |
+|------|------|------|------|------|
+| **A** | TFJS + MoveNet（端侧 WebGL） | 纯端侧、隐私好 | 帧率可能不足 | ✅ **选定** |
+| **B** | ONNX Runtime 小程序版 | 模型可控 | 集成复杂、包体限制 | 未采用 |
+| **C** | 轻量化端侧 + 关键帧云端兜底 | 平衡体验 | 弱网体验差 | 备选（若 A 优化后仍不达标） |
+| **D** | 全云端推理（腾讯云人体分析等） | 开发快 | 延迟、成本、隐私；违背 `FR-033` 时需产品签字 | 未采用 |
 
-**MVP 决策门**：Phase 0 结束时选定 A 或 D，写入本 PRD 版本 0.2.0。
+**Spike 实测（`nhwc-v11`，G4B/iOS 26.5 微信真机）**：全身 14-15/17 关键点、~4 FPS、稳态 ~350ms/帧。详见 `docs/spike-report.md`。
+
+**关键实现约束（供 M2B `packages/pose-mp` 复用）**：
+- 微信 `device_util.isBrowser()===false`，webgl 包不会自动 `registerBackend`；需 `wx.createOffscreenCanvas` + `setWebGLContext` + 手动 `registerBackend('webgl', ()=>new MathBackendWebGL(new GPGPUContext(gl)), 2)`。
+- CPU backend 的 `execute` 同步会堵死主线程，**必须走 WebGL**。
+- 模型 ~4.5MB 不进主包（80051 限 2MB），运行时下载至 `USER_DATA_PATH` 缓存。
+
+**待优化(不阻塞 Phase 0，落在 M2B / VT-P2-005)**：~4 FPS 低于后续 ≥15 FPS 目标。优化阶梯见 `spike-report.md`（降分辨率 → 确认 WebGL2 → 复用张量 → 必要时降级 KPI 或启用方案 C）。
+
+**MVP 决策门**：✅ 已于本版本 0.2.0 达成。
 
 ### 5.4 开发顺序建议
 
@@ -409,7 +419,7 @@ M0 → MU（与 M1 可并行）→ M3 用 L1+L2 → M4/M5 用 L1+L3
 | ID | 问题 | 状态 |
 |----|------|------|
 | OQ-001 | 首发先 App 还是先小程序？ | 待定（Roadmap 默认先 App） |
-| OQ-002 | 小程序是否接受云端推理（隐私换体验）？ | 待定 |
+| OQ-002 | 小程序是否接受云端推理（隐私换体验）？ | 已定：否（Phase 0 选定端侧方案 A，符合 FR-033）。仅当 A 优化后仍严重不达标才重开评估方案 C/D |
 | OQ-003 | 是否需要账号体系与云同步？ | MVP 否 |
 | OQ-004 | 品牌名与包名 | 待定 |
 

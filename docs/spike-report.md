@@ -46,7 +46,7 @@
 
 - [x] 继续 App 主线（MediaPipe + Dev Client）
 - [x] 小程序方案：**A（端侧 MoveNet / WebGL）**
-- [ ] 是否更新 PRD 至 0.2.0（App 方案可先记入变更记录）
+- [x] 已更新 PRD 至 **0.2.0**（§5.3 选定方案 A、变更记录、OQ-002 结论）
 
 ## 小程序 FPS 优化路径（进入 M2B 前评估）
 
