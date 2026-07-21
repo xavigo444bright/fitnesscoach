@@ -2,7 +2,8 @@
  * @fitness-coach/core — Rep 计数（M1-T6，VT-P1-005）
  *
  * 一个 rep = stand → descend → bottom → ascend → 回 stand。
- * 若该次 bottom 阶段触发 squat-depth（未达深度），该 rep 不计入（见 squat-rules.md）。
+ * 未进入 bottom（半蹲）的周期不结算计入；回站时给出 rejected/shallow 供 UI 提示。
+ * 若 bottom 阶段触发 squat-depth 则 counted=false（rejected/depth_fault）。
  */
 
 import {
@@ -12,7 +13,7 @@ import {
   type PhaseConfig,
 } from "./phase.js";
 import { SQUAT_RULES, validate, type EvaluableRule } from "./validate.js";
-import type { Pose, RepCounterState } from "./types.js";
+import type { Pose, RepCounterState, RepCycleOutcome } from "./types.js";
 
 export function initialRepCounterState(): RepCounterState {
   return {
@@ -20,6 +21,7 @@ export function initialRepCounterState(): RepCounterState {
     reps: [],
     phaseState: initialPhaseState(),
     depthFaultThisCycle: false,
+    lastOutcome: null,
   };
 }
 
@@ -30,7 +32,7 @@ export interface RepCounterOptions {
 
 /**
  * 推进一帧：更新相位；在 bottom 阶段记录是否深度不足；
- * 当相位回到 stand（完成一次 down-up 周期）时结算一次 rep。
+ * 当相位回到 stand 时结算（完整周期）或提示半蹲未计入。
  */
 export function stepRep(
   state: RepCounterState,
@@ -47,6 +49,7 @@ export function stepRep(
   let depthFaultThisCycle = state.depthFaultThisCycle;
   let count = state.count;
   const reps = state.reps;
+  let lastOutcome: RepCycleOutcome | null = null;
 
   // 离开 stand 进入下蹲：开启新周期
   if (prevPhase === "stand" && nowPhase === "descend") {
@@ -61,11 +64,20 @@ export function stepRep(
     }
   }
 
-  // 回到 stand 且本周期确实经过 bottom：结算一次 rep
+  // 完整周期：ascend → stand
   if (nowPhase === "stand" && prevPhase === "ascend") {
     const counted = !depthFaultThisCycle;
     if (counted) count += 1;
     reps.push({ index: reps.length, counted });
+    lastOutcome = counted
+      ? { type: "counted" }
+      : { type: "rejected", reason: "depth_fault" };
+    depthFaultThisCycle = false;
+  }
+
+  // 半蹲：descend → stand（未进 bottom / ascend）
+  if (nowPhase === "stand" && prevPhase === "descend") {
+    lastOutcome = { type: "rejected", reason: "shallow" };
     depthFaultThisCycle = false;
   }
 
@@ -74,6 +86,7 @@ export function stepRep(
     reps,
     phaseState,
     depthFaultThisCycle,
+    lastOutcome,
   };
 }
 
@@ -87,4 +100,12 @@ export function countReps(
     state = stepRep(state, pose, opts);
   }
   return state;
+}
+
+/** 半蹲/深度不足时的 UI 文案（与 squat-depth 对齐）。 */
+export function messageForRepReject(
+  reason: "shallow" | "depth_fault",
+): string {
+  if (reason === "shallow") return "蹲得不够深，未计入次数";
+  return "蹲得不够深，臀部再下沉一些";
 }

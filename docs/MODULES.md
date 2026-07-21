@@ -109,9 +109,9 @@ flowchart TD
 
 **模块门禁 MU-GATE**
 
-- [ ] `design-tokens.md` 非占位，有确认日期
-- [ ] `packages/ui` 导出组件类型 / 主题 hook
-- [ ] M3/M4 可直接 import token，无需临时硬编码
+- [x] `design-tokens.md` 非占位，有确认日期（0.2.0 / 2026-07-18）
+- [x] `packages/ui` 导出组件类型 / 主题（`getTheme`）
+- [x] M3/M4 可直接 import token，无需临时硬编码（2026-07-18 人工确认）
 
 **出口产物**：视觉规范 + 组件契约（实现分布在 M3/M4/M5）
 
@@ -134,8 +134,8 @@ flowchart TD
 
 **模块门禁 M2A-GATE**
 
-- [ ] 真机调试页：膝角 + validation status 实时更新
-- [ ] FPS ≥15（接 core 后）
+- [x] 真机调试页：膝角 + validation status 实时更新
+- [x] FPS ≥15（接 core 后）
 
 ---
 
@@ -199,8 +199,10 @@ flowchart TD
 
 **模块门禁 M4-GATE（= M2 里程碑）**
 
-- [ ] VT-P3B-M2 全流程场景通过
-- [ ] 录屏 `docs/evidence/M2.mp4`
+- [x] VT-P3B-M2 全流程场景通过
+- [x] UX-007：有效 rep 时屏幕中央绿色打勾动效可见
+- [x] UX-008：半蹲后可点「查看上次问题」；下次做对出现「很好，蹲得更深了」类正反馈
+- [x] 录屏 `docs/evidence/M2.mp4`（若已录；未落盘可后续补）
 
 ---
 

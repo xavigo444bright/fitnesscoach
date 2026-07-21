@@ -57,21 +57,29 @@ function kneeAngle(pose: Pose, side: "left" | "right"): number | null {
   return jointAngle(pose, idx);
 }
 
-/** 躯干角：肩-髋-膝（右侧），160–180 视为直立。 */
-function torsoAngle(pose: Pose): number | null {
-  return jointAngle(pose, {
-    a: LandmarkIndex.RightShoulder,
-    b: LandmarkIndex.RightHip,
-    c: LandmarkIndex.RightKnee,
-  });
+/**
+ * 躯干相对竖直的前倾角（度），0 = 直立。
+ * 用肩-髋向量相对画面竖直（y 向下）的夹角；侧蹲正常会有 15–40° 前倾，
+ * 切勿用「肩-髋-膝」三点角（深蹲底部该角本就会变小，会误报前倾）。
+ */
+export function torsoLeanFromVertical(pose: Pose): number | null {
+  const shoulder =
+    pose[LandmarkIndex.RightShoulder] ?? pose[LandmarkIndex.LeftShoulder];
+  const hip = pose[LandmarkIndex.RightHip] ?? pose[LandmarkIndex.LeftHip];
+  if (!shoulder || !hip) return null;
+  const dx = shoulder.x - hip.x;
+  const dy = hip.y - shoulder.y; // 肩在髋上方时 > 0
+  if (dy <= 1e-6) return 90; // 躯干接近水平
+  return (Math.atan2(Math.abs(dx), dy) * 180) / Math.PI;
 }
 
 /**
  * 冠状面 valgus 近似：膝相对「踝的竖直线」的水平偏移，用小腿竖直长度换算成角度。
  * 只对膝向内/外的横向位移敏感，不把矢状面「膝前移」误判为内扣。
  * 正面机位下髋与踝的 x 近似相等，此度量与髋-踝线一致。
+ * 侧摄 MVP 不启用（见 SQUAT_RULES evaluate），本函数供正面机位 / 单测预留。
  */
-function valgusDeg(pose: Pose, side: "left" | "right"): number | null {
+export function valgusDeg(pose: Pose, side: "left" | "right"): number | null {
   const knee =
     pose[side === "left" ? LandmarkIndex.LeftKnee : LandmarkIndex.RightKnee];
   const ankle =
@@ -98,8 +106,8 @@ export const SQUAT_RULES: EvaluableRule[] = [
     evaluate(pose) {
       const deg = kneeAngle(pose, "right");
       if (deg == null) return { triggered: false };
-      // 膝角 < 90 视为达标；否则（未够深）触发
-      return { triggered: deg >= 90, measuredDeg: deg };
+      // 目标 <100°；容差 10° → ≥110° 才报不够深
+      return { triggered: deg >= 110, measuredDeg: deg };
     },
   },
   {
@@ -110,13 +118,13 @@ export const SQUAT_RULES: EvaluableRule[] = [
       c: LandmarkIndex.LeftAnkle,
     },
     severity: "error",
-    phases: ["descend", "bottom", "ascend"],
-    toleranceDeg: 15,
+    phases: ["bottom"],
+    toleranceDeg: 35,
     message: "左膝内扣，向外推开膝盖",
     evaluate(pose) {
-      const deg = valgusDeg(pose, "left");
-      if (deg == null) return { triggered: false };
-      return { triggered: deg > 15, measuredDeg: deg };
+      // 侧摄 MVP：矢状面膝前移会被当成内扣，恒不触发（正面机位再启）
+      void pose;
+      return { triggered: false };
     },
   },
   {
@@ -127,13 +135,12 @@ export const SQUAT_RULES: EvaluableRule[] = [
       c: LandmarkIndex.RightAnkle,
     },
     severity: "error",
-    phases: ["descend", "bottom", "ascend"],
-    toleranceDeg: 15,
+    phases: ["bottom"],
+    toleranceDeg: 35,
     message: "右膝内扣，向外推开膝盖",
     evaluate(pose) {
-      const deg = valgusDeg(pose, "right");
-      if (deg == null) return { triggered: false };
-      return { triggered: deg > 15, measuredDeg: deg };
+      void pose;
+      return { triggered: false };
     },
   },
   {
@@ -145,13 +152,13 @@ export const SQUAT_RULES: EvaluableRule[] = [
     },
     severity: "warning",
     phases: [],
-    toleranceDeg: 15,
+    toleranceDeg: 10,
     message: "躯干前倾过多，挺胸收紧核心",
     evaluate(pose) {
-      const deg = torsoAngle(pose);
-      if (deg == null) return { triggered: false };
-      // 160–180 直立，容差 15 → < 145 触发
-      return { triggered: deg < 145, measuredDeg: deg };
+      const lean = torsoLeanFromVertical(pose);
+      if (lean == null) return { triggered: false };
+      // 理想前倾 ≤45°；容差 10° → 仅 >55° 才 warning（正常侧蹲 20–40° 不报）
+      return { triggered: lean > 55, measuredDeg: lean };
     },
   },
 ];

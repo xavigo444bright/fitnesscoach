@@ -16,8 +16,10 @@ export interface FeedbackConfig {
 }
 
 export const DEFAULT_FEEDBACK_CONFIG: FeedbackConfig = {
-  debounceMs: 300,
-  cooldownMs: 2000,
+  /** 缓冲：需持续约 0.8s 才确认，避免边缘抖动频繁红字。 */
+  debounceMs: 800,
+  /** 确认后 3s 内不重复同规则播报。 */
+  cooldownMs: 3000,
 };
 
 interface RuleTrack {
@@ -105,4 +107,26 @@ export function pushFeedback(
   }
 
   return cues;
+}
+
+/**
+ * 已过防抖、且本帧仍触发的规则（条常驻展示用）。
+ * 与 pushFeedback 不同：冷却期内仍返回，便于 FeedbackBar 持续显示 correcting。
+ * 须先调用 pushFeedback 更新 tracks。
+ */
+export function listConfirmedFeedback(
+  state: FeedbackState,
+  validation: ValidationResult,
+  now: number,
+  cfg: FeedbackConfig = DEFAULT_FEEDBACK_CONFIG,
+): FeedbackCue[] {
+  const out: FeedbackCue[] = [];
+  for (const r of validation.results) {
+    if (!r.triggered) continue;
+    const track = state.tracks[r.id];
+    if (!track || track.activeSince == null) continue;
+    if (now - track.activeSince < cfg.debounceMs) continue;
+    out.push({ id: r.id, severity: r.severity, message: r.message });
+  }
+  return out;
 }

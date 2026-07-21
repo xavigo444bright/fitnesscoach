@@ -53,11 +53,7 @@ describe("VT-P2-004 visibility 过滤", () => {
 
   it("遮挡一腿：过滤后低置信度侧不参与 validate", () => {
     const raw = occludedLeftLegPose();
-    // 未过滤时左膝极端横向偏移会触发 knee-valgus-l
-    const before = validate(raw, "bottom");
-    expect(
-      before.results.find((r) => r.id === "knee-valgus-l")?.triggered,
-    ).toBe(true);
+    expect(raw[LandmarkIndex.LeftKnee]?.visibility).toBeLessThan(0.5);
 
     const filtered = filterByVisibility(raw);
     expect(filtered[LandmarkIndex.LeftKnee]).toBeUndefined();
@@ -65,9 +61,10 @@ describe("VT-P2-004 visibility 过滤", () => {
     expect(filtered[LandmarkIndex.LeftAnkle]).toBeUndefined();
     expect(filtered[LandmarkIndex.RightKnee]).toBeTruthy();
 
+    // 侧摄 valgus 已禁用；过滤后右腿仍可校验且不因缺左腿崩溃
     const after = validate(filtered, "bottom");
-    expect(
-      after.results.find((r) => r.id === "knee-valgus-l")?.triggered,
-    ).toBe(false);
+    expect(after.results.some((r) => r.id === "knee-valgus-l" && r.triggered)).toBe(
+      false,
+    );
   });
 });

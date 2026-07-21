@@ -27,15 +27,23 @@ const THIGH = 0.2;
 const TORSO = 0.26;
 
 /**
- * 从膝角（髋-膝-踝）与躯干角（肩-髋-膝）反推侧面四点，左右两侧默认镜像同值。
+ * 从膝角（髋-膝-踝）反推侧面下肢；躯干用相对竖直的前倾角放置肩。
+ * torsoLeanDeg：0 = 直立，正值 = 向前倾（朝膝方向）；默认 20°。
  * leftKneeDx：左膝在冠状面向内偏移的近似（用于 knee-valgus 夹具）。
  */
 export function buildSquatPose(opts: {
   kneeDeg: number;
-  torsoDeg: number;
+  /** @deprecated 旧「肩-髋-膝」角；若提供 torsoLeanDeg 则忽略。 */
+  torsoDeg?: number;
+  /** 躯干相对竖直的前倾角（度）。 */
+  torsoLeanDeg?: number;
   leftKneeDx?: number;
 }): Pose {
-  const { kneeDeg, torsoDeg, leftKneeDx = 0 } = opts;
+  const {
+    kneeDeg,
+    torsoLeanDeg = opts.torsoDeg != null ? undefined : 20,
+    leftKneeDx = 0,
+  } = opts;
   const ankle: Vec2 = { x: 0.5, y: 0.9 };
   const knee: Vec2 = { x: 0.5, y: ankle.y - SHIN };
 
@@ -47,16 +55,27 @@ export function buildSquatPose(opts: {
     y: knee.y + THIGH * thighDir.y,
   };
 
-  // 躯干：把 (膝-髋) 绕髋旋转 torsoDeg，取更“朝上”的解作肩方向
-  const hipToKnee: Vec2 = { x: knee.x - hip.x, y: knee.y - hip.y };
-  const c1 = rotate(hipToKnee, torsoDeg);
-  const c2 = rotate(hipToKnee, -torsoDeg);
-  const pick = c1.y < c2.y ? c1 : c2;
-  const norm = Math.hypot(pick.x, pick.y) || 1;
-  const shoulder: Vec2 = {
-    x: hip.x + (TORSO * pick.x) / norm,
-    y: hip.y + (TORSO * pick.y) / norm,
-  };
+  let shoulder: Vec2;
+  if (torsoLeanDeg != null) {
+    const lr = (torsoLeanDeg * Math.PI) / 180;
+    // 前倾：肩相对竖直偏向膝所在的 -x
+    shoulder = {
+      x: hip.x - TORSO * Math.sin(lr),
+      y: hip.y - TORSO * Math.cos(lr),
+    };
+  } else {
+    // 兼容旧 torsoDeg（肩-髋-膝）构造
+    const torsoDeg = opts.torsoDeg ?? 170;
+    const hipToKnee: Vec2 = { x: knee.x - hip.x, y: knee.y - hip.y };
+    const c1 = rotate(hipToKnee, torsoDeg);
+    const c2 = rotate(hipToKnee, -torsoDeg);
+    const pick = c1.y < c2.y ? c1 : c2;
+    const norm = Math.hypot(pick.x, pick.y) || 1;
+    shoulder = {
+      x: hip.x + (TORSO * pick.x) / norm,
+      y: hip.y + (TORSO * pick.y) / norm,
+    };
+  }
 
   const lm = (v: Vec2): Landmark => ({ x: v.x, y: v.y, visibility: 1 });
   const pose: Pose = [];
@@ -78,40 +97,40 @@ function repeatFrames(pose: Pose, frames: number): Pose[] {
 
 const FX_SQUAT_STAND: Fixture = {
   id: "FX-SQUAT-STAND",
-  description: "站立，膝角约 175°",
-  pose: buildSquatPose({ kneeDeg: 175, torsoDeg: 175 }),
+  description: "站立，膝角约 175°，躯干近直立",
+  pose: buildSquatPose({ kneeDeg: 175, torsoLeanDeg: 8 }),
   expectedStatus: "correct",
   expectedRuleIds: [],
 };
 
 const FX_SQUAT_BOTTOM_OK: Fixture = {
   id: "FX-SQUAT-BOTTOM-OK",
-  description: "底部，膝角约 85°，躯干直立",
-  pose: buildSquatPose({ kneeDeg: 85, torsoDeg: 172 }),
+  description: "底部，膝角约 85°，正常前倾约 28°",
+  pose: buildSquatPose({ kneeDeg: 85, torsoLeanDeg: 28 }),
   expectedStatus: "correct",
   expectedRuleIds: [],
 };
 
 const FX_SQUAT_SHALLOW: Fixture = {
   id: "FX-SQUAT-SHALLOW",
-  description: "底部，膝角约 115°（不够深）",
-  pose: buildSquatPose({ kneeDeg: 115, torsoDeg: 172 }),
+  description: "强制 bottom 相位下膝角约 112°（≥110 触发 squat-depth）",
+  pose: buildSquatPose({ kneeDeg: 112, torsoLeanDeg: 25 }),
   expectedStatus: "error",
   expectedRuleIds: ["squat-depth"],
 };
 
 const FX_SQUAT_VALGUS_L: Fixture = {
   id: "FX-SQUAT-VALGUS-L",
-  description: "左膝内扣",
-  pose: buildSquatPose({ kneeDeg: 88, torsoDeg: 172, leftKneeDx: 0.08 }),
-  expectedStatus: "error",
-  expectedRuleIds: ["knee-valgus-l"],
+  description: "左膝几何内扣姿态（侧摄 MVP 规则禁用，不期望触发）",
+  pose: buildSquatPose({ kneeDeg: 88, torsoLeanDeg: 28, leftKneeDx: 0.16 }),
+  expectedStatus: "correct",
+  expectedRuleIds: [],
 };
 
 const FX_SQUAT_LEAN: Fixture = {
   id: "FX-SQUAT-LEAN",
-  description: "躯干前倾约 30°（躯干角约 140°）",
-  pose: buildSquatPose({ kneeDeg: 120, torsoDeg: 140 }),
+  description: "躯干前倾过多（相对竖直约 62°，>55 触发 warning）",
+  pose: buildSquatPose({ kneeDeg: 100, torsoLeanDeg: 62 }),
   expectedStatus: "warning",
   expectedRuleIds: ["torso-upright"],
 };
@@ -120,11 +139,11 @@ const FX_SEQ_5REPS: Fixture = {
   id: "FX-SEQ-5REPS",
   description: "5 次完整相位序列（stand→descend→bottom→ascend→stand）",
   sequence: Array.from({ length: 5 }).flatMap(() => [
-    ...repeatFrames(buildSquatPose({ kneeDeg: 175, torsoDeg: 175 }), 6),
-    ...repeatFrames(buildSquatPose({ kneeDeg: 130, torsoDeg: 170 }), 6),
-    ...repeatFrames(buildSquatPose({ kneeDeg: 85, torsoDeg: 172 }), 6),
-    ...repeatFrames(buildSquatPose({ kneeDeg: 130, torsoDeg: 170 }), 6),
-    ...repeatFrames(buildSquatPose({ kneeDeg: 175, torsoDeg: 175 }), 6),
+    ...repeatFrames(buildSquatPose({ kneeDeg: 175, torsoLeanDeg: 8 }), 6),
+    ...repeatFrames(buildSquatPose({ kneeDeg: 130, torsoLeanDeg: 22 }), 6),
+    ...repeatFrames(buildSquatPose({ kneeDeg: 85, torsoLeanDeg: 28 }), 6),
+    ...repeatFrames(buildSquatPose({ kneeDeg: 130, torsoLeanDeg: 22 }), 6),
+    ...repeatFrames(buildSquatPose({ kneeDeg: 175, torsoLeanDeg: 8 }), 6),
   ]),
   expectedRepCount: 5,
 };

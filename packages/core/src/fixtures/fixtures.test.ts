@@ -64,9 +64,9 @@ describe("夹具几何自洽（用 angles.ts 复核膝角）", () => {
     expect(rightKnee(FIXTURES["FX-SQUAT-BOTTOM-OK"].pose!)!).toBeLessThan(90);
   });
 
-  it("SHALLOW 膝角在 90–160°（未达深度）", () => {
+  it("SHALLOW 膝角 ≥110°（深度 error 触发线）", () => {
     const deg = rightKnee(FIXTURES["FX-SQUAT-SHALLOW"].pose!)!;
-    expect(deg).toBeGreaterThan(90);
+    expect(deg).toBeGreaterThanOrEqual(110);
     expect(deg).toBeLessThan(160);
   });
 
@@ -84,10 +84,11 @@ describe("夹具元数据（期望状态/规则）", () => {
     expect(FIXTURES["FX-SQUAT-SHALLOW"].expectedRuleIds).toContain("squat-depth");
   });
 
-  it("VALGUS-L 期望触发 knee-valgus-l", () => {
-    expect(FIXTURES["FX-SQUAT-VALGUS-L"].expectedRuleIds).toContain(
+  it("VALGUS-L 侧摄禁用：不期望触发 knee-valgus-l", () => {
+    expect(FIXTURES["FX-SQUAT-VALGUS-L"].expectedRuleIds ?? []).not.toContain(
       "knee-valgus-l",
     );
+    expect(FIXTURES["FX-SQUAT-VALGUS-L"].expectedStatus).toBe("correct");
   });
 
   it("LEAN 期望触发 torso-upright（warning）", () => {

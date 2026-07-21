@@ -98,6 +98,11 @@ export interface RepEvent {
   counted: boolean;
 }
 
+/** 本帧刚发生的周期结算（仅事件帧非 null，供 UI 提示）。 */
+export type RepCycleOutcome =
+  | { type: "counted" }
+  | { type: "rejected"; reason: "shallow" | "depth_fault" };
+
 /** repCounter 状态。 */
 export interface RepCounterState {
   count: number;
@@ -105,6 +110,8 @@ export interface RepCounterState {
   phaseState: PhaseState;
   /** 本次下蹲周期内是否出现过深度不足。 */
   depthFaultThisCycle: boolean;
+  /** 本帧结算结果；无结算则为 null。 */
+  lastOutcome: RepCycleOutcome | null;
 }
 
 /** 一个动作的完整定义（角度、规则、相位阈值集合）。 */

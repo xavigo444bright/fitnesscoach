@@ -93,7 +93,7 @@ pnpm --filter miniprogram dev
 | `FX-SQUAT-BOTTOM-OK` | 底部，膝角 85°，躯干直立 | 正确 deep squat |
 | `FX-SQUAT-SHALLOW` | 底部，膝角 115° | 触发 `squat-depth` |
 | `FX-SQUAT-VALGUS-L` | 左膝内扣 | 触发 `knee-valgus-l` |
-| `FX-SQUAT-LEAN` | 躯干前倾 30° | 触发 `torso-upright` |
+| `FX-SQUAT-LEAN` | 躯干相对竖直前倾 &gt;55° | 触发 `torso-upright` |
 | `FX-SEQ-5REPS` | 5 次完整相位序列 | rep 计数 |
 
 每个夹具为 JSON：`{ landmarks: Landmark[], meta: { expectedPhase, expectedStatus, expectedIssues } }`
@@ -168,8 +168,8 @@ T0A-4 绘制 → VT-P0A-005 通过后才能采信 VT-P0A-006
 | VT-P1-004 | L1 | `phase.ts` | 输入 `FX-SEQ-5REPS` 相位序列 | 相位转移顺序正确 |
 | VT-P1-005 | L1 | `repCounter.ts` | `FX-SEQ-5REPS` | count === 5 |
 | VT-P1-006 | L2 | 规则契约 | 脚本对比 `squat-rules.md` 与 `squat.ts` | 规则 ID、阈值、文案一致 |
-| VT-P1-007 | L1 | 防抖逻辑 | 单帧错误不触发；持续 300ms 触发 | 时间模拟测试通过 |
-| VT-P1-008 | L1 | 冷却逻辑 | 2s 内同错误不重复 | 时间模拟测试通过 |
+| VT-P1-007 | L1 | 防抖逻辑 | 单帧错误不触发；持续 debounceMs（默认 800ms）触发 | 时间模拟测试通过 |
+| VT-P1-008 | L1 | 冷却逻辑 | cooldownMs（默认 3s）内同错误不重复 | 时间模拟测试通过 |
 | VT-P1-009 | L1 | 覆盖率 | `test:coverage` | core 核心文件 ≥80% |
 | VT-P1-010 | L2 | 夹具完备 | 检查 `fixtures/` 目录 | §3 全部夹具存在 |
 
@@ -225,7 +225,7 @@ VT-P2-005 失败 → 先优化 pose 层，不得跳到 Phase 3 UI
 | VT-P3A-002 | L4 | 颜色编码 | 标准蹲 vs 半蹲 vs 内扣 | FR-061：绿/黄/红正确 |
 | VT-P3A-003 | L4 | 文字反馈 | 三种错误各做 1 次 | FR-063、FR-045：文案对且 ≤2 条 |
 | VT-P3A-004 | L1 | 防抖 | 快速抖一下 | FR-042：不闪报 |
-| VT-P3A-005 | L1 | 冷却 | 同一错误连续触发 | FR-043：≥2s 间隔 |
+| VT-P3A-005 | L1 | 冷却 | 同一错误连续触发 | FR-043：≥cooldown（默认 3s） |
 | VT-P3A-006 | L4 | 站位引导 | 走出画面 | FR-022：有引导 |
 | VT-P3A-007 | L4 | 延迟 | 从动作变化到颜色变化 | ≤200ms（KPI-001） |
 
@@ -236,7 +236,7 @@ VT-P2-005 失败 → 先优化 pose 层，不得跳到 Phase 3 UI
 | VT-P3B-001 | L4 | Ghost 显示 | 深蹲全程 | FR-064：半透明参考骨架 |
 | VT-P3B-002 | L4 | Ghost 同步 | 对比相位 | FR-065：延迟 <250ms |
 | VT-P3B-003 | L4 | Rep 计数 | 标准 5 蹲 | FR-051：5/5 |
-| VT-P3B-004 | L4 | 半蹲不计数 | 5 次半蹲 | FR-052：0 rep |
+| VT-P3B-004 | L4 | 半蹲不计数 | 5 次半蹲（未蹲到平行/未进 bottom） | FR-052：0 rep |
 | VT-P3B-005 | L5 | 页面流 | 首页→详情→准备→训练→总结 | §9 PG-001–005 无断点 |
 | VT-P3B-006 | L5 | 倒计时 | 准备页 | FR-070：3-2-1 |
 | VT-P3B-007 | L5 | 总结页 | 练完一组 | FR-072：rep、用时、错误 |

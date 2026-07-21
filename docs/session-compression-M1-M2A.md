@@ -62,11 +62,16 @@
 | phase.test 未用 `frames` 致 tsc 失败 | 删除未用变量 |
 | pose-native detect 返回 Pose\|Promise 索引报错 | 测试里 `Awaited<ReturnType<…>>` |
 
+## Deferred / Product Notes（勿在 M2A 偷做）
+
+- **侧摄 × 膝内扣假阳性**：HUD 膝角=髋膝踝深度角（侧摄有效）；`knee-valgus-*` 用图像横向偏移，侧摄膝前移易误报。用户确认：机位非最优时（如侧摄无法证伪/证实内扣）应给**机位摆设建议示意图**，规则分流/禁用待后做（偏 MU/M3/UI，非当前 T5）。
+- VT-P2-002 真机已通过（膝角+status+33点+FPS30）。
+
 ## Next Steps
 
-1. **M2A-T4** DevPoseScreen 接 core → **human_required / 真机**（未确认勿开做）
-2. 可选：先人工 **MU-T1** 线框确认；或 `/loop` 再启（仍会卡在 T4）
-3. 大量未提交改动（M0 文档 + M1 全量 + M2A）；remote 仍未配置，需用户给 URL 再 push
+1. **M2A-T5** 分辨率自适应降级（VT-P2-006）
+2. **M2A-T6** 接 core 后 FPS 回归（真机）→ M2A-GATE
+3. 未推送：本地 commit 已有；remote 仍未配置，后续一起 push
 
 ## Probe Cheatsheet
 

@@ -4,6 +4,9 @@
   "main": "index.ts",
   "dependencies": {
     "@fitness-coach/core": "workspace:*",
+    "@fitness-coach/pose-native": "workspace:*",
+    "@fitness-coach/render": "workspace:*",
+    "@fitness-coach/ui": "workspace:*",
     "@thinksys/react-native-mediapipe": "^0.0.21",
     "expo": "~54.0.35",
     "expo-camera": "~17.0.10",

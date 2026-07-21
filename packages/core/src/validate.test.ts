@@ -55,10 +55,20 @@ describe("相位过滤", () => {
 });
 
 describe("汇总优先级", () => {
-  it("error 压过 warning", () => {
-    // VALGUS-L 底部：valgus(error) 存在；即使 torso 正常也应为 error
+  it("侧摄禁用 valgus：VALGUS-L 几何仍 correct", () => {
     const res = validate(FIXTURES["FX-SQUAT-VALGUS-L"].pose!, "bottom");
-    expect(res.status).toBe("error");
+    expect(res.status).toBe("correct");
+    expect(
+      res.results.find((r) => r.id === "knee-valgus-l")?.triggered,
+    ).toBe(false);
+  });
+
+  it("正常底部深蹲不因肩-髋-膝闭合误报前倾", () => {
+    const res = validate(FIXTURES["FX-SQUAT-BOTTOM-OK"].pose!, "bottom");
+    expect(res.status).toBe("correct");
+    expect(
+      res.results.find((r) => r.id === "torso-upright")?.triggered,
+    ).toBe(false);
   });
 
   it("规则集合覆盖 squat-rules.md 四条", () => {

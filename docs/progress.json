@@ -1,50 +1,172 @@
 {
   "version": "0.4.0",
   "plan": "module-based",
-  "last_updated": "2026-07-18T00:10:00+08:00",
+  "last_updated": "2026-07-22T01:14:00+08:00",
   "status": "in_progress",
   "blocker": null,
   "loop": {
-    "interval": "20m",
-    "mode": "stopped",
-    "started_at": "2026-07-17T00:10:00+08:00",
-    "stopped_at": "2026-07-17T23:57:00+08:00",
-    "stop_reason": "用户要求下一 tick 停 loop 并 summarize"
+    "interval": "dynamic",
+    "mode": "running",
+    "started_at": "2026-07-21T23:58:00+08:00",
+    "stopped_at": null,
+    "stop_reason": null,
+    "stop_after_next_tick": false,
+    "note": "动态节奏 /loop；M4 已过；焦点切 M2B"
   },
-  "current_module": "M2A",
+  "current_module": "M2B",
   "modules": {
-    "M0": { "name": "工程基建", "status": "done", "depends_on": [] },
-    "MU": { "name": "UI 设计基础", "status": "ready", "depends_on": ["M0"] },
-    "M1": { "name": "Core 引擎", "status": "done", "depends_on": ["M0"] },
-    "M2A": { "name": "Pose App", "status": "in_progress", "depends_on": ["M1"] },
-    "M2B": { "name": "Pose 小程序", "status": "ready", "depends_on": ["M0", "M1"] },
-    "M3": { "name": "渲染与反馈", "status": "pending", "depends_on": ["M1", "MU", "M2A"] },
-    "M4": { "name": "App 壳", "status": "pending", "depends_on": ["M3", "MU"] },
-    "M5": { "name": "小程序壳", "status": "pending", "depends_on": ["M2B", "M3", "MU"] },
-    "M6": { "name": "质量与交付", "status": "pending", "depends_on": ["M4", "M5"] }
+    "M0": {
+      "name": "工程基建",
+      "status": "done",
+      "depends_on": []
+    },
+    "MU": {
+      "name": "UI 设计基础",
+      "status": "done",
+      "depends_on": [
+        "M0"
+      ]
+    },
+    "M1": {
+      "name": "Core 引擎",
+      "status": "done",
+      "depends_on": [
+        "M0"
+      ]
+    },
+    "M2A": {
+      "name": "Pose App",
+      "status": "done",
+      "depends_on": [
+        "M1"
+      ]
+    },
+    "M2B": {
+      "name": "Pose 小程序",
+      "status": "in_progress",
+      "depends_on": [
+        "M0",
+        "M1"
+      ]
+    },
+    "M3": {
+      "name": "渲染与反馈",
+      "status": "done",
+      "depends_on": [
+        "M1",
+        "MU",
+        "M2A"
+      ]
+    },
+    "M4": {
+      "name": "App 壳",
+      "status": "done",
+      "depends_on": [
+        "M3",
+        "MU"
+      ]
+    },
+    "M5": {
+      "name": "小程序壳",
+      "status": "pending",
+      "depends_on": [
+        "M2B",
+        "M3",
+        "MU"
+      ]
+    },
+    "M6": {
+      "name": "质量与交付",
+      "status": "pending",
+      "depends_on": [
+        "M4",
+        "M5"
+      ]
+    }
   },
   "next_task": {
-    "id": "M2A-T4",
-    "module": "M2A",
-    "title": "DevPoseScreen：接 core 实时校验",
-    "verification": ["VT-P2-002"],
-    "human_required": true,
-    "notes": "调试页摄像头 → detect → filter → smooth → validate；需真机验收膝角+status。"
+    "id": "M2B-T1",
+    "module": "M2B",
+    "title": "小程序构建接入 monorepo",
+    "verification": [
+      "VT-P5-001",
+      "VT-P5-002"
+    ],
+    "human_required": false,
+    "notes": "packages/pose-mp + apps/miniprogram 接入；M5 依赖本模块 GATE"
   },
   "queue": [
-    { "id": "M2A-T4", "module": "M2A", "human_required": true },
-    { "id": "M2A-T5", "module": "M2A", "human_required": false },
-    { "id": "M2A-T6", "module": "M2A", "human_required": true },
-    { "id": "M2A-GATE", "module": "M2A", "human_required": true },
-    { "id": "MU-T1", "module": "MU", "human_required": true },
-    { "id": "MU-T2", "module": "MU", "human_required": false },
-    { "id": "MU-T3", "module": "MU", "human_required": false },
-    { "id": "MU-T4", "module": "MU", "human_required": false },
-    { "id": "MU-T5", "module": "MU", "human_required": false },
-    { "id": "MU-GATE", "module": "MU", "human_required": true }
+    {
+      "id": "M2B-T1",
+      "module": "M2B"
+    },
+    {
+      "id": "M2B-T2",
+      "module": "M2B"
+    },
+    {
+      "id": "M2B-T3",
+      "module": "M2B"
+    },
+    {
+      "id": "M2B-GATE",
+      "module": "M2B",
+      "human_required": true
+    }
   ],
-  "completed_tasks": ["M0-T1", "M0-T2", "M0-T3", "M0-T4", "M0-T5", "M0-T6", "M0-T7", "M1-T1", "M1-T2", "M1-T3", "M1-T4", "M1-T5", "M1-T6", "M1-T7", "M1-T8", "M1-T9", "M1-T10", "M2A-T1", "M2A-T2", "M2A-T3"],
-  "completed_gates": ["M0-GATE", "M1-GATE"],
+  "completed_tasks": [
+    "M0-T1",
+    "M0-T2",
+    "M0-T3",
+    "M0-T4",
+    "M0-T5",
+    "M0-T6",
+    "M0-T7",
+    "M1-T1",
+    "M1-T2",
+    "M1-T3",
+    "M1-T4",
+    "M1-T5",
+    "M1-T6",
+    "M1-T7",
+    "M1-T8",
+    "M1-T9",
+    "M1-T10",
+    "M2A-T1",
+    "M2A-T2",
+    "M2A-T3",
+    "M2A-T4",
+    "M2A-T5",
+    "M2A-T6",
+    "MU-T1",
+    "MU-T2",
+    "MU-T3",
+    "MU-T4",
+    "MU-T5",
+    "M3-T1",
+    "M3-T2",
+    "M3-T3",
+    "M3-T4",
+    "M3-T5",
+    "M3-T6",
+    "M3-T7",
+    "M4-T1",
+    "M4-T2",
+    "M4-T3",
+    "M4-T4",
+    "M4-T5",
+    "M4-T6",
+    "M4-T7",
+    "M4-GATE"
+  ],
+  "completed_gates": [
+    "M0-GATE",
+    "M1-GATE",
+    "M2A-GATE",
+    "MU-GATE",
+    "M3-GATE",
+    "M4-GATE"
+  ],
   "iteration_log": [
     {
       "at": "2026-07-11T23:15:00+08:00",
@@ -216,6 +338,267 @@
       "summary": "visibility.ts：filterByVisibility / isVisible，阈值 0.5（FR-032）；低 visibility → undefined，validate 不参与。visibility.test.ts 5 用例（含遮挡一腿→knee-valgus-l 不再触发）。pose-native 10/10。VT-P2-004 通过。停在 T4 前（需真机）。",
       "next": "M2A-T4 DevPoseScreen（human_required）",
       "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T15:50:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T4",
+      "result": "partial",
+      "summary": "DevPoseScreen：摄像头→poseFromMediapipeEvent→filterByVisibility→PoseSmoother→stepPhase→validate；HUD 膝角+status+phase。mediapipe 适配 4 单测；pose-native 14/14；mobile tsc 绿。未标 done：待真机 VT-P2-002。",
+      "next": "真机跑 Dev Client，确认膝角与 status 实时更新后解除阻塞",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T21:57:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T4",
+      "result": "done",
+      "summary": "真机 VT-P2-002 通过：HUD 膝角 56.5°、status=error、phase=bottom、关键点 33、FPS 30，并出左膝内扣提示。管线 detect→filter→smooth→validate 闭环成立。",
+      "next": "M2A-T5 分辨率自适应降级（VT-P2-006）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T22:05:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T5",
+      "result": "done",
+      "summary": "AdaptiveQualityController：high/medium/low（frameLimit+processEveryN+inputScale）；FPS 自动降/升档+手动循环；DevPoseScreen 接档位 HUD。adaptiveQuality 7 单测；pose-native 21/21；mobile tsc 绿。VT-P2-006 逻辑/手动降级就绪。",
+      "next": "M2A-T6 FPS 回归（human_required / VT-P2-005）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T22:23:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T6",
+      "result": "blocked",
+      "summary": "20min tick：next_task=M2A-T6 需真机 VT-P2-005（接 core 后 30s FPS≥15）。无法无人值守完成，标 blocked。",
+      "next": "真机 DevPose 观察 ≥30s，确认 FPS≥15 后回复「VT-P2-005 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T22:28:00+08:00",
+      "module": "M2A",
+      "task": "M2A-T6",
+      "result": "done",
+      "summary": "用户确认 VT-P2-005 通过：接 core 后真机 FPS≥15。M2A-T1~T6 全部完成，进入 M2A-GATE（人工）。",
+      "next": "M2A-GATE（人工确认）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T22:29:00+08:00",
+      "module": "M2A",
+      "task": "M2A-GATE",
+      "result": "passed",
+      "summary": "人工确认 M2A-GATE 通过（膝角+status 真机、FPS≥15）。M2A → done。current_module 切至 MU；M3 仍 pending（须 MU-GATE）。M2B 仍 ready 可并行。",
+      "next": "MU-T1 确认 UI.md 线框（需你确认）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T22:36:00+08:00",
+      "module": "MU",
+      "task": "MU-T1",
+      "result": "done",
+      "summary": "用户确认线框 OK；UI.md 已含 PG-004 FeedbackBar recovered/清空（改正正反馈）。",
+      "next": "MU-T2 design-tokens",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T22:38:00+08:00",
+      "module": "MU",
+      "task": "MU-T2~T5",
+      "result": "done",
+      "summary": "T2 design-tokens 0.2.0 定稿；T3 packages/ui theme+CMP props（4 测绿）；T4 PG-004 分区图；T5 §5 平台差异补全。进入 MU-GATE。",
+      "next": "MU-GATE（人工确认）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T22:44:00+08:00",
+      "module": "MU",
+      "task": "MU-GATE",
+      "result": "blocked",
+      "summary": "20min tick：仍待人工确认 MU-GATE，未推进。",
+      "next": "回复「MU-GATE 通过」后解锁 M3",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-18T22:46:00+08:00",
+      "module": "MU",
+      "task": "MU-GATE",
+      "result": "passed",
+      "summary": "人工确认 MU-GATE 通过。MU → done；解锁 M3 → in_progress。",
+      "next": "M3-T1 骨骼数据结构 + App adapter",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T22:48:00+08:00",
+      "module": "M3",
+      "task": "M3-T1",
+      "result": "done",
+      "summary": "render：buildSkeletonScene + POSE_BONES；3 单测绿。App SkeletonOverlay 接 DevPose；色走 @fitness-coach/ui。VT-P3A-001 数据层+叠加就绪。",
+      "next": "M3-T2 关节颜色编码（VT-P3A-002）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T22:52:00+08:00",
+      "module": "M3",
+      "task": "M3-T2",
+      "result": "done",
+      "summary": "applyJointColors：按规则 joints 染 warning/error，error 优先；3 单测；DevPose 已接线。VT-P3A-002 逻辑层通过（真机色检非本轮门禁）。",
+      "next": "M3-T3 FeedbackBar 文案优先级",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-18T23:16:00+08:00",
+      "module": "M3",
+      "task": "M3-T3",
+      "result": "done",
+      "summary": "stepFeedbackBar：≤2 条、error>warning、recovered 1.8s；3 单测；DevPose 接 FeedbackBar。VT-P3A-003 数据层通过。下一接 pushFeedback。",
+      "next": "M3-T4 防抖/冷却接反馈层",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-19T23:47:00+08:00",
+      "module": "M3",
+      "task": "M3-T4",
+      "result": "done",
+      "summary": "listConfirmedFeedback + stepWiredFeedback：pushFeedback 防抖/冷却接入 FeedbackBar；单帧不闪、冷却期条仍常驻、消失走 recovered。core 85/85、render 11/11。VT-P3A-004/005 通过。",
+      "next": "M3-T5 站位引导逻辑",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T00:08:00+08:00",
+      "module": "M3",
+      "task": "M3-T5",
+      "result": "done",
+      "summary": "evaluatePlacement：髋/踝缺失、出画、过近 → 引导文案；PlacementGuide 叠 DevPose。render 15/15。VT-P3A-006 逻辑层通过（真机走出画面可后补）。",
+      "next": "M3-T6 Ghost 关键帧 + 插值",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T00:28:00+08:00",
+      "module": "M3",
+      "task": "M3-T6",
+      "result": "done",
+      "summary": "core squat-keyframes + render ghostPoseForPhase/lerpPose；DevPose 半透明 ghost 叠加。core 87/87、render 18/18。VT-P3B-001/002 逻辑层通过。",
+      "next": "M3-T7 Rep 计数接 UI",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T23:13:00+08:00",
+      "module": "M3",
+      "task": "M3-T7",
+      "result": "done",
+      "summary": "repDisplayFromState + DevPose 改用 stepRep；RepCounter（UX-003 bump）；render 21/21。VT-P3B-003/004 逻辑层通过（真机 5/5 与半蹲 0 可作 GATE 抽查）。",
+      "next": "M3-GATE（人工）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-20T23:35:00+08:00",
+      "module": "M3",
+      "task": "M3-GATE",
+      "result": "blocked",
+      "summary": "dynamic wake：next_task=M3-GATE 需人工；期间已放宽站位框与深蹲严苛度，仍待真机验收。未推进下一模块。",
+      "next": "真机 Reload 后验站位/平行蹲/Ghost，回复「M3-GATE 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-20T23:54:00+08:00",
+      "module": "M3",
+      "task": "M3-GATE",
+      "result": "passed",
+      "summary": "用户确认真机 OK（站位框、规则放宽、侧摄内扣关闭、躯干改竖直前倾角）。M3 → done；解锁 M4 → in_progress。",
+      "next": "M4-T1 PG-001 动作库",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T23:56:00+08:00",
+      "module": "M4",
+      "task": "M4-T1",
+      "result": "done",
+      "summary": "PG-001 动作库：ExerciseCard + ExerciseLibraryScreen；点击深蹲进详情占位；保留 DevPose 调试入口。App 入口切至动作库。FR-001 数据层/导航就绪。",
+      "next": "M4-T2 动作详情",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T23:58:00+08:00",
+      "module": "M4",
+      "task": "M4-T2",
+      "result": "done",
+      "summary": "PG-002：侧面机位示意 + 要点/摆机位文案 + 开始训练 CTA（≥48）；接 DevPose。FR-002 就绪。",
+      "next": "M4-T3 准备页倒计时",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-20T23:58:30+08:00",
+      "module": "M4",
+      "task": "M4-T3",
+      "result": "done",
+      "summary": "PG-003：PrepareScreen 摄像头预览 + PlacementGuide + CountdownOverlay 3-2-1（可跳过）；详情→准备→训练。FR-070/022 就绪。",
+      "next": "M4-T4 正式训练页",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-21T00:18:00+08:00",
+      "module": "M4",
+      "task": "M4-T4",
+      "result": "done",
+      "summary": "PG-004 TrainingScreen：DevPose variant=training；FeedbackBar+骨骼/Ghost+Rep「结束」；正式流准备页进入，调试入口仍可用。FR-060/061/063/064/065 组装就绪（FR-062 角度弧为 P1 未做）。",
+      "next": "M4-T5 总结页",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-21T23:58:00+08:00",
+      "module": "M4",
+      "task": "M4-T5",
+      "result": "done",
+      "summary": "PG-005：SessionSummary + 训练结束带出 reps/用时/最常见问题；再来一组→准备页，返回→动作库。FR-072 就绪。动态 loop 重启。",
+      "next": "M4-T6 弱光提示",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-22T00:28:00+08:00",
+      "module": "M4",
+      "task": "M4-T6",
+      "result": "done",
+      "summary": "FR-023/VT-P4-001：pose-native evaluateLowLight（关键点 mean visibility <0.4 →「请改善光线」）；DevPose/训练页横幅；4 单测绿。",
+      "next": "M4-T7 端到端延迟抽测（人机）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-22T00:48:00+08:00",
+      "module": "M4",
+      "task": "M4-T7",
+      "result": "blocked",
+      "summary": "dynamic wake：仍等人机 VT-P3A-007（动作→反馈 <200ms）。期间已修 Ghost 对齐用户体型、站位框加大与防闪烁；未推进任务。",
+      "next": "真机确认后回复「VT-P3A-007 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-22T00:53:00+08:00",
+      "module": "M4",
+      "task": "M4-T7",
+      "result": "done",
+      "summary": "用户确认无反馈延迟、计数 OK → VT-P3A-007/M4-T7 通过。同步落地 UX-007 CorrectCheckBurst（rep+1 中央绿色 ✓）；下一 M4-GATE 一并真机验打勾。",
+      "next": "M4-GATE（含 UX-007）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-22T01:09:00+08:00",
+      "module": "M4",
+      "task": "M4-GATE",
+      "result": "blocked",
+      "summary": "dynamic wake：仍等人机 M4-GATE。期间已补准备页翻转/质量、半蹲不计次顶部提示。验收清单：全流程、绿勾、半蹲提示「蹲得不够深，未计入次数」。",
+      "next": "回复「M4-GATE 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-22T01:14:00+08:00",
+      "module": "M4",
+      "task": "M4-GATE",
+      "result": "done",
+      "summary": "用户确认 M4-GATE 通过（全流程/绿勾/半蹲提示/上次问题回看等）。M4 → done；焦点切 M2B（小程序 Pose），queue=M2B-T1~GATE；M5 仍待 M2B-GATE。",
+      "next": "M2B-T1 小程序构建接入 monorepo",
+      "human_action_needed": false
     }
   ]
 }

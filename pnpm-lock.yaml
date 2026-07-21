@@ -28,6 +28,15 @@ importers:
       '@fitness-coach/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@fitness-coach/pose-native':
+        specifier: workspace:*
+        version: link:../../packages/pose-native
+      '@fitness-coach/render':
+        specifier: workspace:*
+        version: link:../../packages/render
+      '@fitness-coach/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@thinksys/react-native-mediapipe':
         specifier: ^0.0.21
         version: 0.0.21(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -100,6 +109,15 @@ importers:
       '@fitness-coach/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@26.1.0)(lightningcss@1.32.0)(terser@5.48.0)
+
+  packages/ui:
     devDependencies:
       typescript:
         specifier: ^5.7.2
