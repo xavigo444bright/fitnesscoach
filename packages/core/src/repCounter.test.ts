@@ -78,4 +78,19 @@ describe("VT-P1-005 / FR-052 rep 计数", () => {
     expect(state.count).toBe(1);
     expect(state.reps[0].counted).toBe(true);
   });
+
+  it("低 FPS 稀疏采样 stand→bottom→stand（跳过 descend/ascend）仍计 1", () => {
+    // 模拟小程序 ~4FPS：两帧之间完成一整次下蹲
+    const sparseCfg = {
+      phaseConfig: {
+        standAboveDeg: 160,
+        bottomBelowDeg: 100,
+        confirmFrames: 1,
+      },
+    };
+    const seq = [STAND, BOTTOM, STAND, STAND];
+    const state = countReps(seq, sparseCfg);
+    expect(state.count).toBe(1);
+    expect(state.reps[0].counted).toBe(true);
+  });
 });

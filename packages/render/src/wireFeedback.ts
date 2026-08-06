@@ -3,6 +3,7 @@
  */
 
 import {
+  displayValidation as buildDisplayValidation,
   initialFeedbackState,
   listConfirmedFeedback,
   pushFeedback,
@@ -45,6 +46,8 @@ export function stepWiredFeedback(
   items: FeedbackBarItem[];
   /** 本帧新播报（过冷却），可供 TTS 等；条展示用 items。 */
   newCues: FeedbackCue[];
+  /** 叠了 latch 的 validate，供骨骼染色（抗单帧噪声变绿）。 */
+  displayValidation: ValidationResult;
 } {
   const newCues = pushFeedback(
     state.feedback,
@@ -72,5 +75,6 @@ export function stepWiredFeedback(
     state: { feedback: state.feedback, bar: barStep.state },
     items: barStep.items,
     newCues,
+    displayValidation: buildDisplayValidation(validation, confirmed),
   };
 }

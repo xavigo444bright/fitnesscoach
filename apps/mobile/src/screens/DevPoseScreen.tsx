@@ -5,12 +5,15 @@
 import {
   initialRepCounterState,
   messageForRepReject,
-  squatKneeAngle,
   stepRep,
   validate,
   type Phase,
   type ValidationStatus,
 } from '@fitness-coach/core';
+import {
+  getExerciseSession,
+  type ExerciseId,
+} from '../exerciseSession';
 import {
   AdaptiveQualityController,
   evaluateLowLight,
@@ -21,14 +24,12 @@ import {
   type QualityTier,
 } from '@fitness-coach/pose-native';
 import {
-  alignGhostToUser,
   applyJointColors,
   beginFaultCycle,
   buildSkeletonScene,
   celebrateFixedFaults,
   DEFAULT_FEEDBACK_BAR_CONFIG,
   evaluatePlacement,
-  ghostPoseForPhase,
   initialLastFaultState,
   initialWiredFeedbackState,
   noteCycleFaults,
@@ -64,6 +65,13 @@ import {
   toggleSessionFacing,
 } from '../sessionCameraPrefs';
 import type { SessionSummaryData } from '../types/session';
+import {
+  hydrateVoiceEnabled,
+  isSpeechNativeReady,
+  isVoiceEnabled,
+  setVoiceEnabled,
+  speakCoach,
+} from '../voiceCoach';
 
 function statusColor(status: ValidationStatus | '—'): string {
   switch (status) {
@@ -81,15 +89,19 @@ function statusColor(status: ValidationStatus | '—'): string {
 export type DevPoseScreenProps = {
   /** debug = 开发 HUD；training = PG-004 正式训练页 */
   variant?: 'debug' | 'training';
+  /** 当前动作；默认深蹲 */
+  exerciseId?: ExerciseId;
   /** 训练页「结束」回调，带回会话摘要 */
   onEnd?: (summary: SessionSummaryData) => void;
 };
 
 export default function DevPoseScreen({
   variant = 'debug',
+  exerciseId = 'squat',
   onEnd,
 }: DevPoseScreenProps) {
   const isTraining = variant === 'training';
+  const exercise = getExerciseSession(exerciseId);
   const { width, height } = useWindowDimensions();
   const [permission, requestPermission] = useCameraPermissions();
 
@@ -111,6 +123,14 @@ export default function DevPoseScreen({
   const [landmarkCount, setLandmarkCount] = useState(0);
   const [kneeDeg, setKneeDeg] = useState<number | null>(null);
   const [phase, setPhase] = useState<Phase>('stand');
+  const [voiceOn, setVoiceOn] = useState(true);
+  const [speechReady, setSpeechReady] = useState(false);
+  const lastSpokenRep = useRef(0);
+
+  useEffect(() => {
+    void hydrateVoiceEnabled().then((on) => setVoiceOn(on));
+    setSpeechReady(isSpeechNativeReady());
+  }, []);
   const [status, setStatus] = useState<ValidationStatus | '—'>('—');
   const [feedbackItems, setFeedbackItems] = useState<FeedbackBarItem[]>([]);
   const [repCount, setRepCount] = useState(0);
@@ -119,7 +139,6 @@ export default function DevPoseScreen({
   const [frameLimit, setFrameLimit] = useState(30);
   const [inputScale, setInputScale] = useState(1);
   const [skeleton, setSkeleton] = useState<SkeletonScene | null>(null);
-  const [ghostScene, setGhostScene] = useState<SkeletonScene | null>(null);
   const [placementVisible, setPlacementVisible] = useState(false);
   const [placementHint, setPlacementHint] = useState<string | null>(null);
   const [lowLightHint, setLowLightHint] = useState<string | null>(null);
@@ -190,9 +209,12 @@ export default function DevPoseScreen({
       if (!detected) {
         setLandmarkCount(0);
         setSkeleton(null);
-        setGhostScene(null);
         setPlacementVisible(true);
-        setPlacementHint('髋膝踝入画即可，不必顶满框');
+        setPlacementHint(
+          exercise.id === 'pushup'
+            ? '肩肘髋踝入画即可，不必顶满框'
+            : '髋膝踝入画即可，不必顶满框',
+        );
         setLowLightHint(null);
         return;
       }
@@ -215,7 +237,13 @@ export default function DevPoseScreen({
       const showPlacement =
         placement.visible || placementOkStreak.current < 12;
       const prevPhase = prevPhaseRef.current;
-      const nextRep = stepRep(repRef.current, smoothed);
+      const nextRep = stepRep(repRef.current, smoothed, {
+        phaseConfig: exercise.phaseConfig,
+        rules: exercise.rules,
+        angleFn: exercise.angleFn,
+        depthRuleId: exercise.depthRuleId,
+        exerciseId: exercise.id,
+      });
       repRef.current = nextRep;
       const phaseNow = nextRep.phaseState.phase;
       prevPhaseRef.current = phaseNow;
@@ -224,22 +252,23 @@ export default function DevPoseScreen({
         lastFaultRef.current = beginFaultCycle(lastFaultRef.current);
       }
 
-      const result = validate(smoothed, phaseNow);
-      const knee = squatKneeAngle(smoothed);
-      const scene = applyJointColors(buildSkeletonScene(smoothed), result);
-      const ghostPose = alignGhostToUser(
-        ghostPoseForPhase(phaseNow, knee),
-        smoothed,
-      );
-      const ghost = buildSkeletonScene(ghostPose);
+      const result = validate(smoothed, phaseNow, exercise.rules);
+      const driveAngle = exercise.angleFn(smoothed);
       const wired = stepWiredFeedback(wiredFeedbackRef.current, result, now);
       wiredFeedbackRef.current = wired.state;
+      // 骨骼色用 latch 后的 validate，避免噪声一帧把黄骨刷绿
+      const scene = applyJointColors(
+        buildSkeletonScene(smoothed),
+        wired.displayValidation,
+        exercise.rules,
+      );
       for (const cue of wired.newCues) {
         const prev = issueCounts.current[cue.id];
         issueCounts.current[cue.id] = {
           message: cue.message,
           count: (prev?.count ?? 0) + 1,
         };
+        speakCoach(cue.message);
       }
 
       // 本周期已确认纠错 → 缓冲，供半蹲结算后回看
@@ -266,12 +295,16 @@ export default function DevPoseScreen({
       }
 
       if (nextRep.lastOutcome?.type === 'rejected') {
-        const msg = messageForRepReject(nextRep.lastOutcome.reason);
+        const msg = messageForRepReject(
+          nextRep.lastOutcome.reason,
+          exercise.id,
+        );
+        speakCoach(msg);
         rejectHintUntil.current = now + 2500;
         rejectRuleIdRef.current =
           nextRep.lastOutcome.reason === 'shallow'
             ? 'rep-shallow'
-            : 'squat-depth';
+            : exercise.depthRuleId;
         reject = msg;
         const id = rejectRuleIdRef.current;
         const prev = issueCounts.current[id];
@@ -285,6 +318,10 @@ export default function DevPoseScreen({
           severity: 'error',
         });
       } else if (nextRep.lastOutcome?.type === 'counted') {
+        if (nextRep.count !== lastSpokenRep.current) {
+          lastSpokenRep.current = nextRep.count;
+          speakCoach(`${nextRep.count}`);
+        }
         const celebrated = celebrateFixedFaults(
           lastFaultRef.current,
           DEFAULT_FEEDBACK_BAR_CONFIG.recoverMessageById,
@@ -314,12 +351,13 @@ export default function DevPoseScreen({
               {
                 ruleId: rejectRuleIdRef.current,
                 message: reject,
-                severity: 'error',
-                phase: 'correcting',
+                severity: 'error' as const,
+                phase: 'correcting' as const,
               },
               ...wired.items.filter(
                 (i) =>
-                  i.ruleId !== 'rep-shallow' && i.ruleId !== 'squat-depth',
+                  i.ruleId !== 'rep-shallow' &&
+                  i.ruleId !== exercise.depthRuleId,
               ),
             ].slice(0, 2)
           : wired.items;
@@ -334,7 +372,7 @@ export default function DevPoseScreen({
       }
 
       setPhase(phaseNow);
-      setKneeDeg(knee);
+      setKneeDeg(driveAngle);
       setStatus(result.status);
       setFeedbackItems(barItems);
       setRejectHint(reject);
@@ -343,15 +381,17 @@ export default function DevPoseScreen({
       setFaultReviewing(lastFaultRef.current.reviewing);
       setRepCount(repUi.count);
       setSkeleton(scene);
-      setGhostScene(ghost);
       setPlacementVisible(showPlacement);
       setPlacementHint(
         showPlacement
-          ? (placement.hint ?? '髋膝踝入画即可，不必顶满框')
+          ? (placement.hint ??
+              (exercise.id === 'pushup'
+                ? '肩肘髋踝入画即可，侧面看清身体一线'
+                : '髋膝踝入画即可，不必顶满框'))
           : null,
       );
     },
-    [syncQualityUi],
+    [syncQualityUi, exercise],
   );
 
   const onToggleFaultReview = useCallback(() => {
@@ -360,9 +400,15 @@ export default function DevPoseScreen({
     setFaultReviewing(lastFaultRef.current.reviewing);
   }, []);
 
+  const onToggleVoice = useCallback(() => {
+    const next = !isVoiceEnabled();
+    void setVoiceEnabled(next).then(() => setVoiceOn(next));
+  }, []);
+
   const onResetReps = useCallback(() => {
     repRef.current = initialRepCounterState();
     lastFaultRef.current = initialLastFaultState();
+    lastSpokenRep.current = 0;
     prevPhaseRef.current = 'stand';
     setRepCount(0);
     setPhase('stand');
@@ -463,7 +509,6 @@ export default function DevPoseScreen({
           />
           <SkeletonOverlay
             scene={skeleton}
-            ghost={ghostScene}
             width={camW}
             height={camH}
           />
@@ -496,7 +541,10 @@ export default function DevPoseScreen({
           />
           <Text style={styles.hudTitle}>DevPose · 调试</Text>
           <Text style={styles.hudText}>
-            膝角: <Text style={styles.hudEm}>{kneeText}</Text>
+            {exercise.id === 'pushup' ? '肘角' : '膝角'}:{' '}
+            <Text style={styles.hudEm}>{kneeText}</Text>
+            {' · '}
+            {exercise.def.name}
           </Text>
           <Text style={styles.hudText}>
             status:{' '}
@@ -543,6 +591,17 @@ export default function DevPoseScreen({
             <Text style={styles.actionBtnText}>自动</Text>
           </Pressable>
         ) : null}
+        <Pressable
+          style={styles.actionBtn}
+          onPress={onToggleVoice}
+          accessibilityRole="button"
+          accessibilityLabel={voiceOn ? '关闭语音' : '打开语音'}
+          hitSlop={8}
+        >
+          <Text style={styles.actionBtnText}>
+            {!speechReady ? '语音×' : voiceOn ? '语音开' : '语音关'}
+          </Text>
+        </Pressable>
       </View>
 
       <CorrectCheckBurst repCount={repCount} />

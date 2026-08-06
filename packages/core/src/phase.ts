@@ -1,8 +1,8 @@
 /**
- * @fitness-coach/core — 深蹲相位状态机（M1-T5，VT-P1-004）
+ * @fitness-coach/core — 相位状态机（M1-T5，VT-P1-004）
  *
- * 由膝角驱动 stand → descend → bottom → ascend → stand。
- * 相位切换需连续 confirmFrames 帧满足条件（防抖），见 squat-rules.md §相位定义。
+ * 由驱动角（深蹲=膝角，俯卧撑=肘角）驱动 stand → descend → bottom → ascend → stand。
+ * 相位切换需连续 confirmFrames 帧满足条件（防抖）。
  */
 
 import { jointAngle } from "./angles.js";
@@ -13,7 +13,7 @@ import {
   type Pose,
 } from "./types.js";
 
-/** 相位阈值（膝角，度）与确认帧数。默认取自 squat-rules.md。 */
+/** 相位阈值（驱动角，度）与确认帧数。 */
 export interface PhaseConfig {
   standAboveDeg: number;
   bottomBelowDeg: number;
@@ -23,6 +23,13 @@ export interface PhaseConfig {
 export const DEFAULT_SQUAT_PHASE_CONFIG: PhaseConfig = {
   standAboveDeg: 160,
   bottomBelowDeg: 100,
+  confirmFrames: 5,
+};
+
+/** 俯卧撑：肘角阈值，见 pushup-rules.md。 */
+export const DEFAULT_PUSHUP_PHASE_CONFIG: PhaseConfig = {
+  standAboveDeg: 160,
+  bottomBelowDeg: 120,
   confirmFrames: 5,
 };
 
@@ -46,15 +53,31 @@ export function squatKneeAngle(pose: Pose): number | null {
   return left ?? right;
 }
 
+/** 取两侧肘角（肩-肘-腕）均值；俯卧撑相位驱动。 */
+export function pushupElbowAngle(pose: Pose): number | null {
+  const left = jointAngle(pose, {
+    a: LandmarkIndex.LeftShoulder,
+    b: LandmarkIndex.LeftElbow,
+    c: LandmarkIndex.LeftWrist,
+  });
+  const right = jointAngle(pose, {
+    a: LandmarkIndex.RightShoulder,
+    b: LandmarkIndex.RightElbow,
+    c: LandmarkIndex.RightWrist,
+  });
+  if (left != null && right != null) return (left + right) / 2;
+  return left ?? right;
+}
+
 /**
- * 由当前相位 + 膝角，给出「目标相位」（未考虑防抖）。
- * - stand：膝角 > standAbove
- * - bottom：膝角 < bottomBelow
+ * 由当前相位 + 驱动角，给出「目标相位」（未考虑防抖）。
+ * - stand：角 > standAbove
+ * - bottom：角 < bottomBelow
  * - 中间区：按上一相位方向判 descend / ascend
  */
-function targetPhase(current: Phase, knee: number, cfg: PhaseConfig): Phase {
-  if (knee > cfg.standAboveDeg) return "stand";
-  if (knee < cfg.bottomBelowDeg) return "bottom";
+function targetPhase(current: Phase, angle: number, cfg: PhaseConfig): Phase {
+  if (angle > cfg.standAboveDeg) return "stand";
+  if (angle < cfg.bottomBelowDeg) return "bottom";
   // 中间过渡区：依据上一相位推断上升还是下降
   switch (current) {
     case "stand":
@@ -69,19 +92,18 @@ function targetPhase(current: Phase, knee: number, cfg: PhaseConfig): Phase {
 }
 
 /**
- * 推进一帧。膝角缺失则保持原相位。返回新状态与是否发生相位切换。
+ * 用显式驱动角推进一帧（俯卧撑肘角 / 测试注入）。
  */
-export function stepPhase(
+export function stepPhaseWithAngle(
   state: PhaseState,
-  pose: Pose,
+  angle: number | null,
   cfg: PhaseConfig = DEFAULT_SQUAT_PHASE_CONFIG,
 ): { state: PhaseState; changed: boolean } {
-  const knee = squatKneeAngle(pose);
-  if (knee == null) {
+  if (angle == null) {
     return { state: { ...state }, changed: false };
   }
 
-  const target = targetPhase(state.phase, knee, cfg);
+  const target = targetPhase(state.phase, angle, cfg);
 
   // 目标即当前：清空候选
   if (target === state.phase) {
@@ -117,6 +139,17 @@ export function stepPhase(
     },
     changed: false,
   };
+}
+
+/**
+ * 推进一帧（默认深蹲膝角）。角缺失则保持原相位。
+ */
+export function stepPhase(
+  state: PhaseState,
+  pose: Pose,
+  cfg: PhaseConfig = DEFAULT_SQUAT_PHASE_CONFIG,
+): { state: PhaseState; changed: boolean } {
+  return stepPhaseWithAngle(state, squatKneeAngle(pose), cfg);
 }
 
 /** 跑完整序列，返回相位转移序列（去重相邻重复）。 */

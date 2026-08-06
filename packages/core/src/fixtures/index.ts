@@ -129,8 +129,8 @@ const FX_SQUAT_VALGUS_L: Fixture = {
 
 const FX_SQUAT_LEAN: Fixture = {
   id: "FX-SQUAT-LEAN",
-  description: "躯干前倾过多（相对竖直约 62°，>55 触发 warning）",
-  pose: buildSquatPose({ kneeDeg: 100, torsoLeanDeg: 62 }),
+  description: "站立时躯干前倾过多（相对竖直约 62°，>55 触发 warning；仅 stand 评估）",
+  pose: buildSquatPose({ kneeDeg: 175, torsoLeanDeg: 62 }),
   expectedStatus: "warning",
   expectedRuleIds: ["torso-upright"],
 };

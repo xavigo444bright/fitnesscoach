@@ -31,7 +31,12 @@ export {
   type PlacementGuideResult,
   type PlacementReason,
 } from "./placement.js";
-export { alignGhostToUser, ghostPoseForPhase, lerpPose } from "./ghost.js";
+export {
+  alignGhostToUser,
+  ghostPoseForExercise,
+  ghostPoseForPhase,
+  lerpPose,
+} from "./ghost.js";
 export { repDisplayFromState, type RepDisplay } from "./repDisplay.js";
 export {
   beginFaultCycle,

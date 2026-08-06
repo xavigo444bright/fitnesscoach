@@ -15,7 +15,14 @@
 
 .desc {
   color: #aaa;
+  margin-bottom: 16rpx;
+}
+
+.meta {
+  color: #6a9;
+  font-size: 24rpx;
   margin-bottom: 64rpx;
+  font-family: ui-monospace, monospace;
 }
 
 .btn {

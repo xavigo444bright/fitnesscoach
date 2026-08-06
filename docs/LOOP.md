@@ -1,8 +1,8 @@
 ---
 document: LOOP
 product: fitness-coach
-version: 0.3.0
-last_updated: 2026-07-07
+version: 0.4.0
+last_updated: 2026-07-25
 plan: module-based
 depends_on:
   - docs/MODULES.md
@@ -26,13 +26,50 @@ depends_on:
 /loop 阅读 docs/LOOP.md，执行一次 fitness-coach 模块迭代
 ```
 
-停止：`停止 loop`
+停止：`停止 loop` → 立刻杀 sleeper、**禁止再 arm**、`progress.loop.mode = stopped`。
+
+---
+
+## 人工校验 = 停表（强制）
+
+Loop 服务于用户进程：
+
+```
+自动跑 next_task → 碰到需人工 → paused_human（杀 sleeper，不计时）
+     ↑                                    ↓
+     └──── 用户确认 VT/GATE 通过 ←────────┘
+```
+
+- **禁止**在等人检验时还 `sleep` / arm heartbeat（「为什么还在计时」= 错误）
+- 进入人工节点：`loop.mode = paused_human`，写清 `blocker` 与待确认 VT
+- 用户说通过后：`mode = running`，再做下一任务；若用户仍要 loop，才重新 arm
+
+---
+
+## Wake 纪律（强制，高于「做 next_task」）
+
+Heartbeat / shell 完成通知 **不等于**「立刻编码下一任务」。先读 `progress.json`：
+
+| 状态 | Wake 后允许做什么 |
+|------|-------------------|
+| `loop.mode = stopped` | 只汇报已停止；不执行、不 re-arm |
+| `loop.mode = paused_human` 或 `blocked` | 只复述待验项；**不编码、不推进、不 re-arm** |
+| `next_task.human_required = true` | 同上（应已是 `paused_human`） |
+| 对话/log 标明正等真机 | 同上 |
+| `running` 且任务可无人完成 | 才执行 **仅一个** `next_task`，再按规则 re-arm |
+
+硬禁：
+- 禁止因 wake /「perform follow-up」在检验窗口期盲目推进或改依赖（如乱装 TFJS）
+- 禁止跳过未确认的 GATE / VT
+- 禁止同时多个 `AGENT_LOOP_WAKE_fcmod` sleeper
+
+解除须用户明确说通过（见下节）。
 
 ---
 
 ## 每轮迭代流程
 
-1. 读 `docs/progress.json`
+1. 读 `docs/progress.json`（若 `loop.mode=stopped` → 停；若 blocked / 待检验 → 只汇报）
 2. 读 `docs/MODULES.md` 中 `current_module` 章节
 3. 读 `docs/PRD.md`、`docs/VERIFICATION.md`（仅相关 VT）
 4. 执行 `next_task`（**仅一个**）
@@ -40,7 +77,7 @@ depends_on:
 6. 更新 `progress.json`：
    - 任务完成 → `completed_tasks` + 弹出 `queue`
    - 遇 `*-GATE` 且自动项全过 → 标 `modules[Mx].status = done`，解锁 `depends_on` 含它的模块为 `ready`
-   - 需人工 → `status: blocked`，写 `blocker`
+   - 需人工 → `status: blocked`，写 `blocker`，**停手等人**
 7. `current_module` 随队列推进；模块做完后切下一模块
 8. 写 `iteration_log` 一条
 

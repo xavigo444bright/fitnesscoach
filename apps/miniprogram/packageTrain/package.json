@@ -1,0 +1,14 @@
+{
+  "name": "@fitness-coach/miniprogram-train",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Training subpackage — TFJS MoveNet + core/pose-mp/render (NFR-007)",
+  "dependencies": {
+    "@fitness-coach/core": "file:../local_modules/core",
+    "@fitness-coach/pose-mp": "file:../local_modules/pose-mp",
+    "@fitness-coach/render": "file:../local_modules/render",
+    "@tensorflow/tfjs-backend-webgl": "^4.22.0",
+    "@tensorflow/tfjs-converter": "^4.22.0",
+    "@tensorflow/tfjs-core": "^4.22.0"
+  }
+}

@@ -1,11 +1,14 @@
 /**
  * Ghost 相位插值（M3-T6 / VT-P3B-001,002 / FR-064,065）
+ * 支持深蹲 / 俯卧撑等多动作关键帧。
  */
 
 import {
   DEFAULT_SQUAT_PHASE_CONFIG,
+  ghostKeyframesFor,
+  ghostPhaseConfigFor,
   LandmarkIndex,
-  SQUAT_GHOST_KEYFRAMES,
+  type GhostExerciseId,
   type Landmark,
   type Phase,
   type Pose,
@@ -52,8 +55,45 @@ function clamp01(x: number): number {
 }
 
 /**
- * 由相位 + 膝角生成当前 Ghost Pose。
- * 膝角缺失时退化为相位中点关键帧（无插值）。
+ * 由相位 + 驱动角生成 Ghost Pose（膝角或肘角）。
+ */
+export function ghostPoseForExercise(
+  exerciseId: GhostExerciseId,
+  phase: Phase,
+  driveDeg: number | null,
+  standAboveDeg?: number,
+  bottomBelowDeg?: number,
+): Pose {
+  const cfg = ghostPhaseConfigFor(exerciseId);
+  const standAbove = standAboveDeg ?? cfg.standAboveDeg;
+  const bottomBelow = bottomBelowDeg ?? cfg.bottomBelowDeg;
+  const kf = ghostKeyframesFor(exerciseId);
+  const span = standAbove - bottomBelow || 1;
+
+  switch (phase) {
+    case "stand":
+      return kf.stand;
+    case "bottom":
+      return kf.bottom;
+    case "descend": {
+      if (driveDeg == null) return kf.descend_mid;
+      const t = clamp01((standAbove - driveDeg) / span);
+      if (t <= 0.5) return lerpPose(kf.stand, kf.descend_mid, t * 2);
+      return lerpPose(kf.descend_mid, kf.bottom, (t - 0.5) * 2);
+    }
+    case "ascend": {
+      if (driveDeg == null) return kf.ascend_mid;
+      const t = clamp01((driveDeg - bottomBelow) / span);
+      if (t <= 0.5) return lerpPose(kf.bottom, kf.ascend_mid, t * 2);
+      return lerpPose(kf.ascend_mid, kf.stand, (t - 0.5) * 2);
+    }
+    default:
+      return kf.stand;
+  }
+}
+
+/**
+ * @deprecated 等价于 ghostPoseForExercise('squat', …)；保留兼容旧测试。
  */
 export function ghostPoseForPhase(
   phase: Phase,
@@ -61,32 +101,13 @@ export function ghostPoseForPhase(
   standAboveDeg: number = DEFAULT_SQUAT_PHASE_CONFIG.standAboveDeg,
   bottomBelowDeg: number = DEFAULT_SQUAT_PHASE_CONFIG.bottomBelowDeg,
 ): Pose {
-  const stand = SQUAT_GHOST_KEYFRAMES.stand.pose;
-  const midD = SQUAT_GHOST_KEYFRAMES.descend_mid.pose;
-  const bottom = SQUAT_GHOST_KEYFRAMES.bottom.pose;
-  const midA = SQUAT_GHOST_KEYFRAMES.ascend_mid.pose;
-  const span = standAboveDeg - bottomBelowDeg || 1;
-
-  switch (phase) {
-    case "stand":
-      return stand;
-    case "bottom":
-      return bottom;
-    case "descend": {
-      if (kneeDeg == null) return midD;
-      const t = clamp01((standAboveDeg - kneeDeg) / span);
-      if (t <= 0.5) return lerpPose(stand, midD, t * 2);
-      return lerpPose(midD, bottom, (t - 0.5) * 2);
-    }
-    case "ascend": {
-      if (kneeDeg == null) return midA;
-      const t = clamp01((kneeDeg - bottomBelowDeg) / span);
-      if (t <= 0.5) return lerpPose(bottom, midA, t * 2);
-      return lerpPose(midA, stand, (t - 0.5) * 2);
-    }
-    default:
-      return stand;
-  }
+  return ghostPoseForExercise(
+    "squat",
+    phase,
+    kneeDeg,
+    standAboveDeg,
+    bottomBelowDeg,
+  );
 }
 
 function midPoint(
@@ -117,7 +138,6 @@ function hipAnkleAnchors(pose: Pose): {
 
 /**
  * 将模板 Ghost 对齐到用户：按髋–踝尺度缩放，并以髋为锚点平移。
- * 关键帧是固定小比例几何，不对齐时会远小于真人躯干。
  */
 export function alignGhostToUser(ghost: Pose, user: Pose): Pose {
   const g = hipAnkleAnchors(ghost);

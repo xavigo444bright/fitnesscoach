@@ -1,0 +1,96 @@
+.page {
+  min-height: 100vh;
+  padding: 32rpx 40rpx 48rpx;
+  box-sizing: border-box;
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.diagram {
+  background: #1e293b;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 40rpx;
+}
+
+.diagram-cap {
+  color: #94a3b8;
+  font-size: 26rpx;
+  margin-bottom: 24rpx;
+}
+
+.diagram-body {
+  height: 220rpx;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.phone {
+  width: 56rpx;
+  height: 100rpx;
+  border: 4rpx solid #64748b;
+  border-radius: 8rpx;
+  position: absolute;
+  left: 48rpx;
+  bottom: 40rpx;
+}
+
+.person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.head {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.torso {
+  width: 28rpx;
+  height: 70rpx;
+  background: #94a3b8;
+  margin-top: 6rpx;
+  transform: rotate(-18deg);
+  transform-origin: top center;
+}
+
+.leg {
+  width: 24rpx;
+  height: 80rpx;
+  background: #64748b;
+  margin-top: -8rpx;
+  transform: rotate(28deg);
+  transform-origin: top center;
+}
+
+.section {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin: 28rpx 0 12rpx;
+}
+
+.bullet {
+  color: #cbd5e1;
+  font-size: 28rpx;
+  line-height: 1.6;
+  margin-bottom: 4rpx;
+}
+
+.privacy {
+  margin-top: 40rpx;
+  color: #94a3b8;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
+.cta {
+  margin-top: 24rpx;
+  background: #3b82f6 !important;
+  border-radius: 16rpx;
+  font-weight: 600;
+}

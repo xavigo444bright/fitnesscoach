@@ -9,7 +9,7 @@ const PHASE_OF: Record<string, Phase> = {
   "FX-SQUAT-BOTTOM-OK": "bottom",
   "FX-SQUAT-SHALLOW": "bottom",
   "FX-SQUAT-VALGUS-L": "bottom",
-  "FX-SQUAT-LEAN": "descend",
+  "FX-SQUAT-LEAN": "stand",
 };
 
 describe("VT-P1-003 validate 与夹具 expectedStatus 一致", () => {
@@ -42,8 +42,13 @@ describe("相位过滤", () => {
     const ids = res.results.map((r) => r.id);
     expect(ids).not.toContain("squat-depth");
     expect(ids).not.toContain("knee-valgus-l");
-    // torso-upright 是 all 相位，应仍在
+    // torso-upright 仅 stand
     expect(ids).toContain("torso-upright");
+  });
+
+  it("bottom 相位不评估 torso-upright（避免自然前倾误报）", () => {
+    const res = validate(FIXTURES["FX-SQUAT-BOTTOM-OK"].pose!, "bottom");
+    expect(res.results.map((r) => r.id)).not.toContain("torso-upright");
   });
 
   it("SHALLOW 在 bottom 触发 squat-depth，在 descend 不触发（规则不生效）", () => {
@@ -63,12 +68,10 @@ describe("汇总优先级", () => {
     ).toBe(false);
   });
 
-  it("正常底部深蹲不因肩-髋-膝闭合误报前倾", () => {
+  it("正常底部深蹲不评估躯干规则，status 为 correct", () => {
     const res = validate(FIXTURES["FX-SQUAT-BOTTOM-OK"].pose!, "bottom");
     expect(res.status).toBe("correct");
-    expect(
-      res.results.find((r) => r.id === "torso-upright")?.triggered,
-    ).toBe(false);
+    expect(res.results.find((r) => r.id === "torso-upright")).toBeUndefined();
   });
 
   it("规则集合覆盖 squat-rules.md 四条", () => {

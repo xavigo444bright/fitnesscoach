@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fitness Coach",
     "slug": "fitness-coach",
-    "version": "0.0.0",
+    "version": "0.1.0",
     "scheme": "fitness-coach",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,12 +10,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.fitnesscoach.mobile",
+      "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "需要摄像头以实时分析您的健身动作"
       }
     },
     "android": {
       "package": "com.fitnesscoach.mobile",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -27,6 +29,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "_comment": "首次在 apps/mobile 执行 npx eas init 或 eas build 时由 CLI 写入 projectId；勿手填假 ID"
+      }
     }
   }
 }

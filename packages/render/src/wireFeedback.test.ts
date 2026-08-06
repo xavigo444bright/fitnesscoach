@@ -15,6 +15,13 @@ const empty: ValidationResult = {
   results: [],
 };
 
+/** 同相位未触发（结果集仍含该规则），用于测解除防抖；空结果集会被当成相位不适用立刻清 latch */
+const off = (id: string): ValidationResult => ({
+  status: "correct",
+  messages: [],
+  results: [{ id, triggered: false, severity: "error", message: "蹲得不够深" }],
+});
+
 const D = DEFAULT_FEEDBACK_CONFIG.debounceMs;
 
 describe("stepWiredFeedback (M3-T4 / VT-P3A-004,005)", () => {
@@ -41,7 +48,22 @@ describe("stepWiredFeedback (M3-T4 / VT-P3A-004,005)", () => {
     expect(cooled.items[0]?.phase).toBe("correcting");
     state = cooled.state;
 
-    const recovered = stepWiredFeedback(state, empty, D + 1100);
+    // 单帧变好：仍 correcting（解除防抖）
+    const blip = stepWiredFeedback(state, off("squat-depth"), D + 1100);
+    expect(blip.items[0]?.phase).toBe("correcting");
+    expect(
+      blip.displayValidation.results.some(
+        (r) => r.id === "squat-depth" && r.triggered,
+      ),
+    ).toBe(true);
+    state = blip.state;
+
+    // 持续变好满 debounce 才 recovered
+    const recovered = stepWiredFeedback(
+      state,
+      off("squat-depth"),
+      D + 1100 + D,
+    );
     expect(recovered.items[0]?.phase).toBe("recovered");
   });
 });

@@ -1,0 +1,49 @@
+<view class="page" bindtouchend="onOverlayTouchEnd">
+  <!--
+    camera 仅作帧源；画面由 canvas 按 snapshot 自绘（与骨骼同坐标）。
+    保留全屏占位，部分 iOS 机型隐藏 camera 会停帧。
+  -->
+  <camera
+    wx:if="{{cameraOn}}"
+    class="camera"
+    device-position="{{facing}}"
+    flash="off"
+    frame-size="small"
+    binderror="onCameraError"
+  />
+
+  <!-- 真机全屏 canvas 拦截触摸：自己接住并按坐标路由翻转/结束/镜像 -->
+  <canvas
+    type="2d"
+    id="overlay"
+    class="overlay"
+    bindtouchend="onOverlayTouchEnd"
+  ></canvas>
+
+  <!--
+    交互控件全部改 canvas 绘制，避免 cover-view 吞触摸且 bindtap 不稳。
+    仅保留加载期/错误等少量非命中区文案。
+  -->
+  <cover-view
+    class="cv-hud"
+    wx:if="{{!modelReady}}"
+    style="top: {{uiTopPx}}px;"
+  >
+    <cover-view>{{status}}</cover-view>
+    <cover-view class="cv-err" wx:if="{{errorMsg}}">{{errorMsg}}</cover-view>
+  </cover-view>
+
+  <cover-view
+    class="cv-feedback"
+    wx:if="{{feedbackLines.length}}"
+    style="top: {{feedbackTopPx}}px;"
+  >
+    <cover-view
+      wx:for="{{feedbackLines}}"
+      wx:key="ruleId"
+      class="cv-fb {{item.tone}}"
+    >{{item.phase === 'recovered' ? '✓ ' : '⚠ '}}{{item.message}}</cover-view>
+  </cover-view>
+
+  <cover-view class="cv-err-bar" wx:if="{{errorMsg && modelReady}}">{{errorMsg}}</cover-view>
+</view>

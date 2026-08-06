@@ -20,6 +20,10 @@ export interface Landmark {
 export enum LandmarkIndex {
   LeftShoulder = 11,
   RightShoulder = 12,
+  LeftElbow = 13,
+  RightElbow = 14,
+  LeftWrist = 15,
+  RightWrist = 16,
   LeftHip = 23,
   RightHip = 24,
   LeftKnee = 25,

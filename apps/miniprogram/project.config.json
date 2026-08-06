@@ -8,11 +8,31 @@
       },
       {
         "type": "folder",
+        "value": "packageTrain/node_modules"
+      },
+      {
+        "type": "folder",
+        "value": "local_modules"
+      },
+      {
+        "type": "folder",
         "value": "models"
       },
       {
         "type": "folder",
         "value": "vendor"
+      },
+      {
+        "type": "folder",
+        "value": "scripts"
+      },
+      {
+        "type": "folder",
+        "value": "miniprogram_npm"
+      },
+      {
+        "type": "suffix",
+        "value": ".map"
       }
     ],
     "include": []
@@ -26,9 +46,14 @@
     "coverView": true,
     "compileWorklet": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
-    "packNpmManually": false,
-    "packNpmRelationList": [],
+    "uploadWithSourceMap": false,
+    "packNpmManually": true,
+    "packNpmRelationList": [
+      {
+        "packageJsonPath": "./packageTrain/package.json",
+        "miniprogramNpmDistDir": "./packageTrain/"
+      }
+    ],
     "minifyWXSS": true,
     "minifyWXML": true,
     "localPlugins": false,

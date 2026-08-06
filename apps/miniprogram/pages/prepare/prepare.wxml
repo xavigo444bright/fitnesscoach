@@ -1,0 +1,38 @@
+<view class="page">
+  <camera
+    wx:if="{{cameraOn}}"
+    class="camera"
+    device-position="{{facing}}"
+    flash="off"
+    binderror="onCameraError"
+  >
+    <!-- CMP-006 站位框：4 条边线拼成，整块透明 cover-view 会拦截框内按钮点击 -->
+    <cover-view class="pf pf-top"></cover-view>
+    <cover-view class="pf pf-bottom"></cover-view>
+    <cover-view class="pf pf-left"></cover-view>
+    <cover-view class="pf pf-right"></cover-view>
+    <cover-view class="hint">髋膝踝入画即可，不必顶满框</cover-view>
+
+    <cover-view wx:if="{{countdown != null}}" class="countdown">{{countdown}}</cover-view>
+
+    <cover-view class="cv-back" style="top: {{uiTopPx}}px;" bindtap="goBack">← 返回</cover-view>
+
+    <!-- 翻转在左侧，避开右上角胶囊（微信差异 UI.md §5） -->
+    <cover-view
+      class="cv-flip"
+      style="top: {{flipTopPx}}px;"
+      bindtap="flip"
+    >翻转</cover-view>
+
+    <cover-view class="cv-bottom">
+      <cover-view
+        wx:if="{{!running}}"
+        class="cv-primary"
+        bindtap="startCountdown"
+      >开始倒计时</cover-view>
+      <cover-view wx:else class="cv-skip" bindtap="skip">跳过</cover-view>
+    </cover-view>
+
+    <cover-view class="cv-err" wx:if="{{errorMsg}}">{{errorMsg}}</cover-view>
+  </camera>
+</view>

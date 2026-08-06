@@ -99,4 +99,33 @@ describe("listConfirmedFeedback", () => {
     pushFeedback(s, hit, 0);
     expect(listConfirmedFeedback(s, hit, D - 1)).toHaveLength(0);
   });
+
+  it("确认后单帧未触发仍保持列表（解除防抖）", () => {
+    const s = initialFeedbackState();
+    const hit = withRule("torso-upright", true);
+    // EMPTY 不含该规则 id → 视为相位不适用会立刻清；此处用 triggered:false 模拟同相位未触发
+    const off: ValidationResult = {
+      status: "correct",
+      messages: [],
+      results: [
+        { id: "torso-upright", triggered: false, severity: "warning", message: "x" },
+      ],
+    };
+    pushFeedback(s, hit, 0);
+    pushFeedback(s, hit, D);
+    pushFeedback(s, off, D + 50);
+    expect(listConfirmedFeedback(s, off, D + 50)).toHaveLength(1);
+    pushFeedback(s, off, D + 50 + D);
+    expect(listConfirmedFeedback(s, off, D + 50 + D)).toHaveLength(0);
+  });
+
+  it("相位不再评估该规则时立刻松开 latch", () => {
+    const s = initialFeedbackState();
+    const hit = withRule("torso-upright", true);
+    pushFeedback(s, hit, 0);
+    pushFeedback(s, hit, D);
+    // bottom 结果集无 torso → 立即清
+    pushFeedback(s, EMPTY, D + 10);
+    expect(listConfirmedFeedback(s, EMPTY, D + 10)).toHaveLength(0);
+  });
 });

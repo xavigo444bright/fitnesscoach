@@ -30,7 +30,9 @@ function ruleAppliesToPhase(rule: RuleDefinition, phase: Phase): boolean {
 /**
  * 汇总状态：任一 error → error；否则任一 warning → warning；否则 correct。
  */
-function summarize(results: RuleResult[]): ValidationStatus {
+export function summarizeValidationStatus(
+  results: RuleResult[],
+): ValidationStatus {
   let hasWarning = false;
   for (const r of results) {
     if (!r.triggered) continue;
@@ -151,14 +153,93 @@ export const SQUAT_RULES: EvaluableRule[] = [
       c: LandmarkIndex.RightKnee,
     },
     severity: "warning",
-    phases: [],
+    // 仅站立评估：bottom 自然前倾常 >55°，会误锁黄骨并破坏计次体验
+    phases: ["stand"],
     toleranceDeg: 10,
     message: "躯干前倾过多，挺胸收紧核心",
     evaluate(pose) {
       const lean = torsoLeanFromVertical(pose);
       if (lean == null) return { triggered: false };
-      // 理想前倾 ≤45°；容差 10° → 仅 >55° 才 warning（正常侧蹲 20–40° 不报）
+      // 理想前倾 ≤45°；容差 10° → 仅 >55° 才 warning（站立弯腰）
       return { triggered: lean > 55, measuredDeg: lean };
+    },
+  },
+];
+
+/** 肩-髋-踝夹角（度）；俯卧撑身体一线。两侧取均值。 */
+export function pushupBodyLineDeg(pose: Pose): number | null {
+  const left = jointAngle(pose, {
+    a: LandmarkIndex.LeftShoulder,
+    b: LandmarkIndex.LeftHip,
+    c: LandmarkIndex.LeftAnkle,
+  });
+  const right = jointAngle(pose, {
+    a: LandmarkIndex.RightShoulder,
+    b: LandmarkIndex.RightHip,
+    c: LandmarkIndex.RightAnkle,
+  });
+  if (left != null && right != null) return (left + right) / 2;
+  return left ?? right;
+}
+
+function pushupElbowDegSide(pose: Pose, side: "left" | "right"): number | null {
+  return jointAngle(
+    pose,
+    side === "left"
+      ? {
+          a: LandmarkIndex.LeftShoulder,
+          b: LandmarkIndex.LeftElbow,
+          c: LandmarkIndex.LeftWrist,
+        }
+      : {
+          a: LandmarkIndex.RightShoulder,
+          b: LandmarkIndex.RightElbow,
+          c: LandmarkIndex.RightWrist,
+        },
+  );
+}
+
+/** 俯卧撑规则（与 pushup-rules.md 一致）。 */
+export const PUSHUP_RULES: EvaluableRule[] = [
+  {
+    id: "elbow-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "手臂未弯到位，胸口再靠近地面",
+    evaluate(pose) {
+      const left = pushupElbowDegSide(pose, "left");
+      const right = pushupElbowDegSide(pose, "right");
+      const deg =
+        left != null && right != null
+          ? (left + right) / 2
+          : (left ?? right);
+      if (deg == null) return { triggered: false };
+      // 目标 <110°；容差 10° → ≥120° 才报
+      return { triggered: deg >= 120, measuredDeg: deg };
+    },
+  },
+  {
+    id: "body-line",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightAnkle,
+    },
+    severity: "error",
+    phases: [], // all
+    toleranceDeg: 10,
+    message: "臀部翘起或下沉，保持身体一条直线",
+    evaluate(pose) {
+      const deg = pushupBodyLineDeg(pose);
+      if (deg == null) return { triggered: false };
+      // 理想 ≥170°；容差 10° → <160° 才报
+      return { triggered: deg < 160, measuredDeg: deg };
     },
   },
 ];
@@ -183,7 +264,7 @@ export function validate(
       measuredDeg,
     });
   }
-  const status = summarize(results);
+  const status = summarizeValidationStatus(results);
   const messages = results.filter((r) => r.triggered).map((r) => r.message);
   return { status, messages, results };
 }

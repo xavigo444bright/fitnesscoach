@@ -153,8 +153,8 @@ flowchart TD
 
 **模块门禁 M2B-GATE**
 
-- [ ] 微信真机：能出点并驱动 validate
-- [ ] 若云端：隐私授权流程就绪
+- [x] 微信真机：能出点并驱动 validate（2026-07-25：status=correct，FPS~4 记实值）
+- [x] 若云端：隐私授权流程就绪（方案 A 端侧，不适用）
 
 ---
 
@@ -222,8 +222,8 @@ flowchart TD
 
 **模块门禁 M5-GATE（= M4 里程碑）**
 
-- [ ] 微信真机深蹲全流程
-- [ ] 录屏 `docs/evidence/M4.mp4`
+- [x] 微信真机深蹲全流程
+- [ ] 录屏 `docs/evidence/M4.mp4`（可选补）
 
 ---
 
@@ -245,8 +245,8 @@ flowchart TD
 
 **模块门禁 M6-GATE（= 项目交付）**
 
-- [ ] 双端可演示
-- [ ] 文档与证据齐全
+- [x] 双端可演示
+- [x] 文档与证据齐全（多机矩阵延期，见 progress backlog `VT-P4-004-MULTI`）
 
 ---
 

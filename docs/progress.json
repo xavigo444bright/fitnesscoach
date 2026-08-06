@@ -1,19 +1,85 @@
 {
   "version": "0.4.0",
   "plan": "module-based",
-  "last_updated": "2026-07-22T01:14:00+08:00",
+  "last_updated": "2026-08-07T00:30:00+08:00",
   "status": "in_progress",
-  "blocker": null,
+  "blocker": "放入 squat.mp4 / pushup.mp4 后验详情播放；真机确认训练无 Ghost",
+  "focus": "app",
+  "backlog": [
+    {
+      "id": "MP-FPS",
+      "title": "小程序 MoveNet FPS / 训练页对齐（已暂停）",
+      "note": "2026-08-04 用户决定跳过小程序攻坚，先做完 App。原生推理曾达 onnx-p0 FPS≈22-25；对齐/触摸未收口。代码保留，交接 docs/session-compression-MP-FPS.md。恢复前勿当完成。",
+      "after": "M5-GATE",
+      "status": "parked"
+    },
+    {
+      "id": "RULE-BOUNDARY",
+      "title": "动作规则边界自动化（上线前必做）",
+      "note": "框架 done；俯卧撑矩阵/sweep 已随 APP-PUSHUP 落地（VT-RB-004）。扩第三动作同样先矩阵后接线。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "VT-P4-004-MULTI",
+      "title": "补测矩阵 ≥2～3 台机",
+      "note": "M6-T4 仅 1 台临时签字；上架前若依赖完整 VT-P4-004，再喊用户补第二台。",
+      "before": "launch",
+      "status": "deferred"
+    },
+    {
+      "id": "APP-PUSHUP",
+      "title": "App 第二动作：俯卧撑（FR-011）",
+      "note": "pushup-rules v0.2.1 + core/矩阵 + App 接线。用户确认真机 OK（深度放宽后计次合理）。VT-P6-001/002/003/005 通过；VT-P6-004 随小程序延期。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-DISTRIBUTE",
+      "title": "App 内测分发（TestFlight / EAS）",
+      "note": "eas.json+README 已就绪（VT-P4-005a）。自用 Dev Client，暂缓云端出包/TestFlight。",
+      "before": "launch",
+      "status": "configured"
+    },
+    {
+      "id": "APP-VOICE",
+      "title": "训练语音提醒（FR-066）",
+      "note": "expo-speech 真机 OK（重装 Dev Client 后）。开关默认开；无原生模块时静默降级。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-GHOST",
+      "title": "详情预渲染 3D 示意（替代训练 Ghost）",
+      "note": "训练去 Ghost；详情 ExerciseDemoPlayer + demoAsset。素材待放入 assets/demos/ 并在 demoAssets.ts require。",
+      "before": "launch",
+      "status": "awaiting_human"
+    },
+    {
+      "id": "APP-CATALOG",
+      "title": "分部位分层动作库",
+      "note": "catalog.ts + 胸肩背下肢核心 Section；coachable=深蹲/俯卧撑，其余即将支持。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-UPGRADE",
+      "title": "按队列升级 coachable（Phase D）",
+      "note": "队列：臀桥→弓步→平板→划船→推举→卧推。下一：glute-bridge（rules planned）。见 docs/exercises/UPGRADE-QUEUE.md",
+      "before": "launch",
+      "status": "open"
+    }
+  ],
   "loop": {
     "interval": "dynamic",
-    "mode": "running",
-    "started_at": "2026-07-21T23:58:00+08:00",
-    "stopped_at": null,
-    "stop_reason": null,
+    "mode": "paused_human",
+    "started_at": "2026-07-25T14:03:00+08:00",
+    "stopped_at": "2026-07-25T23:12:30+08:00",
+    "stop_reason": "project_complete_M6-GATE",
     "stop_after_next_tick": false,
-    "note": "动态节奏 /loop；M4 已过；焦点切 M2B"
+    "note": "示意改为预渲染视频管线；等人导入 mp4 或确认占位 OK。"
   },
-  "current_module": "M2B",
+  "current_module": null,
   "modules": {
     "M0": {
       "name": "工程基建",
@@ -43,7 +109,7 @@
     },
     "M2B": {
       "name": "Pose 小程序",
-      "status": "in_progress",
+      "status": "done",
       "depends_on": [
         "M0",
         "M1"
@@ -68,7 +134,7 @@
     },
     "M5": {
       "name": "小程序壳",
-      "status": "pending",
+      "status": "done",
       "depends_on": [
         "M2B",
         "M3",
@@ -77,43 +143,15 @@
     },
     "M6": {
       "name": "质量与交付",
-      "status": "pending",
+      "status": "done",
       "depends_on": [
         "M4",
         "M5"
       ]
     }
   },
-  "next_task": {
-    "id": "M2B-T1",
-    "module": "M2B",
-    "title": "小程序构建接入 monorepo",
-    "verification": [
-      "VT-P5-001",
-      "VT-P5-002"
-    ],
-    "human_required": false,
-    "notes": "packages/pose-mp + apps/miniprogram 接入；M5 依赖本模块 GATE"
-  },
-  "queue": [
-    {
-      "id": "M2B-T1",
-      "module": "M2B"
-    },
-    {
-      "id": "M2B-T2",
-      "module": "M2B"
-    },
-    {
-      "id": "M2B-T3",
-      "module": "M2B"
-    },
-    {
-      "id": "M2B-GATE",
-      "module": "M2B",
-      "human_required": true
-    }
-  ],
+  "next_task": null,
+  "queue": [],
   "completed_tasks": [
     "M0-T1",
     "M0-T2",
@@ -157,7 +195,25 @@
     "M4-T5",
     "M4-T6",
     "M4-T7",
-    "M4-GATE"
+    "M4-GATE",
+    "M2B-T1",
+    "M2B-T2",
+    "M2B-T3",
+    "M2B-GATE",
+    "M5-T1",
+    "M5-T2",
+    "M5-T3",
+    "M5-T4",
+    "M5-T5",
+    "M5-GATE",
+    "M6-T1",
+    "M6-T2",
+    "M6-T3",
+    "M6-T4",
+    "M6-T5",
+    "M6-T6",
+    "M6-T7",
+    "M6-GATE"
   ],
   "completed_gates": [
     "M0-GATE",
@@ -165,7 +221,10 @@
     "M2A-GATE",
     "MU-GATE",
     "M3-GATE",
-    "M4-GATE"
+    "M4-GATE",
+    "M2B-GATE",
+    "M5-GATE",
+    "M6-GATE"
   ],
   "iteration_log": [
     {
@@ -599,6 +658,303 @@
       "summary": "用户确认 M4-GATE 通过（全流程/绿勾/半蹲提示/上次问题回看等）。M4 → done；焦点切 M2B（小程序 Pose），queue=M2B-T1~GATE；M5 仍待 M2B-GATE。",
       "next": "M2B-T1 小程序构建接入 monorepo",
       "human_action_needed": false
+    },
+    {
+      "at": "2026-07-22T01:18:00+08:00",
+      "module": "M2B",
+      "task": "session-compress",
+      "result": "done",
+      "summary": "写入 docs/session-compression-M3-M4.md；loop stopped；本聊天归档标题。下一会话从 M2B-T1 开始。",
+      "next": "新会话执行 M2B-T1",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-22T01:24:00+08:00",
+      "module": "M2B",
+      "task": "M2B-T1",
+      "result": "done",
+      "summary": "小程序 monorepo 接入：esbuild 将 packages/core+pose-mp 打成 CJS 写入 miniprogram_npm；pose-mp 对齐 PoseDetector 契约+2测；首页 require core 冒烟 FX stand=correct。VT-P5-002（verify+core 90/90）通过；VT-P5-001 构建管线就绪（开发者工具打开确认一次即可）。",
+      "next": "M2B-T2 pose-mp MoveNet 实现",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:06:00+08:00",
+      "module": "M2B",
+      "task": "M2B-T2",
+      "result": "blocked",
+      "summary": "MoveNet runtime 迁至 packages/pose-mp/wechat；movenetKeypointsToPose+analyzeMoveNetResult 接 core；调试页显示膝角/validate；poseSpike 变薄封装；pose-mp 6/6 测绿、miniprogram verify OK。待真机 VT-P5-003。",
+      "next": "真机确认出点+膝角后回复「VT-P5-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T14:18:00+08:00",
+      "module": "M2B",
+      "task": "M2B-T2",
+      "result": "done",
+      "summary": "用户确认 VT-P5-003 通过（真机出点、膝角、FPS~4）。",
+      "next": "M2B-T3",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:18:30+08:00",
+      "module": "M2B",
+      "task": "M2B-T3",
+      "result": "done",
+      "summary": "VT-P5-004：parity.test.ts 五组 FX-* 经 MoveNet 映射后 validate status/规则与直喂 core 一致；analyzeMoveNetResult(SHALLOW) 对齐；pose-mp 12/12 绿。",
+      "next": "M2B-GATE（人工）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T14:19:00+08:00",
+      "module": "M2B",
+      "task": "M2B-GATE",
+      "result": "passed",
+      "summary": "用户确认真机：出点并驱动 validate=correct，FPS~4（记实值，同 Spike）。M2B → done；解锁 M5 → in_progress。",
+      "next": "M5-T1 Canvas adapter 接 render",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:24:00+08:00",
+      "module": "M5",
+      "task": "M5-T1",
+      "result": "done",
+      "summary": "Canvas adapter：bundle @fitness-coach/render；utils/canvasOverlay 画 Ghost/用户骨骼/站位虚线框；姿态页接 stepPhase+evaluatePlacement+applyJointColors+alignGhostToUser。verify OK；render 26/26。",
+      "next": "M5-T2 PG-001~005 小程序页面流",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:35:00+08:00",
+      "module": "M5",
+      "task": "M5-T2",
+      "result": "done",
+      "summary": "PG-001~005：library→detail→prepare(倒计时/跳过)→training(stepRep+骨骼/Ghost/站位+结束)→summary(再来一组/返回)。入口切动作库；pose 保留调试。",
+      "next": "M5-T3 Ghost + 反馈对齐 App",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:40:00+08:00",
+      "module": "M5",
+      "task": "M5-T3",
+      "result": "done",
+      "summary": "训练页接 stepWiredFeedback（防抖/冷却+recovered）；FeedbackBar 最多 2 行 correcting/recovered 色；半蹲 reject 置顶。Ghost 已在 T1。",
+      "next": "M5-T4 包体/分包",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T14:47:00+08:00",
+      "module": "M5",
+      "task": "loop-stop",
+      "result": "stopped",
+      "summary": "用户停止 loop；杀尽 wake sleeper；LOOP 0.4.0 + cursor rule：wake 禁止在待检验时盲目推进。",
+      "next": "M5-T4（手动继续）",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T15:05:00+08:00",
+      "module": "M5",
+      "task": "M5-T4",
+      "result": "done",
+      "summary": "VT-P5-007：训练分包 packageTrain，主包无 TFJS；瘦身去掉 cpu/map/嵌套依赖，check:size 主包~0.02MB、分包~1.46MB（微信单包硬顶 2MB）。真机可加载模型并训练。",
+      "next": "M5-T5",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T15:08:00+08:00",
+      "module": "M5",
+      "task": "M5-T5",
+      "result": "done",
+      "summary": "VT-P5-008：方案 A 端侧无云端授权弹窗；首次本地隐私说明 + 详情页 FR-033 文案。FPS 差记 backlog MP-FPS（GATE 后处理）。",
+      "next": "M5-GATE（人工）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T15:09:00+08:00",
+      "module": "M5",
+      "task": "M5-GATE",
+      "result": "passed",
+      "summary": "用户确认 M5-GATE 通过（真机全流程）。M5 → done；解锁 M6 → in_progress。loop 仍 stopped。",
+      "next": "M6-T1",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T15:15:00+08:00",
+      "module": "M6",
+      "task": "M6-T1",
+      "result": "done",
+      "summary": "L0/L1：core 91 + render 26 + pose-native 25 + pose-mp 12 + ui 4 全绿；core coverage All~94.7%；packages build 绿；mobile tsc 绿（修 FeedbackBarItem as const）；miniprogram verify + check:size OK。",
+      "next": "M6-T2（人工 App 回归）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T22:57:00+08:00",
+      "module": "M6",
+      "task": "M6-T2",
+      "result": "partial",
+      "summary": "回归缺陷：弯腰黄骨约1s误变绿。根因解除无防抖；已加 latch+对称解除防抖(800ms)，骨骼改用 displayValidation。core/render 测绿。待复验。注：躯干 warning 默认不阻止计次（仅深度影响）。",
+      "next": "复验弯腰保持黄骨；通过后回「M6-T2 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T23:03:00+08:00",
+      "module": "M6",
+      "task": "M6-T2",
+      "result": "done",
+      "summary": "用户确认通过并继续。期间已修：反馈解除防抖、躯干仅 stand、相位切换清 latch。上线前 backlog 记 RULE-BOUNDARY（动作边界自动化，禁人工逐动作调参）。",
+      "next": "M6-T3（小程序回归）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T23:04:00+08:00",
+      "module": "M6",
+      "task": "M6-T3",
+      "result": "done",
+      "summary": "用户确认小程序 M2 场景回归通过（VT-P5-006）。",
+      "next": "M6-T4（≥2 台机矩阵）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T23:10:00+08:00",
+      "module": "M6",
+      "task": "M6-T4",
+      "result": "waived",
+      "summary": "仅 1 台真机：ROADMAP 矩阵记 iPhone 14 Pro 实值并临时签字；VT-P4-004 多机补测延期（backlog VT-P4-004-MULTI，M6-GATE/上架前再喊）。",
+      "next": "M6-T5",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T23:12:00+08:00",
+      "module": "M6",
+      "task": "M6-T5",
+      "result": "done",
+      "summary": "VT-P4-005 简化：apps/mobile/README 写明 Dev Client / EAS 分发路径；公开 TestFlight 后补。",
+      "next": "M6-T6",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T23:12:30+08:00",
+      "module": "M6",
+      "task": "M6-T6",
+      "result": "done",
+      "summary": "VT-P4-006：docs/privacy-notice.md；App 动作库 + 小程序已有本地推理文案。",
+      "next": "M6-T7",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T23:12:45+08:00",
+      "module": "M6",
+      "task": "M6-T7",
+      "result": "done",
+      "summary": "PRD 升 0.2.1（隐私/规则/backlog 纪要）；progress 未标 complete（待 M6-GATE）。",
+      "next": "M6-GATE（人工）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-25T23:13:00+08:00",
+      "module": "M6",
+      "task": "M6-GATE",
+      "result": "passed",
+      "summary": "用户确认 M6-GATE 通过。M6 → done；progress.status=complete。上线前仍可处理 backlog：MP-FPS、RULE-BOUNDARY、多机矩阵。",
+      "next": null,
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-07-25T23:20:00+08:00",
+      "module": null,
+      "task": "MP-FPS",
+      "result": "partial",
+      "summary": "nhwc-v12-fps：snapshot 下采样、去二次拷贝与热路径 yield、resize 池化、WEBGL_PACK/F16、训练页 HUD 节流+FPS。verify PREPROCESS_VERSION=nhwc-v12-fps；分包~1.46MB。待真机报 FPS/inferMs。",
+      "next": "真机重载后报调试页/训练底栏 FPS 与 inferMs",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-07-31T00:45:00+08:00",
+      "module": null,
+      "task": "MP-FPS align-fix",
+      "result": "partial",
+      "summary": "录屏证实骨骼整体偏移（非仅半身乱猜）。改 canvas 自绘 snapshot 与骨骼同 cover+mirror；去掉吞触摸的 cover-view 控件；perfLine 常驻 mir:on/off；placement 未 ok 不计次。待真机复验。",
+      "next": "真机确认骨架贴合 + 放远后翻转/结束可点",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-04T23:27:00+08:00",
+      "module": null,
+      "task": "MP-FPS park",
+      "result": "parked",
+      "summary": "用户决定暂停小程序训练页攻坚，焦点切回 App。MP-FPS → parked；新增 backlog APP-PUSHUP / APP-DISTRIBUTE。交接更新 docs/session-compression-MP-FPS.md。",
+      "next": "App：俯卧撑 / 规则边界自动化 / TestFlight 择一推进",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-04T23:45:00+08:00",
+      "module": "M1",
+      "task": "RULE-BOUNDARY",
+      "result": "done",
+      "summary": "落地边界自动化：docs/RULE-BOUNDARY.md；core/boundary 深蹲矩阵+阈值扫描+latch（VT-RB-001～003）；pushupMatrix stub；core 111 tests 绿。",
+      "next": "APP-PUSHUP：定稿 pushup-rules → pushupMatrix → core → App",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-04T23:56:00+08:00",
+      "module": null,
+      "task": "APP-PUSHUP",
+      "result": "partial",
+      "summary": "pushup-rules v0.2.0（侧面）；core PUSHUP+矩阵/sweep+夹具；App 动作库/详情/训练接 exerciseSession。core 127 测绿、mobile tsc 绿。VT-P6-001/002/RB-004 通过；真机 VT-P6-003/005 待验。",
+      "next": "真机：库→俯卧撑→侧面 5rep + 身体一线 + 切深蹲无 crash → 回「VT-P6-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-06T23:46:00+08:00",
+      "module": null,
+      "task": "APP-PUSHUP-relax",
+      "result": "partial",
+      "summary": "用户反馈「降得不够低」偏严。pushup-rules→0.2.1：相位 bottom<120，elbow-depth≥120才报；矩阵/sweep/core 同步。",
+      "next": "真机 Reload 后再做几组俯卧撑，确认计次更合理后回「通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-06T23:47:30+08:00",
+      "module": null,
+      "task": "APP-PUSHUP",
+      "result": "done",
+      "summary": "用户确认俯卧撑真机 OK（v0.2.1 放宽后）。APP-PUSHUP → done；VT-P6-003/005 通过。",
+      "next": "可选 APP-DISTRIBUTE 或其它 backlog",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-06T23:52:00+08:00",
+      "module": null,
+      "task": "APP-DISTRIBUTE",
+      "result": "configured",
+      "summary": "落地 apps/mobile/eas.json、app.json v0.1.0、README iOS TestFlight→Android APK 步骤；VERIFICATION VT-P4-005 拆 a/b。本次不打云端包。",
+      "next": "用户 eas login → production iOS submit → preview Android APK 后勾 VT-P4-005b",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-07T00:15:00+08:00",
+      "module": null,
+      "task": "APP-CAPABILITIES",
+      "result": "partial",
+      "summary": "语音 expo-speech；Ghost 通用化+俯卧撑关键帧+详情预览；分部位 catalog；升级队列与臀桥 rules planned。PRD 0.3.0。",
+      "next": "真机 Reload（若原生模块需 rebuild Dev Client）验语音/俯卧撑 Ghost；通过后开始 glute-bridge",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-07T00:18:30+08:00",
+      "module": null,
+      "task": "APP-VOICE",
+      "result": "done",
+      "summary": "用户确认语音 OK（ExpoSpeech 编入 Dev Client）。",
+      "next": "真机确认俯卧撑 Ghost + 动作库分区；通过后开 glute-bridge",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-07T00:30:00+08:00",
+      "module": null,
+      "task": "APP-DEMO-3D",
+      "result": "partial",
+      "summary": "详情页 ExerciseDemoPlayer(expo-av)；训练去 Ghost；catalog.demoAsset；demo-assets.md。PRD 0.3.1。",
+      "next": "用户放入可商用 squat/pushup.mp4 → 取消 demoAssets require 注释 → Reload",
+      "human_action_needed": true
     }
   ]
 }

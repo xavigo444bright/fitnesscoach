@@ -16,17 +16,19 @@
   />
 
   <view class="hud">
-    <view class="title">M0-T6 · MoveNet Spike</view>
+    <view class="title">M5-T1 · render Canvas</view>
+    <view class="perf">{{perfLine}}</view>
     <view>状态: {{status}}</view>
-    <view>关键点: {{landmarkCount}}（目标 ≥17）</view>
-    <view>FPS: {{fps}}（目标 ≥10，Spike 节流约 1 帧/0.8s）</view>
-    <view>最近推理: {{lastInferMs}} ms</view>
+    <view>关键点: {{landmarkCount}} · phase: {{phase}}</view>
+    <view>膝角: {{kneeDeg}}° · validate: {{validateStatus}}</view>
+    <view class="place" wx:if="{{placementHint}}">站位: {{placementHint}}</view>
+    <view class="fb" wx:if="{{feedbackHint}}">纠错: {{feedbackHint}}</view>
     <view class="err" wx:if="{{errorMsg}}">{{errorMsg}}</view>
     <view class="actions">
       <button size="mini" type="primary" bindtap="toggleDetect" disabled="{{!modelReady && !detecting}}">
         {{detecting ? '停止检测' : '开始检测'}}
       </button>
     </view>
-    <view class="tip">请用真机预览；需先在开发者工具「工具 → 构建 npm」</view>
+    <view class="tip">应见：绿/黄/红骨骼 + 半透明 Ghost + 站位虚线框</view>
   </view>
 </view>

@@ -34,8 +34,25 @@
   margin-bottom: 8rpx;
 }
 
+.perf {
+  color: #fef08a;
+  font-weight: 700;
+  font-size: 28rpx;
+  margin-bottom: 8rpx;
+}
+
 .err {
   color: #ff8a80;
+  margin-top: 8rpx;
+}
+
+.place {
+  color: #93c5fd;
+  margin-top: 8rpx;
+}
+
+.fb {
+  color: #fbbf24;
   margin-top: 8rpx;
 }
 

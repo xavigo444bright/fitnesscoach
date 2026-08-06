@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="title">本次训练完成</view>
+  <view class="stats">{{reps}} rep · {{durationLabel}}</view>
+  <view class="issue" wx:if="{{topIssue}}">最常见问题：{{topIssue}}</view>
+  <view class="issue muted" wx:else>本次未记录到高频纠错</view>
+
+  <button class="cta" type="primary" bindtap="retry">再来一组</button>
+  <button class="secondary" bindtap="goLibrary">返回</button>
+</view>

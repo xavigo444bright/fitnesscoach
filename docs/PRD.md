@@ -1,9 +1,9 @@
 ---
 document: PRD
 product: fitness-coach
-version: 0.2.0
+version: 0.3.1
 status: draft
-last_updated: 2026-07-15
+last_updated: 2026-08-07
 owner: xavigo4bright
 target_platforms:
   - mobile_app
@@ -24,6 +24,9 @@ primary_language: zh-CN
 | 0.1.2 | 2026-07-07 | — | 新增 §9 UI/UX 三层、UI 需求 ID、MU 模块引用 |
 | 0.1.3 | 2026-07-11 | — | App Spike：选定 MediaPipe Pose + Development Build；真机 33 点 / 20 FPS |
 | 0.2.0 | 2026-07-15 | — | 小程序 Spike 结束：选定**方案 A（端侧 TFJS MoveNet / WebGL）**；真机 14-15 点 / ~4 FPS / ~350ms（记实值，见 `spike-report.md`）。Phase 0 MVP 决策门达成 |
+| 0.2.1 | 2026-07-25 | — | M5/M6 推进：隐私说明落盘 `docs/privacy-notice.md`（FR-033）；躯干规则改为仅 stand；小程序分包与计次稀疏帧；上线前 backlog：MP-FPS、RULE-BOUNDARY、多机矩阵补测 |
+| 0.3.0 | 2026-08-07 | — | 能力波次：语音 FR-066（自用默认开）；Ghost 多动作；分层动作库（coachable/catalog，按胸肩背下肢核心）；暂缓 TestFlight，仅 Dev Client |
+| 0.3.1 | 2026-08-07 | — | FR-064/065：标准示意改为详情页预渲染 3D 视频；训练页去掉半透明 Ghost |
 
 ## 1. 文档目的
 
@@ -112,7 +115,7 @@ primary_language: zh-CN
 | FR-001 | 展示可用动作列表，含名称、简介、封面 | 列表可滚动，点击进入详情 | P0 | draft |
 | FR-002 | 动作详情含文字说明与推荐机位（正面/侧面） | 深蹲默认侧面；俯卧撑默认正面 | P0 | draft |
 | FR-010 | MVP 用户**手动选择**动作，不做自动动作识别 | 无「猜你在练什么」逻辑 | P0 | draft |
-| FR-011 | 首个上线动作：**深蹲**；第二波：**俯卧撑** | 深蹲全部 P0 能力先闭环 | P0 | draft |
+| FR-011 | 首个上线动作：**深蹲**；第二波：**俯卧撑**；其后按 catalog 分部位升级 | 分层：`coachable` 可训练 / `catalog` 可浏览；见 `docs/exercises/catalog.md` | P0 | draft |
 
 ### 4.2 摄像头与机位引导
 
@@ -160,9 +163,9 @@ primary_language: zh-CN
 | FR-061 | 关节颜色：正确绿 / 警告黄 / 错误红 | 与校验结果一致 | P0 | draft |
 | FR-062 | 问题关节显示角度弧或高亮 | 至少深蹲 3 个关键角 | P1 | draft |
 | FR-063 | 顶部或底部文字反馈条 | 中文短句，≤20 字为宜 | P0 | draft |
-| FR-064 | **Ghost 参考骨架**：半透明标准动作叠加 | opacity ≈ 0.4，与用户区分 | P0 | draft |
-| FR-065 | Ghost 与用户当前相位同步 | 延迟 < 250ms | P0 | draft |
-| FR-066 | 语音反馈（TTS 或预录） | 可开关，默认关 | P2 | draft |
+| FR-064 | **详情页标准动作示意**：预渲染 3D 循环视频（解剖/肌群高亮风格） | 训练页不再叠半透明骨架 Ghost；无素材时占位「待导入」 | P0 | draft |
+| FR-065 | （原 Ghost 相位同步）改为详情示意与训练纠错解耦 | 训练仅用户骨骼 + 文字/语音 | P0 | draft |
+| FR-066 | 语音反馈（TTS 或预录） | 可开关；**自用 Dev Client 默认开**（产品取舍，相对原「默认关」） | P1 | draft |
 
 ### 4.7 训练会话与数据
 

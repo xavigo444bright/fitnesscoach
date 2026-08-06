@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="diagram">
+    <view class="diagram-cap">推荐机位：侧面</view>
+    <view class="diagram-body">
+      <view class="phone"></view>
+      <view class="person">
+        <view class="head"></view>
+        <view class="torso"></view>
+        <view class="leg"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">动作要点</view>
+  <view class="bullet">· 蹲至大腿约平行（膝角进入底部）</view>
+  <view class="bullet">· 膝与脚尖方向一致，避免内扣</view>
+  <view class="bullet">· 躯干适度前倾即可，避免过度折腰</view>
+
+  <view class="section">摆机位</view>
+  <view class="bullet">· 手机竖屏，高度约及腰</view>
+  <view class="bullet">· 站在画面中下部，髋、膝、踝入画即可</view>
+  <view class="bullet">· 左侧或右侧均可，整段保持同一侧面</view>
+
+  <view class="privacy">姿态在本机分析，视频不上传（FR-033）</view>
+
+  <button class="cta" type="primary" bindtap="goPrepare">开始训练</button>
+</view>

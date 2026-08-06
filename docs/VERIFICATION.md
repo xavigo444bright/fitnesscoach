@@ -173,6 +173,17 @@ T0A-4 绘制 → VT-P0A-005 通过后才能采信 VT-P0A-006
 | VT-P1-009 | L1 | 覆盖率 | `test:coverage` | core 核心文件 ≥80% |
 | VT-P1-010 | L2 | 夹具完备 | 检查 `fixtures/` 目录 | §3 全部夹具存在 |
 
+#### RULE-BOUNDARY（上线前 / 扩动作前必做）
+
+手册：`docs/RULE-BOUNDARY.md`。实现：`packages/core/src/boundary/`。
+
+| 检验 ID | 级别 | 检验内容 | 操作步骤 | 通过标准 |
+|---------|------|----------|----------|----------|
+| VT-RB-001 | L1 | 边界矩阵 | `pnpm --filter @fitness-coach/core test boundary` | 每条规则含 ok/critical_ok/critical_fault/violation（+ phase_off/disabled 视规则）全绿 |
+| VT-RB-002 | L1 | 阈值扫描 | 同上，sweep describe | 连续量在阈值两侧触发边沿与 rules.md 一致 |
+| VT-RB-003 | L1 | 反馈 latch | boundary 内 latch 用例 | 进入防抖 / 解除防抖 / 相位切换清 latch |
+| VT-RB-004 | L2 | 扩动作门禁 | 新动作合并前 | 已填 `<id>Matrix`（非空 stub）+ 契约测；禁止仅真机调参 |
+
 **依赖项确认**：
 
 ```
@@ -180,9 +191,11 @@ angles → validate（validate 依赖 angleBetween）
 validate + phase → repCounter（计数依赖相位）
 squat-rules.md → squat.ts（L2 契约先于 L1 场景测试）
 防抖/冷却 → 在 validate 或 feedback 层单测，Phase 3 前必须完成
+扩动作 → VT-RB-001～004（先于 App 接线）
 ```
 
-**Phase 1 门禁**：VT-P1-001 ~ 010 全部 ✅
+**Phase 1 门禁**：VT-P1-001 ~ 010 全部 ✅  
+**扩动作门禁**：目标动作 VT-RB-001～004 ✅（深蹲参考矩阵已落地）
 
 ---
 
@@ -271,8 +284,12 @@ VT-P2-005 失败 → 先优化 pose 层，不得跳到 Phase 3 UI
 | VT-P4-002 | L4 | 严格度 | 宽松 vs 严格模式，误报率有差异 |
 | VT-P4-003 | L3 | 历史存储 | 练 2 次后重启 App，FR-073 记录仍在 |
 | VT-P4-004 | L4 | 测试矩阵 | `ROADMAP.md` 矩阵填 ≥3 台机 |
-| VT-P4-005 | L5 | 内测包 | TestFlight 或 APK 他人可安装 |
+| VT-P4-005a | L2 | 内测配置就绪 | `apps/mobile/eas.json` + README 分发步骤齐全（可不打云端包） |
+| VT-P4-005b | L5 | 内测包他人可装 | TestFlight 或 APK 他人安装后无需 Metro 可训练（原 VT-P4-005） |
 | VT-P4-006 | L2 | 隐私文案 | 写明本地推理、不上传视频 |
+| VT-P4-007 | L5 | 语音反馈 | 训练中纠错/不计次可播报；「语音开/关」生效（FR-066） |
+| VT-P4-008 | L5 | 详情 3D 示意 | 详情页循环 demo（有片）或「待导入」占位；训练页无半透明参考骨（FR-064/065） |
+| VT-P4-009 | L3 | 分部位动作库 | 胸/肩/背/下肢/核心分区；catalog 项不可开始训练 |
 
 **回归（M3 前必做）**：
 
@@ -305,11 +322,11 @@ pnpm --filter core test          # L1 全绿
 
 | 检验 ID | 级别 | 检验内容 | 通过标准 |
 |---------|------|----------|----------|
-| VT-P6-001 | L2 | pushup 契约 | `pushup-rules.md` ≡ `pushup.ts` |
-| VT-P6-002 | L1 | pushup 夹具 | 新增 FX-PUSHUP-* 单测全绿 |
-| VT-P6-003 | L5 | App 俯卧撑 | 正面 5 rep + 身体一线规则 |
-| VT-P6-004 | L5 | 小程序俯卧撑 | 同 VT-P6-003 |
-| VT-P6-005 | L5 | 动作库切换 | 深蹲 ↔ 俯卧撑无 crash |
+| VT-P6-001 | L2 | pushup 契约 | `pushup-rules.md` ≡ `pushup.ts`（`pushup.test.ts`） |
+| VT-P6-002 | L1 | pushup 夹具 + 矩阵 | FX-PUSHUP-* + `pushupMatrix` + sweep（含 VT-RB-004）全绿 |
+| VT-P6-003 | L5 | App 俯卧撑 | **侧面**机位：标准 5 rep 计入；半程不计；塌/撅髋触发身体一线 |
+| VT-P6-004 | L5 | 小程序俯卧撑 | 同 VT-P6-003（MP-FPS parked 期间延期） |
+| VT-P6-005 | L5 | 动作库切换 | 深蹲 ↔ 俯卧撑无 crash；详情机位/要点随动作切换 |
 
 ---
 
@@ -333,7 +350,8 @@ pnpm --filter core test          # L1 全绿
 | 变更位置 | 必跑检验 |
 |----------|----------|
 | `angles.ts` | L1 全部 core + VT-P2-002 |
-| `squat.ts` 规则 | L2 契约 + L1 深蹲夹具 + VT-P3A-M1 真机 |
+| `squat.ts` 规则 | L2 契约 + L1 深蹲夹具 + **VT-RB-001/002** + VT-P3A-M1 真机抽检 |
+| 新动作 `*-rules.md` / `exercises/*` | VT-RB-004：矩阵非空 + 契约 + sweep（连续量） |
 | `pose-native` | VT-P2-* + VT-P3A-M1 |
 | `pose-mp` | VT-P5-* 全套 |
 | UI 文案/样式 | 对应用例 VT-P3A/B 手动 |
@@ -383,9 +401,9 @@ Phase 0:  VT-P0A ☐  VT-P0B ☐  门禁 ☐
 Phase 1:  VT-P1-001~010 ☐  门禁 ☐
 Phase 2:  VT-P2-001~006 ☐  门禁 ☐
 Phase 3:  3A-M1 ☐  3B-M2 ☐  门禁 ☐
-Phase 4:  VT-P4-001~006 ☐  M3 ☐
+Phase 4:  VT-P4-001~004/006 ☐  VT-P4-005a ☑  VT-P4-005b ☐  M3 ☐
 Phase 5:  VT-P5-001~008 ☐  M4 ☐
-Phase 6:  VT-P6-001~005 ☐  M5 ☐
+Phase 6:  VT-P6-001~003/005 ☑  VT-P6-004 ☐（小程序延期）  M5 ☐
 ```
 
 ---

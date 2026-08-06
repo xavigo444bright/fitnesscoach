@@ -1,12 +1,20 @@
 /**
- * PG-002 动作详情（M4-T2 / FR-002 / UI-004）
+ * PG-002 动作详情（FR-002）；catalog 项禁用开始训练
+ * 标准动作示意：预渲染 3D 视频（非训练页 Ghost）
  */
-import { SQUAT } from '@fitness-coach/core';
+import {
+  BODY_PART_LABEL,
+  EQUIPMENT_LABEL,
+  getCatalogEntry,
+  isCoachableId,
+} from '@fitness-coach/core';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import ExerciseDemoPlayer from '../components/ExerciseDemoPlayer';
 
 type Props = {
+  exerciseId: string;
   onBack: () => void;
   onStart: () => void;
 };
@@ -16,29 +24,41 @@ const CAMERA_COPY = {
     title: '推荐机位：侧面',
     tips: [
       '手机竖屏，高度约及腰，与地面约 15–30°',
-      '站在画面中下部，髋、膝、踝入画即可',
+      '关键关节入画即可',
       '左侧或右侧均可，整段动作保持同一侧面',
     ],
   },
   front: {
     title: '推荐机位：正面',
-    tips: ['手机竖屏正对身体', '全身入镜，双脚与肩同宽可见'],
+    tips: ['手机竖屏正对身体', '全身入镜，关键关节可见'],
   },
 } as const;
 
-const SQUAT_CUES = [
-  '蹲至大腿约平行（膝角进入底部）',
-  '膝与脚尖方向一致，避免内扣（正面更易观察）',
-  '躯干适度前倾即可，避免过度折腰',
-];
+export default function ExerciseDetailScreen({
+  exerciseId,
+  onBack,
+  onStart,
+}: Props) {
+  const entry = getCatalogEntry(exerciseId);
+  if (!entry) {
+    return (
+      <View style={styles.root}>
+        <Pressable onPress={onBack} style={styles.back}>
+          <Text style={styles.backText}>← 返回</Text>
+        </Pressable>
+        <Text style={styles.bullet}>未找到该动作</Text>
+      </View>
+    );
+  }
 
-export default function ExerciseDetailScreen({ onBack, onStart }: Props) {
-  const camera = CAMERA_COPY[SQUAT.cameraHint];
+  const camera = CAMERA_COPY[entry.cameraHint];
+  const coachable = isCoachableId(entry.id);
+  const showDemo = Boolean(entry.demoAsset) || coachable;
 
   return (
     <View style={styles.root}>
       <Pressable onPress={onBack} style={styles.back} accessibilityRole="button">
-        <Text style={styles.backText}>← {SQUAT.name}</Text>
+        <Text style={styles.backText}>← {entry.name}</Text>
       </Pressable>
 
       <ScrollView
@@ -46,18 +66,30 @@ export default function ExerciseDetailScreen({ onBack, onStart }: Props) {
         contentContainerStyle={styles.body}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.diagram} accessibilityLabel="侧面机位示意图">
-          <View style={styles.phone} />
-          <View style={styles.person}>
-            <View style={styles.head} />
-            <View style={styles.torso} />
-            <View style={styles.leg} />
+        {showDemo ? (
+          <ExerciseDemoPlayer
+            exerciseName={entry.name}
+            demoAsset={entry.demoAsset}
+          />
+        ) : (
+          <View style={styles.diagram} accessibilityLabel="机位示意图">
+            <View style={styles.phone} />
+            <View style={styles.person}>
+              <View style={styles.head} />
+              <View style={styles.torso} />
+              <View style={styles.leg} />
+            </View>
+            <Text style={styles.diagramCaption}>{camera.title}</Text>
           </View>
-          <Text style={styles.diagramCaption}>{camera.title}</Text>
-        </View>
+        )}
+
+        <Text style={styles.meta}>
+          {BODY_PART_LABEL[entry.bodyPart]} · {EQUIPMENT_LABEL[entry.equipment]}{' '}
+          · {camera.title.replace('推荐机位：', '')}
+        </Text>
 
         <Text style={styles.section}>动作要点</Text>
-        {SQUAT_CUES.map((line) => (
+        {entry.cues.map((line) => (
           <Text key={line} style={styles.bullet}>
             · {line}
           </Text>
@@ -69,15 +101,22 @@ export default function ExerciseDetailScreen({ onBack, onStart }: Props) {
             · {line}
           </Text>
         ))}
+
+        {entry.statusNote ? (
+          <Text style={styles.note}>{entry.statusNote}</Text>
+        ) : null}
       </ScrollView>
 
       <Pressable
-        style={styles.cta}
-        onPress={onStart}
+        style={[styles.cta, !coachable && styles.ctaDisabled]}
+        onPress={coachable ? onStart : undefined}
+        disabled={!coachable}
         accessibilityRole="button"
-        accessibilityLabel="开始训练"
+        accessibilityLabel={coachable ? '开始训练' : '即将支持教练'}
       >
-        <Text style={styles.ctaText}>开始训练</Text>
+        <Text style={[styles.ctaText, !coachable && styles.ctaTextDisabled]}>
+          {coachable ? '开始训练' : '即将支持教练'}
+        </Text>
       </Pressable>
       <StatusBar style="light" />
     </View>
@@ -159,6 +198,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.caption,
   },
+  meta: {
+    color: colors.textSecondary,
+    fontSize: fontSize.caption,
+    marginBottom: space.md,
+  },
   section: {
     color: colors.textPrimary,
     fontSize: fontSize.body,
@@ -171,6 +215,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 4,
   },
+  note: {
+    marginTop: space.lg,
+    color: colors.warning,
+    fontSize: fontSize.caption,
+  },
   cta: {
     backgroundColor: colors.primary,
     borderRadius: radius.sm,
@@ -178,9 +227,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  ctaDisabled: {
+    backgroundColor: colors.surface,
+    opacity: 0.85,
+  },
   ctaText: {
     color: colors.overlayText,
     fontSize: fontSize.body,
     fontWeight: '700',
+  },
+  ctaTextDisabled: {
+    color: colors.textSecondary,
   },
 });

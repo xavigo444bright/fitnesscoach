@@ -21,7 +21,7 @@ export default function ExerciseCard({
       accessibilityLabel={`${name}，${bodyPart}，${cameraHint}`}
     >
       <View style={styles.thumb}>
-        <Text style={styles.thumbLabel}>蹲</Text>
+        <Text style={styles.thumbLabel}>{name.slice(0, 1)}</Text>
       </View>
       <View style={styles.meta}>
         <Text style={styles.name}>{name}</Text>

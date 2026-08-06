@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="title">健身教练</view>
+  <view class="card" bindtap="goDetail">
+    <view class="card-name">深蹲</view>
+    <view class="card-meta">下肢 · 侧面机位</view>
+  </view>
+  <view class="hint">MVP 仅 1 个动作</view>
+  <view class="dev" bindtap="goPose">调试姿态（MoveNet）</view>
+</view>

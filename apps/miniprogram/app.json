@@ -1,14 +1,37 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/camera/camera",
-    "pages/pose/pose"
+    "pages/library/library",
+    "pages/detail/detail",
+    "pages/prepare/prepare",
+    "pages/summary/summary",
+    "pages/index/index"
   ],
+  "subPackages": [
+    {
+      "root": "packageTrain",
+      "name": "train",
+      "pages": [
+        "pages/training/training",
+        "pages/pose/pose",
+        "pages/camera/camera"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/detail/detail": {
+      "network": "all",
+      "packages": ["train"]
+    },
+    "pages/prepare/prepare": {
+      "network": "all",
+      "packages": ["train"]
+    }
+  },
   "window": {
     "navigationBarTitleText": "Fitness Coach",
-    "navigationBarBackgroundColor": "#111111",
+    "navigationBarBackgroundColor": "#0F172A",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#111111"
+    "backgroundColor": "#0F172A"
   },
   "permission": {
     "scope.camera": {

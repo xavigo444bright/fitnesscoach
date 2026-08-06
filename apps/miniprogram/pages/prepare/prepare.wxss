@@ -1,0 +1,156 @@
+/**
+ * PG-003 准备页 — design-tokens + App PrepareScreen 结构
+ * 微信：翻转/返回靠左，避开 menuButton 胶囊
+ */
+.page {
+  width: 100%;
+  height: 100vh;
+  background: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+.camera {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pf {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.pf-top {
+  left: 3%;
+  right: 3%;
+  top: 6%;
+  height: 2px;
+  border-top: 2px dashed rgba(255, 255, 255, 0.85);
+}
+
+.pf-bottom {
+  left: 3%;
+  right: 3%;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  height: 2px;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.85);
+}
+
+.pf-left {
+  left: 3%;
+  top: 6%;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  width: 2px;
+  border-left: 2px dashed rgba(255, 255, 255, 0.85);
+}
+
+.pf-right {
+  right: 3%;
+  top: 6%;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  width: 2px;
+  border-right: 2px dashed rgba(255, 255, 255, 0.85);
+}
+
+.hint {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.countdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  text-align: center;
+  color: #ffffff;
+  font-size: 96px;
+  font-weight: 700;
+}
+
+.cv-back {
+  position: absolute;
+  left: 16px;
+  min-height: 44px;
+  padding: 10px 4px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.cv-flip {
+  position: absolute;
+  left: 16px;
+  min-height: 44px;
+  min-width: 56px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 24px;
+  box-sizing: border-box;
+}
+
+.cv-bottom {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.cv-primary {
+  background-color: #3b82f6; /* --color-primary */
+  color: #ffffff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  min-height: 48px;
+  line-height: 20px;
+  box-sizing: border-box;
+}
+
+.cv-skip {
+  min-height: 44px;
+  padding: 0 20px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 44px;
+  text-decoration: underline;
+}
+
+.cv-err {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 120px;
+  color: #ef4444;
+  background-color: rgba(0, 0, 0, 0.55);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}

@@ -1,8 +1,13 @@
 /**
- * PG-001 动作库（M4-T1 / FR-001 / UI-003）
- * MVP 仅深蹲一张卡片。
+ * PG-001 动作库：按部位分区；coachable / catalog 分层（FR-001）
  */
-import { SQUAT } from '@fitness-coach/core';
+import {
+  BODY_PART_LABEL,
+  BODY_PART_ORDER,
+  catalogByBodyPart,
+  EQUIPMENT_LABEL,
+  type ExerciseCatalogEntry,
+} from '@fitness-coach/core';
 import { colors, fontSize, space } from '@fitness-coach/ui';
 import { StatusBar } from 'expo-status-bar';
 import {
@@ -15,7 +20,7 @@ import {
 import ExerciseCard from '../components/ExerciseCard';
 
 type Props = {
-  onSelectSquat: () => void;
+  onSelectExercise: (id: string) => void;
   onOpenDevPose?: () => void;
 };
 
@@ -24,24 +29,48 @@ const CAMERA_HINT_LABEL: Record<string, string> = {
   front: '正面机位',
 };
 
+function cardSubtitle(e: ExerciseCatalogEntry): string {
+  const cam = CAMERA_HINT_LABEL[e.cameraHint] ?? e.cameraHint;
+  const eq = EQUIPMENT_LABEL[e.equipment];
+  if (e.tier === 'catalog') return `${eq} · ${cam} · 即将支持`;
+  return `${eq} · ${cam}`;
+}
+
 export default function ExerciseLibraryScreen({
-  onSelectSquat,
+  onSelectExercise,
   onOpenDevPose,
 }: Props) {
+  const byPart = catalogByBodyPart();
+
   return (
     <View style={styles.root}>
       <Text style={styles.title}>健身教练</Text>
+      <Text style={styles.sub}>自用 Dev Client · 语音默认开</Text>
       <ScrollView
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
       >
-        <ExerciseCard
-          name={SQUAT.name}
-          bodyPart="下肢"
-          cameraHint={CAMERA_HINT_LABEL[SQUAT.cameraHint] ?? SQUAT.cameraHint}
-          onPress={onSelectSquat}
-        />
-        <Text style={styles.hint}>MVP 仅 1 个动作</Text>
+        {BODY_PART_ORDER.map((part) => {
+          const items = byPart[part];
+          if (!items.length) return null;
+          return (
+            <View key={part} style={styles.section}>
+              <Text style={styles.sectionTitle}>{BODY_PART_LABEL[part]}</Text>
+              {items.map((e) => (
+                <ExerciseCard
+                  key={e.id}
+                  name={e.name}
+                  bodyPart={BODY_PART_LABEL[e.bodyPart]}
+                  cameraHint={cardSubtitle(e)}
+                  onPress={() => onSelectExercise(e.id)}
+                />
+              ))}
+            </View>
+          );
+        })}
+        <Text style={styles.privacy}>
+          姿态在本机分析，视频不上传（详见隐私说明）
+        </Text>
       </ScrollView>
       {onOpenDevPose ? (
         <Pressable style={styles.devLink} onPress={onOpenDevPose}>
@@ -63,27 +92,41 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: space.lg,
+    fontSize: fontSize.title,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  sub: {
+    color: colors.textSecondary,
+    fontSize: fontSize.caption,
+    marginBottom: space.md,
   },
   list: {
-    paddingBottom: space.xl,
-    gap: space.md,
+    paddingBottom: space.lg,
+    gap: space.sm,
   },
-  hint: {
+  section: {
+    marginBottom: space.md,
+    gap: space.sm,
+  },
+  sectionTitle: {
+    color: colors.textPrimary,
+    fontSize: fontSize.body,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  privacy: {
     color: colors.textSecondary,
     fontSize: fontSize.caption,
-    textAlign: 'center',
-    marginTop: space.sm,
+    marginTop: space.md,
+    lineHeight: 18,
   },
   devLink: {
-    alignSelf: 'center',
-    padding: space.sm,
+    paddingVertical: space.sm,
+    alignItems: 'center',
   },
   devLinkText: {
-    color: colors.textSecondary,
+    color: colors.primary,
     fontSize: fontSize.caption,
-    textDecorationLine: 'underline',
   },
 });

@@ -1,6 +1,11 @@
 import { LandmarkIndex } from "@fitness-coach/core";
 import { describe, expect, it } from "vitest";
-import { alignGhostToUser, ghostPoseForPhase, lerpPose } from "./ghost.js";
+import {
+  alignGhostToUser,
+  ghostPoseForExercise,
+  ghostPoseForPhase,
+  lerpPose,
+} from "./ghost.js";
 
 describe("ghost interpolation (M3-T6 / VT-P3B-001,002)", () => {
   it("lerpPose midpoints coordinates", () => {
@@ -29,6 +34,16 @@ describe("ghost interpolation (M3-T6 / VT-P3B-001,002)", () => {
     expect(midY).toBeLessThan(Math.max(standY, bottomY) + 1e-9);
     expect(midY).not.toBeCloseTo(standY);
     expect(midY).not.toBeCloseTo(bottomY);
+  });
+
+  it("pushup ghostPoseForExercise bottom differs from stand", () => {
+    const s = ghostPoseForExercise("pushup", "stand", 170);
+    const b = ghostPoseForExercise("pushup", "bottom", 95);
+    expect(s[LandmarkIndex.RightElbow]?.y).not.toBe(
+      b[LandmarkIndex.RightWrist]?.y,
+    );
+    expect(s[LandmarkIndex.RightShoulder]).toBeDefined();
+    expect(b[LandmarkIndex.RightWrist]).toBeDefined();
   });
 
   it("alignGhostToUser matches user hip–ankle span and hip anchor", () => {
