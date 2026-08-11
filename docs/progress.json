@@ -1,9 +1,9 @@
 {
-  "version": "0.4.0",
+  "version": "0.5.0",
   "plan": "module-based",
-  "last_updated": "2026-08-11T00:10:00+08:00",
-  "status": "blocked",
-  "blocker": "VT-P7-003：轨迹对照/校准后真机抽测，误报漏报不差于基线。通过后回「VT-P7-003 通过」。",
+  "last_updated": "2026-08-12T00:51:00+08:00",
+  "status": "ready",
+  "blocker": null,
   "focus": "app",
   "backlog": [
     {
@@ -51,7 +51,7 @@
     {
       "id": "APP-GHOST",
       "title": "详情预渲染 3D 示意（FR-064）",
-      "note": "播放器位已就绪。PRD 0.3.2 降为 P2：不阻塞主线；待轨迹主线后再补素材。",
+      "note": "详情预渲染仍 P2。训练参考改为 Plan C 3D（非本 backlog）。",
       "before": "launch",
       "status": "deferred"
     },
@@ -72,21 +72,21 @@
     {
       "id": "APP-TRAJECTORY",
       "title": "示范轨迹 → 训练参考/对照（FR-067～069）",
-      "note": "T7-1/T7-2 done。T7-3 逻辑 done。俯卧撑已换真片 side/front（yt 27–29s / 2:44–2:49）。待 VT-P7-003；俯卧撑参考骨待真机目视。",
+      "note": "T7-1/T7-2 逻辑 done；真片 squat/pushup。2D 观感否决。主线转 Plan C（FR-068 / M12 / T8-*）。VT-P7-003 可延后。",
       "before": "launch",
-      "status": "open"
+      "status": "pivoted"
     }
   ],
   "loop": {
     "interval": "20m",
-    "mode": "paused_human",
+    "mode": "stopped",
     "started_at": "2026-08-11T00:05:00+08:00",
-    "stopped_at": "2026-08-11T00:10:00+08:00",
-    "stop_reason": "VT-P7-003_human_verify",
+    "stopped_at": "2026-08-12T00:51:00+08:00",
+    "stop_reason": "pivot_plan_C",
     "stop_after_next_tick": false,
-    "note": "人工校验停表：等 VT-P7-003。"
+    "note": "转向 Plan C：勿自动 arm；新会话执行 T8-1。"
   },
-  "current_module": "M11",
+  "current_module": "M12",
   "modules": {
     "M0": {
       "name": "工程基建",
@@ -157,9 +157,12 @@
       ]
     }
   },
-  "next_task": "T7-3",
+  "next_task": "T8-1",
   "queue": [
-    "T7-3"
+    "T8-1",
+    "T8-2",
+    "T8-3",
+    "T8-4"
   ],
   "completed_tasks": [
     "M0-T1",
@@ -1020,6 +1023,15 @@
       "summary": "FR-069：driveDegStats/proposePhaseThresholds；assertCanonicalStandQuality + ingest armsDownStand。正侧提议冲突→未改 phase/validate。core 144 绿。待 VT-P7-003。",
       "next": "真机抽测对照不差于基线 → 回「VT-P7-003 通过」",
       "human_action_needed": true
+    },
+    {
+      "at": "2026-08-12T00:51:00+08:00",
+      "module": "M12",
+      "task": "PRD-0.4.0-plan-C",
+      "result": "done",
+      "summary": "用户否决 2D/anatomyGuide；PRD 0.4.0 FR-068→3D；删 anatomyGuide；README/ROADMAP Phase8/MODULES M12/VT-P8 对齐；next_task=T8-1。",
+      "next": "T8-1：3D 栈选型 Spike（OQ-005）",
+      "human_action_needed": false
     }
   ]
 }

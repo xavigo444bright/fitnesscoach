@@ -30,13 +30,21 @@ apps/miniprogram/packageTrain/miniprogram_npm/
 .local/
 
 # 示范片源（体积大，本地提轨迹用；目录保留 README）
-media/trajectory-source/**/*.{mp4,mov,MP4,MOV,webm}
+# 注意：gitignore 不支持 {a,b} 花括号展开，须逐后缀写
+media/trajectory-source/**/*.mp4
+media/trajectory-source/**/*.mov
+media/trajectory-source/**/*.MP4
+media/trajectory-source/**/*.MOV
+media/trajectory-source/**/*.webm
 media/trajectory-source/**/*.pose.json
 media/trajectory-source/**/_inbox/**
 !media/trajectory-source/**/_inbox/.gitkeep
-# 候选裁剪片已由上方视频规则忽略；保留 _candidates/.gitkeep 与正式报告 JSON
 media/trajectory-source/**/*-dry-run*
 media/trajectory-source/**/_candidates/*-dry-run*
+media/trajectory-source/**/_candidates/_preview*/
+media/trajectory-source/**/_candidates/_frontscan/
+media/trajectory-source/**/_candidates/_survey/
+media/trajectory-source/**/_candidates/_user_pick/
 
 # 轨迹提取本地环境
 tools/trajectory-extract/.venv/

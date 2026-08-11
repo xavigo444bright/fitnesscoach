@@ -1,7 +1,7 @@
 # Session 压缩交接 — 2026-08-07（App 能力 + 轨迹主线）
 
-> 新对话请先读：`docs/PRD.md`（**0.3.2**）→ `docs/MODULES.md`（M11）→ `docs/exercises/trajectory-pipeline.md` → `docs/progress.json`。  
-> 本文件是上一长会话的进度摘要，**不是**需求真源。
+> **已过时**：主线已转 Plan C。新对话读 `docs/session-compression-2026-08-12-plan-C.md` 与 PRD **0.4.0**。  
+> 下文仅作 T7 启动时的历史摘要。
 
 ---
 

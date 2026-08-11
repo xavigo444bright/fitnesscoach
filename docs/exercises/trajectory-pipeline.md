@@ -1,21 +1,21 @@
 # 示范轨迹管线（FR-067～069）
 
-> 当前开发主线：**扒片/导入视频 → 提轨迹 → 训练参考骨架与对照**。  
-> 解剖 3D 详情 mp4（FR-064）为 P2，不阻塞本管线。
+> 管线本身 **done（逻辑）**。产品绘制主线已转 **Plan C（FR-068 3D）**，见 PRD 0.4.0 与 `session-compression-2026-08-12-plan-C.md`。  
+> 详情预渲染片（FR-064）仍为 P2。
 
 ## 目标
 
-提高动作进行中的指导精度：示范对照、相位/进度对齐、（下一步）阈值校准。
+示范视频 → 清洗轨迹 → 按相位/进度取样并对齐用户；供训练参考层与（可选）阈值校准消费。
 
 ## 阶段
 
 | 阶段 | 内容 | 对应需求 | 状态 |
 |------|------|----------|------|
-| T0 | 轨迹格式约定 + 目录 | FR-067 | **done**（`packages/core/src/trajectory`） |
-| T1 | 离线提取：视频/PoseDump → 清洗/单 rep 循环 | FR-067 | **done**（深蹲/俯卧撑 side+front 真片） |
-| T2 | App 训练：按相位/进度叠加参考骨架 | FR-068 | **done**（VT-P7-002 真机通过） |
-| T3 | 用轨迹分布校准或进度对照驱动角（须更新矩阵/RULE-BOUNDARY） | FR-069 | **逻辑 done**（待真机 VT-P7-003；未改运行时阈值） |
-| — | 详情预渲染解剖片 | FR-064 | **P2 延后** |
+| T0–T1 | 格式 + 离线提取 | FR-067 | **done** |
+| T2 | 取样/对齐驱动参考层 | FR-068 驱动侧 | **done**（VT-P7-002）；**2D 观感否决** |
+| T3 | 阈值校准工具 | FR-069 | **逻辑 done**；VT-P7-003 可延后 |
+| T8+ | 3D 骨骼+肌肉绘制 | FR-068 Plan C | **当前主线** |
+| — | 详情预渲染片 | FR-064 | **P2** |
 
 ## 首批动作
 
@@ -140,24 +140,13 @@ pnpm --filter @fitness-coach/trajectory-extract extract -- from-dump \
 3. 行程帧避免长期过头举手（ingest 会降分）
 4. 片源评分含 `armsDownStand`（见 `tools/trajectory-source-ingest`）
 
-## 训练参考骨架（T7-2 / FR-068）
+## 训练参考驱动（T7-2，供 Plan C 复用）
 
 - `progressByNearestDrive` + `alignGhostToUser` → `referencePoseFromTrajectory(cameraHint)`
-- **参考开**：青色 **anatomy guides**（`buildAnatomyGuideScene`：脊柱弧 / 头轮廓 / 加粗肢段 / 髋弧）+ 用户仅黄/红纠错色点；仍是 **2D FR-068**，不是 FR-064 预渲染 3D，也不是实时解剖人（方案 C）
-- **参考关**：完整用户绿白骨
-- 深蹲默认「自·侧 / 自·正」按肩髋跨度自动切正面/侧面轨迹；按钮循环 自动→侧→正→自动
-- 侧面默认 `squat-side-v1`（垂臂）；v2 举手过多仅备查
-- 俯卧撑：正面 `support`（肩宽钉肩）、侧面 `upright`（肩/髋–踝钉踝）；机位须与身体朝向一致
-
-### A 方案真机评估（深蹲 + 俯卧撑）
-
-| 动作 | 机位 | 看什么 |
-|------|------|--------|
-| squat | side/front | 脊柱弧随下蹲变化；头轮廓不炸；比例接近身体 |
-| pushup | side | 肩–髋–踝接近水平 plank 链，非竖直火柴人 |
-| pushup | front | 肩宽/双手落地感；非胸口小团 |
-
-观感可接受 → 继续 A 扩动作；仍差很远 → 再开 PRD 讨论方案 C。
+- 输出为对齐后的 `Pose`；**绘制层**由 App/3D 消费（当前临时 2D 骨占位；目标 3D）
+- 深蹲：自动/侧/正机位；默认 `squat-side-v1`
+- 俯卧撑：front → `support`；side → `upright`
+- **已移除**：`anatomyGuide`（Plan A 丰满 2D，用户否决）
 
 ## 轨迹辅助校准（T7-3 / FR-069）
 

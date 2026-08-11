@@ -28,7 +28,6 @@ import {
 import {
   applyJointColors,
   beginFaultCycle,
-  buildAnatomyGuideScene,
   buildSkeletonScene,
   celebrateFixedFaults,
   DEFAULT_FEEDBACK_BAR_CONFIG,
@@ -461,7 +460,7 @@ export default function DevPoseScreen({
           updateScale: phaseNow === 'stand',
         },
       );
-      setRefSkeleton(refPose ? buildAnatomyGuideScene(refPose) : null);
+      setRefSkeleton(refPose ? buildSkeletonScene(refPose) : null);
       setPlacementVisible(showPlacement);
       setPlacementHint(
         showPlacement

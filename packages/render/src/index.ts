@@ -3,18 +3,11 @@
 export const RENDER_VERSION = "0.0.0";
 
 export type {
-  GuideKind,
-  GuidePath,
-  GuidePoint,
   RenderBone,
   RenderJoint,
   SkeletonScene,
 } from "./types.js";
 export { POSE_BONES, type BonePair } from "./bones.js";
-export {
-  buildAnatomyGuideScene,
-  type BuildAnatomyGuideOptions,
-} from "./anatomyGuide.js";
 export {
   buildSkeletonScene,
   type BuildSkeletonOptions,

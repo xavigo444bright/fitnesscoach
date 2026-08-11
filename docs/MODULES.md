@@ -1,8 +1,8 @@
 ---
 document: MODULES
 product: fitness-coach
-version: 0.3.0
-last_updated: 2026-07-07
+version: 0.4.0
+last_updated: 2026-08-12
 plan: module-based
 depends_on:
   - docs/PRD.md
@@ -284,9 +284,10 @@ M0 → MU ─┘      M2B → M5 ↗
 | M8-history | 历史、趋势、账号 |
 | M9-voice | 语音反馈（App 已落地，自用默认开） |
 | M10-store | 上架、支付、课程 |
-| **M11-trajectory** | **示范轨迹管线（当前主线）**：提取 → 训练参考骨架 → 对照/校准（FR-067～069）；见 `docs/exercises/trajectory-pipeline.md` |
+| M11-trajectory | 示范轨迹管线：提取 → 相位取样/对齐 → 校准工具（FR-067～069）；见 `trajectory-pipeline.md` |
+| **M12-ref3d** | **训练 3D 参考 Plan C（当前主线）**：轨迹驱动骨骼+肌肉（FR-068）；见 `session-compression-2026-08-12-plan-C.md` |
 
-每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。**M11 优先于 FR-064 解剖成片与 APP-UPGRADE 下一批动作**（升级队列可并行，但默认先轨迹）。
+每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。**M12 优先于 FR-064 详情片与 APP-UPGRADE 下一批动作**；M11 轨迹产物由 M12 消费。
 
 ---
 

@@ -1,49 +1,47 @@
-# 会话交接：转向方案 C（2026-08-12）
+# 交接：Plan C — 训练页 3D 骨骼+肌肉（2026-08-12）
 
-> 供**新对话**粘贴/阅读。旧对话 context 已挤满轨迹对齐与 A 方案绘制，不适合继续做 C。
+> **新对话入口**。先读：`docs/PRD.md`（**0.4.0**）→ 本文 → `docs/progress.json` → `docs/exercises/trajectory-pipeline.md`。
 
-## 用户决策
+## 决策（已定）
 
-- **A 方案（丰满 2D anatomy guide）真机否决**：仍「太离谱 / 太差」
-- **改走 C**：样片驱动的 **3D 骨骼 + 肌肉** 动画叠训练（或等价观感）
-- **须改 PRD**：当前 FR-068 明文是 2D 非解剖；FR-064 预渲染 3D 详情为 P2。C = 新产品范围
+| 项 | 结论 |
+|----|------|
+| 2D 火柴人 / Plan A anatomy guide | **否决**（代码已删） |
+| 产品参考层 | **Plan C**：示范轨迹驱动的 **3D 骨骼 + 简化肌肉** |
+| 轨迹管线 FR-067 | **保留复用**（相位/进度/对齐） |
+| FR-069 / VT-P7-003 | **不阻塞** C；阈值未改运行时 |
+| 详情页 FR-064 | 仍 **P2** |
 
-## 已完成（可保留）
+## 已完成（可依赖）
 
-| 块 | 状态 | 说明 |
-|----|------|------|
-| M0–M4 App 壳 / Core / Pose | done | 深蹲+俯卧撑 coachable、计次、语音、目录 |
-| RULE-BOUNDARY | done | 含俯卧撑矩阵 |
-| APP-TRAJECTORY T7-1 | done | 轨迹格式 + 离线提取工具 |
-| T7-2 | 逻辑 done | 轨迹→参考骨叠加；**观感未过用户验收** |
-| T7-3 | 逻辑 done | calibrate；正侧提议冲突未改运行时阈值 |
-| 深蹲轨迹 | 真片 | side-v1 默认；front-v1；v2 举手过多备查 |
-| 俯卧撑轨迹 | 真片 | side 27–29s；front 2:44–2:49（纠错演示片，质量一般） |
-| 垂臂站立门禁 | done | `assertCanonicalStandQuality` / ingest `armsDownStand` |
-| A 方案代码 | landed | `anatomyGuide.ts` + Overlay guides；**用户否决观感** |
+- M0–M6 GATE；App：深蹲 + 俯卧撑 coachable、计次、语音、分层动作库
+- RULE-BOUNDARY（含俯卧撑矩阵）
+- 轨迹：`packages/core/src/trajectory/` + `packages/core/trajectories/`（squat/pushup side+front 真片）
+- 驱动：`referencePoseFromTrajectory`、ghost 对齐、机位/朝向 latch
+- 工具：`tools/trajectory-extract/`、`tools/trajectory-source-ingest/`
+- 文档：PRD 0.4.0、ROADMAP Phase 8、MODULES M12、VT-P8-*
 
-## 未过 / 阻塞
+## 下一任务（按序）
 
-- **VT-P7-003** 仍 `paused_human`（轨迹对照真机抽测）
-- 2D 参考骨（火柴人 / anatomy guide）用户认定不可作为产品方向
-- 小程序 MP-FPS parked；FR-064 详情解剖片仍无素材
+1. **T8-1**：Expo Dev Client 上 3D 栈选型（记 OQ-005）— Filament / three / 烘焙序列帧等；须能被轨迹关节驱动  
+2. **T8-2**：squat side：轨迹 → 3D rig  
+3. **T8-3**：简化肌肉/体积 + 画幅对齐；用户目视验收  
+4. **T8-4**：pushup side + 开关/性能（VT-P8-003/004）
 
-## C 方案新对话应先做
-
-1. 通读 `docs/PRD.md` → 起草 FR-068/064/065 修订（训练页要什么：实时 skinned mesh？预渲染同步播？）
-2. 技术选型短评：Expo + Filament / three.js / 预渲染序列帧 / 外部 DCC 烘焙
-3. MVP 范围：仅 squat side + pushup side，肌肉可先简化
-4. **轨迹管线可复用**（相位/进度驱动）；绘制层替换，勿推倒 core 规则引擎
+**硬约束**：业务校验仍在 `packages/core`；勿推倒规则引擎；MVP 先 side。
 
 ## 关键路径
 
-- 轨迹：`packages/core/src/trajectory/`、`packages/core/trajectories/`
-- 对齐/参考：`packages/render/src/ghost.ts`、`referenceSkeleton.ts`、`anatomyGuide.ts`
-- App：`apps/mobile/src/screens/DevPoseScreen.tsx`、`SkeletonOverlay.tsx`
-- 工具：`tools/trajectory-extract/`、`tools/trajectory-source-ingest/`
-- 进度：`docs/progress.json`（loop=`paused_human`）
-- 片源：`media/trajectory-source/`（**勿 commit 大视频**；`.gitignore` 已倾向忽略）
+| 用途 | 路径 |
+|------|------|
+| 轨迹 | `packages/core/src/trajectory/`、`packages/core/trajectories/` |
+| 对齐 | `packages/render/src/ghost.ts`、`referenceSkeleton.ts` |
+| 训练页 | `apps/mobile/src/screens/DevPoseScreen.tsx`、`SkeletonOverlay.tsx`（绘制层待换） |
+| 进度 | `docs/progress.json`（`next_task=T8-1`） |
+| 片源 | `media/trajectory-source/`（大视频勿 commit） |
 
-## Metro（若验旧包）
+## 不要做
 
-手机同 Wi‑Fi：`http://<LAN_IP>:8081`（上次 `192.168.10.21:8081`）
+- 复活 anatomyGuide / 继续打磨 2D 观感当产品
+- 未改 PRD 就另起一套「像素直接出解剖片」热路径
+- 在 UI 层写相位/计数规则

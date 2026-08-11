@@ -1,10 +1,10 @@
 /**
- * App adapter：用户骨骼 + 示范参考骨架（M3 / FR-060 / FR-068）
+ * App adapter：用户骨骼 + 示范参考（M3 / FR-060）
  *
- * 参考开：青色 anatomy guides（脊柱/头/肢/髋）+ 用户「纠错色点」（无白线）。
- * 参考关：完整用户绿/黄/红骨。
+ * 当前参考层仍为 2D 骨架占位（轨迹对齐逻辑可复用）。
+ * 产品方向为 FR-068 Plan C：3D 骨骼+肌肉；本组件将随后替换绘制层。
  */
-import type { GuidePath, SkeletonScene } from '@fitness-coach/render';
+import type { SkeletonScene } from '@fitness-coach/render';
 import { colors } from '@fitness-coach/ui';
 import { StyleSheet, View } from 'react-native';
 
@@ -18,7 +18,8 @@ type Props = {
 };
 
 const REF_COLOR = '#38BDF8';
-const REF_OPACITY = 0.92;
+const REF_OPACITY = 0.85;
+const REF_BONE_H = 5;
 const REF_JOINT = 9;
 const USER_BONE_H = 3;
 const USER_JOINT = 10;
@@ -45,80 +46,6 @@ function toPx(
   return { x: x * width, y: y * height };
 }
 
-function strokePx(
-  scene: SkeletonScene,
-  strokeWidth: number,
-  width: number,
-  height: number,
-): number {
-  const short = Math.min(width, height);
-  if (scene.space === 'pixel') {
-    return Math.max(3, Math.min(14, strokeWidth));
-  }
-  return Math.max(3.5, Math.min(16, strokeWidth * short));
-}
-
-/** 折线 → 旋转 View 骨段 */
-function drawPolyline(
-  points: { x: number; y: number }[],
-  opts: {
-    keyPrefix: string;
-    color: string;
-    opacity: number;
-    boneHeight: number;
-  },
-) {
-  const segs = [];
-  for (let i = 0; i < points.length - 1; i += 1) {
-    const p1 = points[i]!;
-    const p2 = points[i + 1]!;
-    const dx = p2.x - p1.x;
-    const dy = p2.y - p1.y;
-    const length = Math.sqrt(dx * dx + dy * dy);
-    if (length < 1) continue;
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    segs.push(
-      <View
-        key={`${opts.keyPrefix}-${i}`}
-        style={[
-          styles.bone,
-          {
-            left: (p1.x + p2.x) / 2 - length / 2,
-            top: (p1.y + p2.y) / 2 - opts.boneHeight / 2,
-            width: length,
-            height: opts.boneHeight,
-            backgroundColor: opts.color,
-            opacity: opts.opacity,
-            borderRadius: opts.boneHeight / 2,
-            transform: [{ rotate: `${angle}deg` }],
-          },
-        ]}
-      />,
-    );
-  }
-  return segs;
-}
-
-function drawGuides(
-  scene: SkeletonScene,
-  guides: GuidePath[],
-  width: number,
-  height: number,
-) {
-  return guides.map((g) => {
-    const pts = g.points.map((p) => toPx(scene, p.x, p.y, width, height));
-    const h = strokePx(scene, g.strokeWidth, width, height);
-    const opacity =
-      g.kind === 'spine' ? REF_OPACITY : g.kind === 'head' ? 0.85 : REF_OPACITY;
-    return drawPolyline(pts, {
-      keyPrefix: `g-${g.id}`,
-      color: REF_COLOR,
-      opacity,
-      boneHeight: h,
-    });
-  });
-}
-
 function drawScene(
   scene: SkeletonScene,
   width: number,
@@ -130,7 +57,6 @@ function drawScene(
     boneHeight: number;
     jointSize: number;
     drawBones: boolean;
-    /** 仅绘制非 correct 关节（指导模式） */
     jointsOnlyFaults?: boolean;
   },
 ) {
@@ -203,33 +129,18 @@ export default function SkeletonOverlay({
 }: Props) {
   if ((!scene && !ghost) || width <= 0 || height <= 0) return null;
   const guiding = guideMode && Boolean(ghost);
-  const hasGuides = Boolean(ghost?.guides && ghost.guides.length > 0);
 
   return (
     <View style={[styles.root, { width, height }]} pointerEvents="none">
       {ghost
-        ? hasGuides
-          ? (
-              <>
-                {drawGuides(ghost, ghost.guides!, width, height)}
-                {drawScene(ghost, width, height, {
-                  colorFor: () => REF_COLOR,
-                  keyPrefix: 'g',
-                  opacity: 0.75,
-                  boneHeight: 2,
-                  jointSize: REF_JOINT,
-                  drawBones: false,
-                })}
-              </>
-            )
-          : drawScene(ghost, width, height, {
-              colorFor: () => REF_COLOR,
-              keyPrefix: 'g',
-              opacity: REF_OPACITY,
-              boneHeight: 5,
-              jointSize: REF_JOINT,
-              drawBones: true,
-            })
+        ? drawScene(ghost, width, height, {
+            colorFor: () => REF_COLOR,
+            keyPrefix: 'g',
+            opacity: REF_OPACITY,
+            boneHeight: REF_BONE_H,
+            jointSize: REF_JOINT,
+            drawBones: true,
+          })
         : null}
       {scene
         ? drawScene(scene, width, height, {
