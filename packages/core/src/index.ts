@@ -17,3 +17,4 @@ export * from "./exercises/catalog.js";
 export * from "./fixtures/index.js";
 export * from "./fixtures/pushup.js";
 export * from "./boundary/index.js";
+export * from "./trajectory/index.js";

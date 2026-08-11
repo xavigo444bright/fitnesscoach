@@ -1,0 +1,39 @@
+---
+description: 健身动作指导项目 — 强制先读 PRD 再开发
+globs:
+alwaysApply: true
+---
+
+# Fitness Coach 项目规则
+
+## 需求真源
+
+- 产品需求：`docs/PRD.md`
+- 执行路线图：`docs/ROADMAP.md`
+- 检验手册：`docs/VERIFICATION.md`
+- 模块划分：`docs/MODULES.md`
+- UI 规格：`docs/UI.md`、`docs/design-tokens.md`
+- Loop：`docs/LOOP.md`、`docs/progress.json`
+- 动作规则：`docs/exercises/*.md`
+
+## 强制流程
+
+在开始任何设计、编码、重构、评审或排期前：
+
+1. **先阅读** `docs/PRD.md`（注意 frontmatter 版本与变更记录）
+2. **再阅读** `docs/MODULES.md` 确认当前模块与依赖
+3. **阅读** `docs/VERIFICATION.md` 中该模块对应 VT
+4. 实现功能时引用 PRD 需求 ID（如 `FR-041`），检验时引用 VT ID（如 `VT-P1-003`）
+5. 若用户修改了 PRD，**重新通读**后再继续
+6. **未通过阶段门禁不得进入下一 Phase**
+
+## 架构约束
+
+- 业务逻辑（校验、相位、计数）只写在 `packages/core`，禁止写在 UI 层
+- 最终交付为 **手机 App** 与 **微信小程序**，Web 仅作可选调试工具
+- App 姿态推理走端侧（MediaPipe / ML Kit）；小程序按 PRD §5.3 选定方案
+
+## 默认 MVP
+
+- 首个动作：深蹲（`docs/exercises/squat-rules.md`）
+- 用户手动选择动作，不做自动识别

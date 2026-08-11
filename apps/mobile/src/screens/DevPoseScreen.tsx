@@ -3,11 +3,13 @@
  * M2A/M3 · M4-T4（variant=training → PG-004）
  */
 import {
+  hasDemoTrajectory,
   initialRepCounterState,
   messageForRepReject,
   stepRep,
   validate,
   type Phase,
+  type TrajectoryCameraHint,
   type ValidationStatus,
 } from '@fitness-coach/core';
 import {
@@ -26,6 +28,7 @@ import {
 import {
   applyJointColors,
   beginFaultCycle,
+  buildAnatomyGuideScene,
   buildSkeletonScene,
   celebrateFixedFaults,
   DEFAULT_FEEDBACK_BAR_CONFIG,
@@ -33,8 +36,14 @@ import {
   initialLastFaultState,
   initialWiredFeedbackState,
   noteCycleFaults,
+  CameraHintLatch,
+  GhostScaleSmoother,
+  inferCameraHintDetailed,
+  inferSideFacingDetailed,
+  referencePoseFromTrajectory,
   repDisplayFromState,
   sealRejectedCycle,
+  SideFacingLatch,
   stepWiredFeedback,
   toggleFaultReview,
   type FeedbackBarItem,
@@ -139,6 +148,31 @@ export default function DevPoseScreen({
   const [frameLimit, setFrameLimit] = useState(30);
   const [inputScale, setInputScale] = useState(1);
   const [skeleton, setSkeleton] = useState<SkeletonScene | null>(null);
+  /** 示范轨迹参考骨架（FR-068）；默认开，可开关。 */
+  const [refSkeleton, setRefSkeleton] = useState<SkeletonScene | null>(null);
+  const [showReference, setShowReference] = useState(true);
+  const showReferenceRef = useRef(true);
+  /** 示范轨迹机位：auto=按肩髋跨度识别；亦可手动锁侧/正 */
+  const [trajCameraMode, setTrajCameraMode] = useState<
+    'auto' | TrajectoryCameraHint
+  >('auto');
+  const trajCameraModeRef = useRef<'auto' | TrajectoryCameraHint>('auto');
+  const [trajCamera, setTrajCamera] = useState<TrajectoryCameraHint>('side');
+  const trajCameraRef = useRef<TrajectoryCameraHint>('side');
+  const cameraHintLatch = useRef(new CameraHintLatch(8));
+  /** 侧面朝向多帧锁定（左/右） */
+  const sideFacingLatch = useRef(new SideFacingLatch(8));
+  /** 参考骨尺度：站立平滑，行程冻结 */
+  const ghostScaleSmoother = useRef(new GhostScaleSmoother());
+  useEffect(() => {
+    sideFacingLatch.current.reset();
+    cameraHintLatch.current.reset();
+    ghostScaleSmoother.current.reset();
+    trajCameraModeRef.current = 'auto';
+    setTrajCameraMode('auto');
+    trajCameraRef.current = 'side';
+    setTrajCamera('side');
+  }, [exercise.id]);
   const [placementVisible, setPlacementVisible] = useState(false);
   const [placementHint, setPlacementHint] = useState<string | null>(null);
   const [lowLightHint, setLowLightHint] = useState<string | null>(null);
@@ -209,6 +243,7 @@ export default function DevPoseScreen({
       if (!detected) {
         setLandmarkCount(0);
         setSkeleton(null);
+        setRefSkeleton(null);
         setPlacementVisible(true);
         setPlacementHint(
           exercise.id === 'pushup'
@@ -381,6 +416,52 @@ export default function DevPoseScreen({
       setFaultReviewing(lastFaultRef.current.reviewing);
       setRepCount(repUi.count);
       setSkeleton(scene);
+      // 正/侧面：自动识别（肩髋跨度）；行程中锁定，stand 可切换
+      let camHint: TrajectoryCameraHint = trajCameraRef.current;
+      const mode = trajCameraModeRef.current;
+      if (mode === 'auto' && hasDemoTrajectory(exercise.id, 'front')) {
+        const camInf = inferCameraHintDetailed(smoothed);
+        const latched = cameraHintLatch.current.update(camInf.hint, {
+          confidence: camInf.confidence,
+          allowFlip: phaseNow === 'stand',
+        });
+        if (latched === 'side' || latched === 'front') {
+          camHint = latched;
+        }
+      } else if (mode === 'side' || mode === 'front') {
+        camHint = mode;
+      }
+      if (camHint !== trajCameraRef.current) {
+        trajCameraRef.current = camHint;
+        // 正侧切换只重置尺度；保留朝向锁定，避免转身/切机位时双重突变
+        ghostScaleSmoother.current.reset();
+        setTrajCamera(camHint);
+      }
+      // 侧面朝左/右：仅 stand 可更新；行程锁定（避免下蹲中途翻转）
+      const userFacing =
+        camHint === 'side'
+          ? (() => {
+              const inf = inferSideFacingDetailed(smoothed);
+              return sideFacingLatch.current.update(inf.facing, {
+                confidence: inf.confidence,
+                allowFlip: phaseNow === 'stand',
+              });
+            })()
+          : 0;
+      const refPose = referencePoseFromTrajectory(
+        exercise.id,
+        smoothed,
+        phaseNow,
+        driveAngle,
+        {
+          enabled: showReferenceRef.current,
+          cameraHint: camHint,
+          userFacing,
+          scaleSmoother: ghostScaleSmoother.current,
+          updateScale: phaseNow === 'stand',
+        },
+      );
+      setRefSkeleton(refPose ? buildAnatomyGuideScene(refPose) : null);
       setPlacementVisible(showPlacement);
       setPlacementHint(
         showPlacement
@@ -404,6 +485,33 @@ export default function DevPoseScreen({
     const next = !isVoiceEnabled();
     void setVoiceEnabled(next).then(() => setVoiceOn(next));
   }, []);
+
+  const onToggleReference = useCallback(() => {
+    setShowReference((prev) => {
+      const next = !prev;
+      showReferenceRef.current = next;
+      if (!next) setRefSkeleton(null);
+      return next;
+    });
+  }, []);
+
+  /** 循环：自动 → 侧 → 正 → 自动 */
+  const onToggleTrajCamera = useCallback(() => {
+    if (!hasDemoTrajectory(exercise.id, 'front')) return;
+    setTrajCameraMode((prev) => {
+      const next: 'auto' | TrajectoryCameraHint =
+        prev === 'auto' ? 'side' : prev === 'side' ? 'front' : 'auto';
+      trajCameraModeRef.current = next;
+      cameraHintLatch.current.reset();
+      sideFacingLatch.current.reset();
+      ghostScaleSmoother.current.reset();
+      if (next === 'side' || next === 'front') {
+        trajCameraRef.current = next;
+        setTrajCamera(next);
+      }
+      return next;
+    });
+  }, [exercise.id]);
 
   const onResetReps = useCallback(() => {
     repRef.current = initialRepCounterState();
@@ -509,6 +617,8 @@ export default function DevPoseScreen({
           />
           <SkeletonOverlay
             scene={skeleton}
+            ghost={showReference ? refSkeleton : null}
+            guideMode={showReference}
             width={camW}
             height={camH}
           />
@@ -602,6 +712,42 @@ export default function DevPoseScreen({
             {!speechReady ? '语音×' : voiceOn ? '语音开' : '语音关'}
           </Text>
         </Pressable>
+        <Pressable
+          style={styles.actionBtn}
+          onPress={onToggleReference}
+          accessibilityRole="button"
+          accessibilityLabel={showReference ? '关闭示范参考骨架' : '打开示范参考骨架'}
+          hitSlop={8}
+        >
+          <Text style={styles.actionBtnText}>
+            {showReference ? '参考开' : '参考关'}
+          </Text>
+        </Pressable>
+        {hasDemoTrajectory(exercise.id, 'front') ? (
+          <Pressable
+            style={styles.actionBtn}
+            onPress={onToggleTrajCamera}
+            accessibilityRole="button"
+            accessibilityLabel={
+              trajCameraMode === 'auto'
+                ? `机位自动（当前${trajCamera === 'side' ? '侧面' : '正面'}），点击改为手动`
+                : trajCameraMode === 'side'
+                  ? '手动侧面轨迹，点击改为正面'
+                  : '手动正面轨迹，点击改回自动'
+            }
+            hitSlop={8}
+          >
+            <Text style={styles.actionBtnText}>
+              {trajCameraMode === 'auto'
+                ? trajCamera === 'side'
+                  ? '自·侧'
+                  : '自·正'
+                : trajCameraMode === 'side'
+                  ? '轨·侧'
+                  : '轨·正'}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
 
       <CorrectCheckBurst repCount={repCount} />

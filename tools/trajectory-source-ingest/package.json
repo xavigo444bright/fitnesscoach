@@ -1,0 +1,23 @@
+{
+  "name": "@fitness-coach/trajectory-source-ingest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "trajectory-source-ingest": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "ingest": "pnpm run build && node dist/cli.js",
+    "test": "vitest run",
+    "lint": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@fitness-coach/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

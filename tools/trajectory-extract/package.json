@@ -1,0 +1,24 @@
+{
+  "name": "@fitness-coach/trajectory-extract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "trajectory-extract": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "extract": "pnpm run build && node dist/cli.js",
+    "generate:bundled": "pnpm run build && node dist/cli.js synthesize --all --out ../../packages/core/trajectories",
+    "test": "vitest run",
+    "lint": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@fitness-coach/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

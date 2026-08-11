@@ -1,0 +1,373 @@
+{
+  "schemaVersion": "1.0",
+  "exerciseId": "pushup",
+  "provenance": {
+    "sourceUrl": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_inbox/yt-37TPwogjcvg.mp4",
+    "localPath": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_inbox/pushup-yt-37TPwogjcvg-2026-08-10T16-21-14.mp4",
+    "fetchedAt": "2026-08-10T16:20:59.325Z",
+    "toolName": "@fitness-coach/trajectory-source-ingest",
+    "toolVersion": "0.0.0",
+    "ytDlpVersion": null,
+    "ffmpegVersion": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "poseScript": "/Users/xavigo4bright/Projects/fitness-coach/tools/trajectory-extract/scripts/video_to_pose_dump.py",
+    "note": "download=local-copy",
+    "licenseNote": "YouTube https://www.youtube.com/watch?v=37TPwogjcvg; user-provided for pushup trajectory"
+  },
+  "cameraHint": "front",
+  "cameraHintSource": "flag",
+  "videoDurationSec": 428.875,
+  "poseDumpPath": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_inbox/pushup-yt-37TPwogjcvg-2026-08-10T16-21-14.pose.json",
+  "candidates": [
+    {
+      "timeRange": {
+        "startSec": 370.083,
+        "endSec": 379.667
+      },
+      "score": 0.978,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9375964243334289,
+        "fullBody": 0.9134615384615384,
+        "camera": 0.85
+      },
+      "estimatedReps": 5,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": true,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ],
+      "outputMp4": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_candidates/pushup-front-cand-01.mp4"
+    },
+    {
+      "timeRange": {
+        "startSec": 309.583,
+        "endSec": 327.583
+      },
+      "score": 0.972,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9452466829115419,
+        "fullBody": 0.8333333333333334,
+        "camera": 0.85
+      },
+      "estimatedReps": 4,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": true,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ],
+      "outputMp4": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_candidates/pushup-front-cand-02.mp4"
+    },
+    {
+      "timeRange": {
+        "startSec": 353.875,
+        "endSec": 376.125
+      },
+      "score": 0.972,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9340441453226777,
+        "fullBody": 0.85,
+        "camera": 0.85
+      },
+      "estimatedReps": 7,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": true,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ],
+      "outputMp4": "/Users/xavigo4bright/Projects/fitness-coach/media/trajectory-source/pushup/_candidates/pushup-front-cand-03.mp4"
+    }
+  ],
+  "rejected": [
+    {
+      "timeRange": {
+        "startSec": 370.083,
+        "endSec": 386.542
+      },
+      "score": 0.972,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.939595404053126,
+        "fullBody": 0.84,
+        "camera": 0.85
+      },
+      "estimatedReps": 10,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 370.083,
+        "endSec": 389.042
+      },
+      "score": 0.972,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9370986550098594,
+        "fullBody": 0.8461538461538461,
+        "camera": 0.85
+      },
+      "estimatedReps": 11,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 370.083,
+        "endSec": 391.708
+      },
+      "score": 0.972,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9347988509912095,
+        "fullBody": 0.85,
+        "camera": 0.85
+      },
+      "estimatedReps": 12,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 309.583,
+        "endSec": 325.333
+      },
+      "score": 0.971,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9439903135651155,
+        "fullBody": 0.8269230769230769,
+        "camera": 0.85
+      },
+      "estimatedReps": 3,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 353.875,
+        "endSec": 374.292
+      },
+      "score": 0.971,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9340464680541891,
+        "fullBody": 0.84,
+        "camera": 0.85
+      },
+      "estimatedReps": 6,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 353.875,
+        "endSec": 378.042
+      },
+      "score": 0.971,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9338318017434184,
+        "fullBody": 0.84,
+        "camera": 0.85
+      },
+      "estimatedReps": 8,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 372.125,
+        "endSec": 391.708
+      },
+      "score": 0.971,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9349111194138998,
+        "fullBody": 0.84,
+        "camera": 0.85
+      },
+      "estimatedReps": 11,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 201,
+        "endSec": 214.083
+      },
+      "score": 0.97,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.8966450643944672,
+        "fullBody": 0.8796296296296297,
+        "camera": 0.85
+      },
+      "estimatedReps": 3,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 309.583,
+        "endSec": 330
+      },
+      "score": 0.97,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.948421897369529,
+        "fullBody": 0.81,
+        "camera": 0.85
+      },
+      "estimatedReps": 5,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 357.667,
+        "endSec": 378.042
+      },
+      "score": 0.97,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9339428277831471,
+        "fullBody": 0.83,
+        "camera": 0.85
+      },
+      "estimatedReps": 7,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 372.125,
+        "endSec": 389.042
+      },
+      "score": 0.97,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9375472912886175,
+        "fullBody": 0.8269230769230769,
+        "camera": 0.85
+      },
+      "estimatedReps": 10,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    },
+    {
+      "timeRange": {
+        "startSec": 373.875,
+        "endSec": 391.708
+      },
+      "score": 0.97,
+      "breakdown": {
+        "duration": 1,
+        "reps": 1,
+        "standEnds": 1,
+        "armsDownStand": 1,
+        "visibility": 0.9353531142561557,
+        "fullBody": 0.8269230769230769,
+        "camera": 0.85
+      },
+      "estimatedReps": 10,
+      "cameraHint": "front",
+      "cameraHintSource": "flag",
+      "selected": false,
+      "reasons": [
+        "符合样片标准（时长/rep/起止/入画）"
+      ]
+    }
+  ],
+  "nextStepHint": "人工确认候选 mp4 符合样片标准后： 1) 将选用片复制/重命名为 media/trajectory-source/pushup/pushup-front-NN.mp4 2) 用 tools/trajectory-extract 的 video_to_pose_dump.py 生成 PoseDump 3) pnpm --filter @fitness-coach/trajectory-extract extract -- from-dump --input <dump.json> --exercise pushup 默认不要覆盖 packages/core/trajectories 正式 JSON，除非人工验收通过。"
+}

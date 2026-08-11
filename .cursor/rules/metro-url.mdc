@@ -1,0 +1,14 @@
+---
+description: 每次启动/重跑 Metro 后必须把手机可连 URL 告诉用户
+alwaysApply: true
+---
+
+# Metro 手机链接
+
+每次执行 `expo start` / `pnpm start`（apps/mobile）或重启 Metro 后，在回复里**明确写出**当前手机可用地址：
+
+1. 查本机 LAN IP（如 `ipconfig getifaddr en0`）
+2. 告知：
+   - Dev Client：`http://<LAN_IP>:8081`（或 Expo 打印的 `exp://<LAN_IP>:8081`）
+   - 本机调试：`http://localhost:8081`
+3. 若端口不是 8081，以实际 Listening 端口为准

@@ -1,0 +1,37 @@
+---
+description: Loop wake 纪律——人工校验停表；禁止盲目推进
+alwaysApply: true
+---
+
+# Loop / Wake 纪律
+
+Loop **服务于用户进程**，不是独立计时器。
+
+## 生命周期
+
+| 阶段 | `progress.loop.mode` | 行为 |
+|------|----------------------|------|
+| 自动推进 | `running` | 可做无人值守的 `next_task`，再 arm |
+| **人工校验** | `paused_human` | **立刻停表**：不 arm、不 sleep、不 wake 编码 |
+| 用户停止 | `stopped` | 杀 sleeper；不 arm；旧 wake 只汇报 |
+
+进入人工校验（`human_required` / GATE / 真机 VT / 对话里等人确认）时：
+
+1. 写入 `loop.mode = paused_human` + `blocker`
+2. **kill 现有 sleeper，禁止再 arm**
+3. 只告诉用户要验什么；等用户说「通过 / 解除阻塞」
+4. 用户确认后：`mode = running`，再继续 `next_task` 并（若用户仍要 loop）重新 arm
+
+## Wake ≠ 继续编码
+
+收到 `AGENT_LOOP_WAKE_*`、shell 完成、或「perform follow-up」时：
+
+1. 先读 `docs/progress.json`
+2. `stopped` / `paused_human` / `blocked` → **只汇报**，不改代码、不推进、不 re-arm
+3. 仅 `running` 且当前任务可无人完成时，才做 **一个** `next_task`
+
+## 硬禁
+
+- 禁止人工校验窗口期还在 `sleep` 计时 wake
+- 禁止用「下一任务可自动」绕过当前待验项
+- 细则：`docs/LOOP.md`

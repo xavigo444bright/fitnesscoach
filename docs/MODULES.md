@@ -280,12 +280,13 @@ M0 → MU ─┘      M2B → M5 ↗
 
 | 模块 | 说明 |
 |------|------|
-| M7-exercises | 俯卧撑等新动作：仅加 `core/exercises` + keyframes |
+| M7-exercises | 新动作升级：`*-rules` + 矩阵 + exercises（见 UPGRADE-QUEUE） |
 | M8-history | 历史、趋势、账号 |
-| M9-voice | 语音反馈 |
+| M9-voice | 语音反馈（App 已落地，自用默认开） |
 | M10-store | 上架、支付、课程 |
+| **M11-trajectory** | **示范轨迹管线（当前主线）**：提取 → 训练参考骨架 → 对照/校准（FR-067～069）；见 `docs/exercises/trajectory-pipeline.md` |
 
-每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。
+每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。**M11 优先于 FR-064 解剖成片与 APP-UPGRADE 下一批动作**（升级队列可并行，但默认先轨迹）。
 
 ---
 
