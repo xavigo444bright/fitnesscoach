@@ -3,26 +3,24 @@ document: ROADMAP
 product: fitness-coach
 version: 0.1.0
 status: draft
-last_updated: 2026-07-06
+last_updated: 2026-09-08
 depends_on: docs/PRD.md
 target_platforms:
   - mobile_app
-  - wechat_miniprogram
 ---
 
-# 健身动作指导 — 可执行路线图（移动端优先）
+# 健身动作指导 — 可执行路线图（App 上线）
 
-> **给 AI Agent**：执行开发前读 `docs/PRD.md`、`docs/MODULES.md`、`docs/VERIFICATION.md`。按模块依赖推进，模块门禁通过后才能进入下游模块。
+> **给 AI Agent**：执行开发前读 `docs/PRD.md`、`docs/MODULES.md`、`docs/VERIFICATION.md`。微信小程序已于 **2026-09-07 放弃**。
 
 ## 总览
 
 | 项 | 内容 |
 |----|------|
-| 最终交付 | 手机 App（iOS/Android）+ 微信小程序 |
-| 默认技术栈 | React Native Expo + 共享 `packages/core` + 微信小程序 |
-| MVP 动作 | 深蹲 → 俯卧撑 |
-| 总周期（单人全职） | 约 12–14 周 |
-| 总周期（兼职 15h/周） | 约 20–24 周 |
+| 最终交付 | 手机 App（iOS/Android）上架。小程序已取消 |
+| 默认技术栈 | React Native Expo + 共享 `packages/core` |
+| 当前动作 | 20 条 coachable，App 真机齐；暂不扩库 |
+| 当前主线 | **APP-SHELL**（2 Tab）→ 课表 → 账号；分发并行。暂不扩库 |
 
 **与 Web 路线的区别**：Web 不作为交付物，仅可选用于 `tools/dev-web` 调试 core 逻辑；所有里程碑以真机为准。
 
@@ -36,8 +34,8 @@ target_platforms:
 | M1 | W4 末 | App 深蹲纠错闭环 | 真机：半蹲/内扣/标准蹲反馈正确 |
 | M2 | W6 末 | App ghost + 计数 + 总结 | 真机完整练 5 rep |
 | M3 | W8 末 | App MVP 可内测 | TestFlight / APK 分发 |
-| M4 | W11 末 | 小程序深蹲闭环 | 微信真机可练 |
-| M5 | W14 末 | 双端 + 俯卧撑 | 动作库 2 个 |
+| M4 | — | 小程序深蹲闭环 | **已取消（2026-09-07）** |
+| M5 | — | 双端 + 俯卧撑 | **改为仅 App；俯卧撑已过** |
 
 ---
 
@@ -55,20 +53,14 @@ target_platforms:
 | T0A-4 | 简单 Canvas/Skia 绘制骨骼 | 跟手 |
 | T0A-5 | 记录 FPS | ≥15 FPS（中端机） |
 
-### 0B — 微信小程序 Spike（2 天）
+### 0B — 微信小程序 Spike（历史）
 
-| 任务 ID | 任务 | 验收 |
-|---------|------|------|
-| T0B-1 | 创建 `apps/miniprogram` 最小工程 | 开发者工具可编译 |
-| T0B-2 | `<camera>` 组件预览 | 真机授权 |
-| T0B-3 | 尝试方案 A：TFJS MoveNet | 记录 FPS 与延迟 |
-| T0B-4 | 若 A 失败：评估方案 D 云端 API | 记录延迟与成本 |
-| T0B-5 | 输出《小程序推理方案决策》 | 更新 PRD §5.3 |
+**2026-09-07 起已取消跟进。** 当时实测见 `docs/spike-report.md`。
 
 ### Phase 0 门禁
 
-- [ ] App Spike 通过 → 继续 Phase 1
-- [ ] 小程序至少一种方案 FPS ≥10 → 继续小程序线；否则 M4 延期并更新 PRD
+- [x] App Spike 通过
+- [x] ~~小程序 FPS ≥10~~ **已取消（2026-09-07）**
 
 **交付物**：`docs/spike-report.md`（FPS、机型、选定方案）
 
@@ -76,7 +68,7 @@ target_platforms:
 
 ## Phase 1：Monorepo 与共享 Core（W2，5 天）
 
-**目标**：业务逻辑只写一次，App/小程序共用。
+**目标**：业务逻辑只写一次，供 App 使用。
 
 | 任务 ID | 任务 | 验收 |
 |---------|------|------|
@@ -151,35 +143,24 @@ target_platforms:
 
 ---
 
-## Phase 5：微信小程序移植（W9–W11，15 天）
+## Phase 5：微信小程序移植 **已取消（2026-09-07）**
 
-**目标**：复用 `packages/core` + `packages/render`，替换 pose 层。
-
-| 任务 ID | 任务 | 验收 |
-|---------|------|------|
-| T5-1 | 小程序工程接入 monorepo 构建 | core 可 import |
-| T5-2 | 实现 `packages/pose-mp`（按 Spike 方案） | 真机出点 |
-| T5-3 | Canvas 叠加骨骼 + ghost | 对标 App |
-| T5-4 | 页面流 PG-001–PG-005 小程序版 | 微信真机 |
-| T5-5 | 包体与分包策略 | 符合 NFR-007 |
-| T5-6 | 隐私授权弹窗（若云端） | 符合 NFR-003 |
-
-**M4 验收（W11 末）**：微信真机深蹲闭环，KPI 可达 PRD 小程序列
+不再排期。T5-1～T5-6 作废。
 
 ---
 
-## Phase 6：动作扩展与双端对齐（W12–W14，15 天）
+## Phase 6：动作扩展（App）
 
 | 任务 ID | 任务 | 验收 |
 |---------|------|------|
-| T6-1 | 俯卧撑规则 + keyframes | pushup-rules.md |
-| T6-2 | App 接入俯卧撑 | 真机 |
-| T6-3 | 小程序接入俯卧撑 | 真机 |
-| T6-4 | 动作库 UI 完善 | FR-001 |
-| T6-5 | 语音反馈（可选） | FR-066 |
-| T6-6 | 历史趋势页 | US-008 |
+| T6-1 | 俯卧撑规则 + keyframes | **done** |
+| T6-2 | App 接入俯卧撑 | **done** |
+| T6-3 | ~~小程序接入俯卧撑~~ | **已取消** |
+| T6-4 | 动作库 UI | **done**（20 条 coachable） |
+| T6-5 | 语音反馈 | **done** |
+| T6-6 | 历史趋势页 | P2，非上线阻塞 |
 
-**M5 验收（W14 末）**：双端 2 动作 + 历史
+当前 20 条 App 真机齐。**暂不扩新动作**。下一主线 Phase 4 分发 / 上架。
 
 ---
 
@@ -194,18 +175,43 @@ target_platforms:
 | T7-3 | 轨迹辅助校验/阈值校准（矩阵同步） | FR-069；VT-P7-003 | partial（不阻塞 C） |
 | T7-4 | （延后）详情预渲染 mp4 | FR-064 | deferred |
 
-## Phase 8：训练页 3D 参考 Plan C（**当前主线**）
+## Phase 8：训练页 3D 参考 Plan C（**done**）
 
-> PRD 0.4.0：FR-068 = 轨迹驱动的 **3D 骨骼+肌肉**。复用 Phase 7 轨迹与相位驱动；替换绘制层。
+> PRD **0.5.x**：FR-068/080～083。评估动作 squat + pushup side。OQ-005：expo-gl + three。M12-GATE **通过（2026-08-15）**。
 
-| 任务 ID | 任务 | 验收 |
-|---------|------|------|
-| T8-1 | 3D 栈选型 Spike（Expo Dev Client 可行） | OQ-005；短报告写入 `docs/` 或 progress |
-| T8-2 | 轨迹关节 → 3D rig 驱动（squat side MVP） | 真机可见随相位运动的 3D 骨 |
-| T8-3 | 简化肌肉/体积观感 + 对齐用户画幅 | 用户目视可接受（相对 2D 明显更好） |
-| T8-4 | pushup side；开关与性能（延迟观感 <250ms） | VT-P8-*；可再接 front |
+| 任务 ID | 任务 | 验收 | 状态 |
+|---------|------|------|------|
+| T8-1 | 3D 栈选型 Spike（expo-gl + three） | OQ-005 落盘；VT-P8-001 | **done** |
+| T8-2 | 轨迹关节 → 3D rig（squat side） | VT-P8-002 | **done** |
+| T8-3 | 简化肌肉/体积 + 画幅对齐 | 用户目视可接受 | **done** |
+| T8-4 | pushup side；开关与性能 | VT-P8-003/004 | **done** |
 
-**本阶段验收**：深蹲侧面训练中，3D 参考可用且观感通过用户确认；再扩俯卧撑。
+**本阶段验收**：深蹲 + 俯卧撑侧面 3D 参考可用；G4B FPS ≈30。不验收第三动作。
+
+## Phase 9：轨迹驱动人形 + 肌群（**done**）
+
+> PRD **0.6.16**：**M13-GATE 通过**。ASSET-SCOUT 清单已落（10 动作）。等你确认新片授权后再臀桥。交接 `docs/session-compression-M13-GATE.md`、`docs/exercises/asset-scout.md`。
+
+| 任务 ID | 任务 | 验收 | 状态 |
+|---------|------|------|------|
+| T9-1 | 程序化补全头/胸/骨盆/手足 | 目视更像人（VT-P9-001） | **done**（签字放行：分块真机仍不明显） |
+| T9-2 | 2D 骨骼（身）+ 示范窗原片/骨骼 + 收起 | 默认识库原片循环；可暂停/调速；可切骨骼跟人；可收起拉开（VT-P9-003） | **done**（2026-08-19 通过） |
+| T9-3 | 简化肌群色块 / 主动肌强调 | 目视可接受（VT-P9-002） | **done**（2026-08-21 通过） |
+
+## Phase 10：壳 + 课表 + 账号（上线范围）
+
+> 真源 `docs/app-ia.md`。视觉 MLS。跟练叠加层不重做。
+
+| 任务 ID | 波次 | 验收 | 状态 |
+|---------|------|------|------|
+| T10-1～5 | APP-SHELL | **2 Tab** + 页内分段 + 旧跟练栈仍可走通 | planned |
+| T11-1～4 | APP-LOG-CORE | 本地课表模型 + 容量公式 + 持久化 | planned |
+| T12-1～5 | APP-LOG-UI | 无相机记一节课；跟练写入组表 | planned |
+| T13 | APP-HOME-HIST | 首页英雄卡、日历、PR | planned |
+| T14 | APP-TEMPLATE | 保存/套用模板 | planned |
+| T15 | APP-ACCOUNT | 游客 + 四登录，不上传 | planned |
+| T16 | APP-TRAIN-CHROME | 训练页铬 MLS 化，叠加层不变 | planned |
+| T4-5 | APP-DISTRIBUTE | TestFlight | in_progress |
 
 ---
 
@@ -221,12 +227,7 @@ target_platforms:
 | W6 | P3 | 总结页 + bugfix | M2 录屏 |
 | W7 | P4 | 弱光 + 设置 + 历史 | 内测预备 |
 | W8 | P4 | 多机测试 + 打包 | M3 内测包 |
-| W9 | P5 | 小程序 core 接入 | 小程序出骨骼 |
-| W10 | P5 | 小程序校验 + UI | 能纠错 |
-| W11 | P5 | 小程序 ghost + 全流程 | M4 |
-| W12 | P6 | 俯卧撑 App | 第二动作 |
-| W13 | P6 | 俯卧撑小程序 | 双端对齐 |
-| W14 | P6 | 打磨 + 文档 | M5 |
+| W9–W14 | — | ~~小程序移植~~ | **已取消**；App 动作库已完成 |
 
 ---
 
@@ -244,11 +245,10 @@ target_platforms:
 
 > **M6-T4 临时签字（2026-07-25）**：当前仅 1 台真机，先记实值放行；`VT-P4-004` 完整 ≥2～3 台矩阵 **延期**，若 `M6-GATE` / 上架前依赖再补测。
 
-| 机型 | 系统 | App FPS | 小程序 FPS | 深蹲计数 | 备注 |
-|------|------|---------|------------|----------|------|
-| iPhone 14 Pro（G4B） | iOS（开发机） | ≥15（Spike/回归） | ~4（记实值） | OK（M6-T2/T3） | 唯一真机；临时签字 |
-| （待补）第二台 | — | — | — | — | 延期至有第二台或 GATE 前 |
-| （待补）第三台 | — | — | — | — | 延期；VT-P4-004 完整项 |
+| 机型 | 系统 | App FPS | 深蹲计数 | 备注 |
+|------|------|---------|----------|------|
+| iPhone 14 Pro（G4B） | iOS（开发机） | ≥15 | OK | 唯一真机；临时签字 |
+| （待补）第二台 | — | — | — | 上架前 VT-P4-004 |
 
 ---
 
@@ -273,7 +273,7 @@ Phase 4:
 - [ ] T4 App 内测
 
 Phase 5:
-- [ ] T5 小程序
+- [x] T5 小程序 — **已取消 2026-09-07**
 
 Phase 6:
 - [ ] T6 扩展
@@ -281,10 +281,6 @@ Phase 6:
 
 ---
 
-## 下一步（Day 1）
+## 下一步
 
-```bash
-cd ~/Projects/fitness-coach
-# 在 Cursor Agent 中说：
-# 「阅读 docs/PRD.md 和 docs/ROADMAP.md，执行 Phase 0A T0A-1」
-```
+读 `docs/app-ia.md`，从 **T10-1**（OLED tokens）开始。不要先做账号或模板。

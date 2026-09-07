@@ -15,6 +15,9 @@ alwaysApply: true
 - UI 规格：`docs/UI.md`、`docs/design-tokens.md`
 - Loop：`docs/LOOP.md`、`docs/progress.json`
 - 动作规则：`docs/exercises/*.md`
+- 机位规格（新动作，FR-089）：`docs/exercises/camera-planes.md`；出 `clips.json` 前必填。Scout 已接线 10 条不补
+- YouTube 检索/下载：一次授权后整批 `yt-dlp` / ingest `--scout-id a,b,c`，禁止 WebFetch watch 页
+- look-window：≥2 次完整 ROM 即停；proposed 查找带默认 ≤10s
 
 ## 强制流程
 
@@ -30,8 +33,8 @@ alwaysApply: true
 ## 架构约束
 
 - 业务逻辑（校验、相位、计数）只写在 `packages/core`，禁止写在 UI 层
-- 最终交付为 **手机 App** 与 **微信小程序**，Web 仅作可选调试工具
-- App 姿态推理走端侧（MediaPipe / ML Kit）；小程序按 PRD §5.3 选定方案
+- 最终交付为 **手机 App（iOS/Android）**。微信小程序已于 2026-09-07 放弃，禁止再排期。Web 仅作可选调试工具
+- App 姿态推理走端侧（MediaPipe / ML Kit）
 
 ## 默认 MVP
 

@@ -1,17 +1,17 @@
 {
-  "version": "0.5.0",
+  "version": "0.6.59",
   "plan": "module-based",
-  "last_updated": "2026-08-12T00:51:00+08:00",
-  "status": "ready",
-  "blocker": null,
+  "last_updated": "2026-09-08T00:45:00+08:00",
+  "status": "in_progress",
+  "blocker": "2 Tab 已定（docs/app-ia.md 0.2.0）。下一编码：APP-SHELL。勿 arm。",
   "focus": "app",
   "backlog": [
     {
       "id": "MP-FPS",
-      "title": "小程序 MoveNet FPS / 训练页对齐（已暂停）",
-      "note": "2026-08-04 用户决定跳过小程序攻坚，先做完 App。原生推理曾达 onnx-p0 FPS≈22-25；对齐/触摸未收口。代码保留，交接 docs/session-compression-MP-FPS.md。恢复前勿当完成。",
+      "title": "小程序 MoveNet FPS / 训练页对齐",
+      "note": "2026-09-07 随小程序一并取消。不再恢复。",
       "after": "M5-GATE",
-      "status": "parked"
+      "status": "cancelled"
     },
     {
       "id": "RULE-BOUNDARY",
@@ -30,16 +30,16 @@
     {
       "id": "APP-PUSHUP",
       "title": "App 第二动作：俯卧撑（FR-011）",
-      "note": "pushup-rules v0.2.1 + core/矩阵 + App 接线。用户确认真机 OK（深度放宽后计次合理）。VT-P6-001/002/003/005 通过；VT-P6-004 随小程序延期。",
+      "note": "pushup-rules v0.2.1 + core/矩阵 + App 接线。VT-P6-001/002/003/005 通过。VT-P6-004 已随小程序取消。",
       "before": "launch",
       "status": "done"
     },
     {
       "id": "APP-DISTRIBUTE",
-      "title": "App 内测分发（TestFlight / EAS）",
-      "note": "eas.json+README 已就绪（VT-P4-005a）。自用 Dev Client，暂缓云端出包/TestFlight。",
+      "title": "App 内测分发与上架（TestFlight / Store）",
+      "note": "2026-09-07：主线。用户将付费苹果开发者（替换免费 7 天描述文件，现至 2026-09-12）。eas.json 已有。待：付费账号签包、TestFlight（VT-P4-005b）、上架材料（OQ-004 品牌名/包名）。",
       "before": "launch",
-      "status": "configured"
+      "status": "in_progress"
     },
     {
       "id": "APP-VOICE",
@@ -58,35 +58,70 @@
     {
       "id": "APP-CATALOG",
       "title": "分部位分层动作库",
-      "note": "catalog.ts + 胸肩背下肢核心 Section；coachable=深蹲/俯卧撑，其余即将支持。",
+      "note": "catalog.ts + 胸肩背下肢核心 Section；20 条 coachable App 真机齐（VT-P6-001～003/005～023）。暂不扩新动作。",
       "before": "launch",
       "status": "done"
     },
     {
+      "id": "ASSET-SCOUT",
+      "title": "批量扩动作库：选片清单 + 版权门闩 + ingest",
+      "note": "2026-09-07：当前批次已接线且 App 真机齐。产品决定暂不扩新动作。管线保留，不排下一波。",
+      "after": "M13-GATE",
+      "status": "parked"
+    },
+    {
       "id": "APP-UPGRADE",
       "title": "按队列升级 coachable（Phase D）",
-      "note": "队列保留；默认排在 APP-TRAJECTORY T7-2 之后推进。下一动作仍为 glute-bridge。",
+      "note": "当前队列（Scout 10 + Phase E 胸 5 + Phase F 肩 5）App 真机齐。下一波须先写 FR-089 机位规格，禁止只真机拧参。",
       "before": "launch",
-      "status": "open"
+      "status": "done"
     },
     {
       "id": "APP-TRAJECTORY",
       "title": "示范轨迹 → 训练参考/对照（FR-067～069）",
-      "note": "T7-1/T7-2 逻辑 done；真片 squat/pushup。2D 观感否决。主线转 Plan C（FR-068 / M12 / T8-*）。VT-P7-003 可延后。",
+      "note": "T7 驱动已过。M13-GATE 通过：身上用户 2D 骨 + 示范窗样片/骨骼/肌群。勿再叠青色 3D 胶囊。",
       "before": "launch",
       "status": "pivoted"
+    },
+    {
+      "id": "APP-SHELL",
+      "title": "2 Tab 壳 + OLED token（FR-110）",
+      "note": "docs/app-ia.md 0.2.0：首页（训练|动作）、记录（记录|我的）。无中间蓝圆。未开始编码。",
+      "before": "launch",
+      "status": "planned"
+    },
+    {
+      "id": "APP-LOG",
+      "title": "训记式训练容量 / 课表（FR-091/092）",
+      "note": "波次 2–5 见 app-ia：先 CORE 再 UI，再首页/日历/PR/模板。禁止先抄训记未点名功能。",
+      "before": "launch",
+      "status": "spec"
+    },
+    {
+      "id": "APP-UI",
+      "title": "全 App 视觉改版（UI-013）",
+      "note": "MLS 视觉随 APP-SHELL 起。训练页铬放波次 7。叠加层不改。",
+      "before": "launch",
+      "status": "spec"
+    },
+    {
+      "id": "APP-ACCOUNT",
+      "title": "账号体系（FR-100）",
+      "note": "波次 6。可与课表 UI 后半并行。首发不上传。",
+      "before": "launch",
+      "status": "spec"
     }
   ],
   "loop": {
     "interval": "20m",
-    "mode": "stopped",
+    "mode": "paused_human",
     "started_at": "2026-08-11T00:05:00+08:00",
-    "stopped_at": "2026-08-12T00:51:00+08:00",
-    "stop_reason": "pivot_plan_C",
+    "stopped_at": "2026-08-28T00:50:00+08:00",
+    "stop_reason": "明日带新 Release 验收。勿 arm。",
     "stop_after_next_tick": false,
-    "note": "转向 Plan C：勿自动 arm；新会话执行 T8-1。"
+    "note": "paused_human。勿 arm。2 Tab 已定。下一编码 APP-SHELL（等用户下令）。"
   },
-  "current_module": "M12",
+  "current_module": "M13",
   "modules": {
     "M0": {
       "name": "工程基建",
@@ -116,7 +151,7 @@
     },
     "M2B": {
       "name": "Pose 小程序",
-      "status": "done",
+      "status": "cancelled",
       "depends_on": [
         "M0",
         "M1"
@@ -141,7 +176,7 @@
     },
     "M5": {
       "name": "小程序壳",
-      "status": "done",
+      "status": "cancelled",
       "depends_on": [
         "M2B",
         "M3",
@@ -152,17 +187,29 @@
       "name": "质量与交付",
       "status": "done",
       "depends_on": [
-        "M4",
-        "M5"
+        "M4"
+      ]
+    },
+    "M12": {
+      "name": "训练 3D 参考 Plan C",
+      "status": "done",
+      "depends_on": [
+        "M6"
+      ]
+    },
+    "M13": {
+      "name": "轨迹驱动人形+肌群",
+      "status": "done",
+      "depends_on": [
+        "M12"
       ]
     }
   },
-  "next_task": "T8-1",
+  "next_task": "APP-SHELL",
   "queue": [
-    "T8-1",
-    "T8-2",
-    "T8-3",
-    "T8-4"
+    "APP-SHELL",
+    "APP-LOG-CORE",
+    "APP-DISTRIBUTE"
   ],
   "completed_tasks": [
     "M0-T1",
@@ -227,7 +274,16 @@
     "M6-T7",
     "M6-GATE",
     "T7-1",
-    "T7-2"
+    "T7-2",
+    "T8-1",
+    "T8-2",
+    "T8-3",
+    "T8-4",
+    "M12-GATE",
+    "T9-1",
+    "T9-2",
+    "T9-3",
+    "M13-GATE"
   ],
   "completed_gates": [
     "M0-GATE",
@@ -238,9 +294,749 @@
     "M4-GATE",
     "M2B-GATE",
     "M5-GATE",
-    "M6-GATE"
+    "M6-GATE",
+    "M12-GATE",
+    "M13-GATE"
   ],
   "iteration_log": [
+    {
+      "at": "2026-09-08T00:45:00+08:00",
+      "module": "M4",
+      "task": "APP-SHELL",
+      "result": "partial",
+      "summary": "上下文交接：docs/session-compression-2026-09-08-launch-ia.md。新会话先只读进度，勿开工。2 Tab 已定，壳未编码。loop paused_human。",
+      "next": "用户在新会话下令后再做 APP-SHELL。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-08T00:40:00+08:00",
+      "module": "M4",
+      "task": "APP-SHELL",
+      "result": "partial",
+      "summary": "产品改口：只要 2 Tab（首页含训练+动作，记录含记录+我的）。废止 5 Tab。PRD 0.6.59。未改 App 代码。",
+      "next": "用户下令后 T10-1 tokens + 2 Tab 导航。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-08T00:30:00+08:00",
+      "module": "M4",
+      "task": "APP-SHELL",
+      "result": "partial",
+      "summary": "定稿 5 Tab 框架与动线（docs/app-ia.md）、PRD 0.6.58、Phase 10 开发计划。未改 App 代码。loop paused_human。",
+      "next": "用户确认后从 T10-1 OLED tokens + React Navigation 开始。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-08T00:20:00+08:00",
+      "module": "MU",
+      "task": "APP-UI",
+      "result": "partial",
+      "summary": "OQ-009：视觉对标 MLS Official App。写入 design-system/fitness-coach/MASTER.md 与 PRD 0.6.57。Mobbin 深链需登录，用公开闪屏+App Store 截图。未改 App 代码。loop paused_human。",
+      "next": "用户确认后再改 tokens + 底栏壳。未确认不实现。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T01:28:00+08:00",
+      "module": "M8",
+      "task": "APP-LOG",
+      "result": "partial",
+      "summary": "PRD 0.6.56：OQ-008 收口（容量公式、跟练弹组表可改次数、模板/PR/日历/上次重量/休息倒计时）。OQ-009 等截图。loop paused_human，未 arm。",
+      "next": "用户发 UI 参考截图并标明先改哪些页。未收到前不改视觉、不实现课表。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T01:20:00+08:00",
+      "module": "M8",
+      "task": "APP-LOG",
+      "result": "partial",
+      "summary": "产品答卷写入 PRD 0.6.55：课表多动作、字段集、登录方式、首发只本地。UI 等截图。容量公式与跟练写入课表仍待问。loop paused_human，未 arm。",
+      "next": "用户答容量公式/跟练如何落组，并发 UI 截图。答完再写 FR-093 验收。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T01:05:00+08:00",
+      "module": "M8",
+      "task": "APP-LOG",
+      "result": "partial",
+      "summary": "上线范围补：训记式容量（FR-091 spec）、UI 改版（UI-013）、账号需要（FR-100）。细规等用户答 OQ-008/009/007。loop paused_human，未 arm。",
+      "next": "用户回答跟练与记训如何拼、一次课几个动作、登录方式与云同步、UI 参考。答完再写 FR 验收。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T00:52:00+08:00",
+      "module": "M6",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "产品决策：放弃微信小程序；暂不扩新动作；方向改 App 上线。MP-FPS / VT-P5 / VT-P6-004 / US-007 取消。用户将付费苹果开发者。loop paused_human，未 arm。",
+      "next": "付费苹果开发者账号就绪后：用付费 Team 签 Release、走 TestFlight（VT-P4-005b）。免费描述文件至 9/12。OQ-004 品牌名/包名仍待定。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T00:48:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "ok",
+      "summary": "用户确认 VT-P6-012 RDL 通过，当前已接线 coachable 动作全部通过。APP-UPGRADE 本批收口。loop paused_human，未 arm。",
+      "next": "下一波扩库须先写 FR-089 机位规格。VT-P6-004 小程序俯卧撑仍延期。证书至 9/12。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T00:46:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "ok",
+      "summary": "用户确认胸背剩余项通过：VT-P6-013 引体、015～018 双杠/上斜俯卧撑/夹胸/推胸器。Phase E 胸 5 条真机齐。RDL VT-P6-012 未勾（下肢）。loop paused_human，未 arm。",
+      "next": "仍待真机：罗马尼亚硬拉 VT-P6-012（侧面完整髋铰链计次、半程不计）。证书至 9/12。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T00:43:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "ok",
+      "summary": "用户确认 VT-P6-021～023 通过。俯身飞鸟 / 面拉 / 派克俯卧撑 coachable 收口。Phase F 肩 5 条真机齐。loop paused_human，未 arm。",
+      "next": "仍待真机：双杠 / 上斜俯卧撑 / 夹胸 / 推胸器（VT-P6-015～018）；RDL / 引体（012～013）。证书至 9/12。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-07T00:39:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "ok",
+      "summary": "用户确认 VT-P6-019 / 020、VT-P3A-008 / 009 通过。侧平举与前平举 coachable 收口；FR-090 / FR-021 收口。loop paused_human，未 arm。",
+      "next": "仍待真机：俯身飞鸟 / 面拉 / 派克（VT-P6-021～023）；双杠 / 上斜俯卧撑 / 夹胸 / 推胸器（015～018）；RDL / 引体（012～013）。证书至 9/12。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-06T00:26:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "G4B 已装 0.6.48 iOS Release：embedded Hermes main.jsbundle 2.5MB + 22 条 mp4。含前平举每侧 max(髋-肩-肘, 竖直外展)。锁屏未能自动打开。无需 Metro。loop paused_human，未 arm。未勾 VT。",
+      "next": "解锁后打开 App 验：前平举近侧与远侧完整抬到肩高都应计、半程不计。证书至 9/12。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-05T23:59:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "0.6.48：前平举每侧 max(髋-肩-肘, 肩到肘/腕竖直外展)。录屏近侧抬完报「抬得不够高」是髋还在时只信透视偏小的髋-肩-肘；远侧髋缺失走竖直外展所以能计。未打 Release。未 arm。未勾 VT。",
+      "next": "Debug/Metro 或下次统一 Release 后再验：前平举近侧与远侧只要画面里看得见夹角都应计；半程仍不计。证书至 9/12。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-05T23:45:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "G4B 已装 0.6.47 iOS Release：embedded Hermes main.jsbundle 2.5MB + 22 条 mp4。含贴边 70° 地板、头-髋抬正、前平举髋缺失回退、工作臂绿骨；原生允许横屏。免费描述文件新签至 2026-09-12。无需 Metro。loop paused_human，未 arm。未勾 VT。",
+      "next": "真机验：侧平举近景腕出画应计、半程不计；横置/横屏抬正后应计；前平举远侧角应计、工作臂不要只剩躯干竖线；卧推近景绿骨锁自己、不飞假腿；停动作仍不计。证书至 9/12。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-05T14:20:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "0.6.47：侧平举贴边 max(可用腕角, memory, 70° 地板)；站姿头-髋抬正后计次、画骨用画面坐标，卧姿/趴地不抬正；前平举髋缺失退回竖直外展；绿骨跟更清楚的手臂，肘弱时肩-腕。app.json orientation=default。未打 Release。未 arm。未勾 VT。",
+      "next": "Debug/Metro 或下次统一 Release 后再验：侧平举近景出画应计、半程仍不计；横置/横屏抬正后应计；前平举侧面远侧角应计、工作臂不要只剩躯干竖线；卧推近景绿骨锁自己、不飞假腿；停动作仍不计。证书至 9/6。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-05T13:38:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "G4B 已装 0.6.46 iOS Release：embedded Hermes main.jsbundle 2.5MB + 22 条 mp4。含近景腕出画计次、贴边假腿不画/不进重合度、髋不可靠不误判正面。无需 Metro。loop paused_human，未 arm。未勾 VT。",
+      "next": "真机验：侧平举近景腕出画应计、半程不计；卧推近景绿骨锁自己、不飞假腿不叠网、已侧面不提示放到侧面；停动作仍不计。证书至 9/6。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-05T12:10:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "0.6.46：只信画内可信关节。侧平举腕出左右边用记忆或肩高地板仍计次；重合度/画骨丢掉贴边假腿；侧面远侧臂低 vis 或叠近侧则不画；髋不可靠不把侧面判成正面。不按动作 id 冻计数。未打 Release。未 arm。未勾 VT。",
+      "next": "Debug/Metro 或下次统一 Release 后再验：侧平举近景出画应计、半程仍不计；卧推近景绿骨锁自己、不飞假腿不叠网、已侧面不提示放到侧面；停动作仍不计。证书至 9/6。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-01T01:05:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "通用 UI：准备页去掉 3-2-1、点开始即练；面部改耳-外眼角-鼻轮廓；训练页 FPS 留作验收并移到左上，去掉「示范窗」角标。将打 iOS Release 装 G4B。未 arm。未勾 VT。",
+      "next": "明日用新 Release 验准备/面部/FPS 左上 + 卧推骨 + 侧平举。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-01T00:45:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "侧平举计次：countPlanes 侧面冻计数+面对镜头；drive 改肩-肘相对竖直向下；峰谷差<50°不计。core/render 单测覆盖髋缺失与擦边阈值。未 arm。未勾 VT。",
+      "next": "下次验收须 Reload/重装：卧推骨 + 侧平举正面应计、侧面/摆动不计。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-01T00:32:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "用户暂不能验。侧平举视频：正面肩高仍 Rep 0（髋点贴前景凳、髋-肩-肘失真）；转身侧面后 Rep 2（规格 countPlanes 仅 front，App 未冻侧面计次；侧面 raise-height 关掉，摆动也能闭环）。方案待确认：正面才计次、外展不要死绑被挡的髋、最小行程。未改代码。未 arm。",
+      "next": "确认侧平举方案后再改。下次验收提醒：卧推骨须新包；侧平举；入框。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-01T00:20:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "卧推参考骨：侧面只画近侧；lowVis 动作画骨 vis≥0.45；推荐侧面却判成正面时身上不叠现场骨、示范窗强制样片。未改相位/阈值。render 98 测绿。未 arm。",
+      "next": "Reload 后侧面近侧应是一条臂、非侧面应见「放到身体侧面」且小窗样片。根治仍强依赖机位。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-31T23:55:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "健身房逐条修。卧推截图：示范窗骨骼+身上绿线成网。根因：骨骼模式直接放大用户 MediaPipe（无打包轨迹）；侧面双侧叠画 + 绘制 vis 0.2 把杠/远侧假点连上；rig 按站立估头/胸，仰卧水平躯干在小窗被挤斜。计次仍成立（Rep 13）。等人确认方案。未改代码。未 arm。",
+      "next": "用户确认后只改绘制（近侧+画骨可见度+仰卧拟合），不改相位/阈值，不打包轨迹。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-30T23:53:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "用户健身房打不开：昨日 Release 描述文件 2026-08-29 15:47 UTC 过期（TimeToLive=7），且上次只 install 未在解锁机 launch。已腾磁盘、刷新签名重装 Release：embedded main.jsbundle、22 条 mp4、无 Metro。devicectl launch 仍报未信任开发者。loop paused_human，未 arm。",
+      "next": "手机点 Fitness Coach；设置→通用→VPN与设备管理 信任 rory fang。看到动作库后回。勿勾 VT。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T16:54:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "用户要求肩也打进 Release 一起验。G4B 已装含 Phase F 的 iOS Release：embedded main.jsbundle + 22 条示范片（含侧平举/前平举/俯身飞鸟/面拉/派克）。无需 Metro。loop paused_human，未 arm。",
+      "next": "健身房一起验 VT-P6-015～018 与 019～023（可顺手 012～013）。勿勾通过。回家后若要改代码需再装 Debug Dev Client。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T16:45:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "用户确认肩 5 条窗（派克改 0:02–0:11）。Phase F 升 coachable：rules + 矩阵/sweep + 各一条压缩示范片（派克 NASM 2–11；俯身/面拉 3/4 打成 side 文件名）。轨迹 JSON 未进 JS 包。loop paused_human，未 arm。",
+      "next": "健身房仍验 015～018（可顺手 012～013）。回家后 Dev Client 验 VT-P6-019～023。勿为 G4B 再打 Release。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T16:25:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "用户确认 Phase F 肩评估桶。5 条必收机位写入 clips.json（proposed 短窗）。未 download/crop，未写 rules。loop paused_human，未 arm。",
+      "next": "核 Phase F 5 条窗（变式+机位+秒数）后整批授权。健身房仍验 015～018（可顺手 012～013）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T16:05:00+08:00",
+      "module": "M13",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "iOS Release 已装到 G4B：embedded main.jsbundle + 17 条示范片（含 Phase E 压缩片）。健身房无需 Metro。Dev Client 已被覆盖，回家后需再装 Debug。Phase F 肩 5 条机位规格已起草，未搜片。loop paused_human，未 arm。",
+      "next": "健身房验 015～018（可顺手 012～013）。确认 Phase F 评估桶后才 clips/ingest。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T15:45:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "用户要求本批剩余动作一次做完一起验收。上斜俯卧撑 / 绳索夹胸 / 坐姿推胸器升 coachable：rules + 矩阵/sweep + 各一条压缩示范片（不打上斜正面、推胸器 3/4）。轨迹 JSON 未进 JS 包。夹胸示范窗初值跟 catalog cameraHint=front。loop paused_human，未 arm。",
+      "next": "完全 Reload 后一起真机：015 双杠 3/4、016 上斜侧、017 夹胸正、018 推胸器侧。完整 ROM 应计次；半程不计；窗内应播对应压缩片。正反馈不要深蹲文案。通过后回 VT-P6-015～018。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T15:20:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "双杠臂屈伸升 coachable：dip-rules + 矩阵/sweep + 压缩 3/4 片 dip-side-01（非 scout 整库、不打正面绕拍）。轨迹 JSON 未进 JS 包。loop paused_human，未 arm。",
+      "next": "完全 Reload 后斜前方 3/4 双杠：完整屈伸应计次；半程不计；窗内应播原片。通过回 VT-P6-015。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T15:06:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "done",
+      "summary": "用户确认 VT-P6-014 通过。哑铃飞鸟 coachable 收口。下一动作双杠臂屈伸（dip）。loop paused_human，未 arm。",
+      "next": "等人说开始双杠臂屈伸后再写 dip-rules + 矩阵。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-29T14:50:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "哑铃飞鸟升 coachable：db-fly-rules + 矩阵/sweep + 压缩 3/4 片 db-fly-side-01（非 scout 整库、不打头侧）。轨迹 JSON 未进 JS 包。loop paused_human，未 arm。",
+      "next": "完全 Reload 后凳侧 3/4 飞鸟：完整开合应计次；半程不计；窗内应播原片。通过回 VT-P6-014。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T02:20:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "Phase E 9 条 proposed 已写入 clips.json。未 ingest。loop paused_human，未 arm。",
+      "next": "目视 9 条链接+时间，回复授权通过。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T01:45:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "Phase E 按最佳收、可有可无不进清单。必收 9 条机位已写入 specs.json。未写 clips、未 ingest。loop paused_human，未 arm。",
+      "next": "出 Phase E clips.json（9 条 proposed），核窗后授权。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T01:35:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "用户推迟 VT-P6-012～013。Phase E 按 catalog 胸部剩余 5 条写入机位规格（FR-089），未写 clips。loop paused_human，未 arm。",
+      "next": "确认评估桶后回复「Phase E 机位通过」，再出 clips.json。012～013 明天再验。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T01:30:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "done",
+      "summary": "PRD 0.6.32 / FR-089：出 clips.json 前必须写机位规格（正面/冠状面；侧面；双机位或 3/4）。ingest 加载清单时校验。Scout 10 条祖父不改接线。loop 仍 paused_human，未 arm。",
+      "next": "仍等人真机 VT-P6-012～013。下一批新动作先填 camera-planes/specs.json。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T00:50:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "用户要求批量。RDL/引体一次升 coachable：rules + 矩阵 + 压缩侧片（非 scout 整库）+ App 接线。轨迹 JSON 未进 JS 包。NFR-010 原片约 13MB。loop paused_human，未 arm。",
+      "next": "完全 Reload 后统一真机：VT-P6-012 侧面 RDL 完整铰链计次、半程不计；VT-P6-013 引体过杆计次、半程不计、脚出画仍可计。通过前不开新 scout 动作。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T00:34:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "done",
+      "summary": "用户确认 VT-P6-008～011 通过（平板/划船/站姿推举/卧推）。四条 coachable 收口。下一动作罗马尼亚硬拉（rdl），其后引体（pullup）。loop paused_human，未 arm。",
+      "next": "等人说开始罗马尼亚硬拉后再写 rdl-rules + 矩阵。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T00:26:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "未入镜站位条前缀改为「请调整姿势」，去掉「示范窗」。未 arm。",
+      "next": "Reload 后缺关键部位应见「请调整姿势 · …」，不见「示范窗」。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-28T00:20:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "划船绿腿点跟裤摆走是模型问题，计次不看膝踝。修：hips_only 站位、有肘角不因正面误判冻计数、recovered 不再用深蹲句。未 arm。",
+      "next": "完全 Reload 后侧面划船：完整拉收应计次；脚出画仍可计；半程仍不计。通过回 VT-P6-009。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-26T01:25:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "UX-009：平板撑稳时中央绿圆（打勾同位置同尺寸）显示进行中秒数；底栏为有效秒汇总。撅臀中央隐藏。未 arm。",
+      "next": "完全 Reload 后侧面平板：撑稳见中央秒数与底栏同步；撅臀中央消失、底栏保留。通过回 VT-P6-008。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-26T01:10:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "平板一线：髋偏向支撑面（衣裤拖地）视为 180° 撑住；只拦撅臀。2D 不区分真塌髋。core 测后等人 Reload。未 arm。",
+      "next": "完全 Reload 后穿宽松衣裤侧面平板应计秒；撅臀仍暂停。通过回 VT-P6-008。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-26T01:02:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "平板一线：髋垂向支撑面且膝在肩踝线上则取较好一线（衣摆不计塌）；撅臀只看髋。core 250 测绿。未 arm。",
+      "next": "完全 Reload 后穿衣侧面平板：应计秒；真塌/撅臀仍暂停。通过回 VT-P6-008。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-26T00:52:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "去掉全屏虚线站位框；hold_second 每秒不再打绿钩，只 bump 底栏秒数。衣物下垂误判未改引擎，已分析方案。未 arm。",
+      "next": "Reload 后平板：无虚线；秒+1 只有数字放大。衣物问题等人拍板。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-26T00:45:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "FR-022 产品共识：站位框铺满预览，判定与全画面一致，禁止内缩安全区冻计数。能算出驱动角则允许计数。loop 仍 paused_human，未 arm。",
+      "next": "完全 Reload 后：侧面平板脚贴底边应开始计秒；划船/推举/卧推仍按原 VT。通过前不开下一动作。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-24T02:58:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "平板/划船/站姿推举/卧推一次升 coachable：rules + 矩阵 + 压缩侧片（非 scout 整库）+ App 接线。core 242 测绿。轨迹 JSON 未进 JS 包。NFR-010 原片约 10MB。loop paused_human，未 arm。",
+      "next": "完全 Reload 后统一真机：VT-P6-008 平板撑稳每秒+1、塌髋暂停；VT-P6-009 划船拉收到髋后计次、半程不计；VT-P6-010 推举锁肘计次、半程不计（用 ohp-side-01 站姿）；VT-P6-011 卧推触胸再推起计次、半程不计。通过前不开下一动作。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-24T00:44:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "done",
+      "summary": "用户确认 VT-P6-007 通过。弓步 coachable 收口（rules v0.1.0 + 侧面原片）。下一动作平板支撑（plank）。loop stopped，未 arm。",
+      "next": "等人说开始平板支撑后再写 plank-rules + 矩阵。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-23T00:35:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "弓步升 coachable：lunge-rules v0.1.0 + 矩阵 + 示范窗 lunge-side-02.mp4（1.1MB）。轨迹 JSON 未进 JS 包。NFR-010 原片合计约 5.5MB。",
+      "next": "真机 Reload 后侧面弓步：完整下到约直角应计次；半程仍不计；窗内应播原片。通过回 VT-P6-007。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-23T00:17:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "done",
+      "summary": "用户确认 VT-P6-006 通过。臀桥 coachable 收口（rules v0.2.1 + 侧面原片）。下一动作弓步蹲（lunge）。loop stopped，未 arm。",
+      "next": "等人说开始弓步蹲后再写 lunge-rules + 矩阵。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-23T00:10:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "真机完整顶髋不计次：bottom 线从髋伸≳162°放到≳140°；hip-extension <130°才报。示范窗打进 glute-bridge-side-01.mp4（728K）。轨迹 JSON 仍不打包。",
+      "next": "Reload 后侧面臀桥：完整顶髋应计次；半程仍不计；窗内应播原片。通过回 VT-P6-006。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-22T23:45:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "臀桥升 coachable：keyframes + exerciseSession + catalog。原片未打进包。待真机 VT-P6-006。",
+      "next": "等人真机验臀桥计次/半程/示范窗骨骼。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-22T23:40:00+08:00",
+      "module": "M13",
+      "task": "APP-UPGRADE",
+      "result": "partial",
+      "summary": "臀桥 GLUTE_BRIDGE_RULES + gluteBridgeMatrix/sweep（VT-RB-001/002/004）。未接线 App、未改 catalog tier。",
+      "next": "keyframes + exerciseSession。未 arm。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-22T23:30:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "臀桥 driveDeg=180−髋伸；reconstructGluteBridgeLoop；glute-bridge-side-v1.json（未打包）。glute-bridge-rules.md v0.2.0 定稿（FR-088 不抄单帧）。",
+      "next": "gluteBridgeMatrix + exercises/glute-bridge.ts。未 arm。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-22T02:40:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "FR-088 生产规范入 PRD/scout。ingest --crop-only 按已核窗裁参考片。未 PoseDump、未写臀桥。",
+      "next": "对裁出的 primary mp4 提轨迹。然后对照 glute-bridge-side-01 写规则。未 arm。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-22T02:25:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "用户确认全部 look-window。明确样片是示范/轨迹真源，不是 *-rules 阈值。未裁、未写臀桥。",
+      "next": "等人说开始裁片。裁完再对照 primary 写 glute-bridge-rules。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-22T02:10:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "对 _inbox 全片 1s 拼图按行程可读改 clips.json start/end。未裁、未 PoseDump、未写臀桥。",
+      "next": "等人核时间。通过后 ffmpeg 裁参考片 → 轨迹 JSON。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T01:25:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "用户确认全部授权。加 --download-only 先落全片，不按未核窗裁、不跑 Pose。随后本地按行程可读重裁。",
+      "next": "下载完成后按新规则标定 start/end。未写臀桥。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T01:15:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "lunge-side-01：字幕入点 38s 含 38–40 特写；人工行程可读 41–48。规则改为查找带∩完整行程，未重裁清单。",
+      "next": "确认规则后说「按新规则重裁」，再改 clips.json。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T01:05:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "抽样 plank/db-row 入出点过长（口播/摆位）。收紧选窗规则+校验；按你指出的 12–17s / 1:55–2:00 改写并重标其余 proposed 窗。",
+      "next": "核查 clips.json 时间点。通过后再谈授权。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T00:50:00+08:00",
+      "module": "M13",
+      "task": "ASSET-SCOUT",
+      "result": "partial",
+      "summary": "按拍板落地 FR-087：ingest 必绑 scout-id、不校 license；10 动作清单；squat/pushup 标 ingested。等你确认新片授权后再 ingest / 臀桥。",
+      "next": "回复「glute-bridge-side-01 授权通过」或列出通过的 scout id。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T00:20:00+08:00",
+      "module": "M13",
+      "task": "M13-GATE",
+      "result": "passed",
+      "summary": "人工确认 M13-GATE 通过。VT-P9-001～003 齐。交接 docs/session-compression-M13-GATE.md。下一新对话先讨论 ASSET-SCOUT，再臀桥。loop stopped。",
+      "next": "新对话充分探讨批量扩库（选片/版权/ingest），勿直接实现 glute-bridge。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-21T00:05:00+08:00",
+      "module": "M13",
+      "task": "T9-3",
+      "result": "pass",
+      "summary": "用户确认 VT-P9-002 通过。T9-3 收口；交接 docs/session-compression-T9-3.md。下一 M13-GATE。",
+      "next": "回复「M13-GATE 通过」后解锁 APP-UPGRADE（臀桥）。未 arm。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-19T01:10:00+08:00",
+      "module": "M13",
+      "task": "T9-3",
+      "result": "partial",
+      "summary": "用户选 B：浅灰人体底+主动肌小色块。主动肌登记 catalog.activeMuscles（coachable 必填）。侧面只画近侧肢体。绿骨 zIndex 压过色块。",
+      "next": "完全 Reload → 切骨骼看小色块和绿骨。顺路复验样片侧↔正。通过回「VT-P9-002 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-19T01:00:00+08:00",
+      "module": "M13",
+      "task": "T9-3",
+      "result": "partial",
+      "summary": "用户：肌群色块过大挡住骨骼。样片路径骨骼侧→正→样片侧→正仍卡住。色块等选型；播放器改为骨骼模式不停掉 AVPlayer，换片 unload+loadAsync。",
+      "next": "选色块方案；Reload 后复验样片循环。通过仍回「VT-P9-002 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-19T00:55:00+08:00",
+      "module": "M13",
+      "task": "T9-3",
+      "result": "partial",
+      "summary": "FR-085：示范窗骨骼模式胸/骨盆/大腿分色；深蹲强调臀+大腿，俯卧撑强调胸+上臂。几何与强调在 render，着色走 ui 令牌。待 VT-P9-002。",
+      "next": "完全 Reload → 切「骨骼」看色块。通过回「VT-P9-002 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-19T00:40:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "pass",
+      "summary": "用户确认 VT-P9-003 通过。T9-2 收口；交接 docs/session-compression-T9-2.md。下一 T9-3。",
+      "next": "T9-3 肌群色块（FR-085 / VT-P9-002）。未 arm。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-19T00:35:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "示范窗原片换站位后强制 isLooping，播完则 replay（FR-086）。",
+      "next": "完全 Reload → 侧切到正后原片应继续循环。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T01:20:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "绘制可见度 0.2 以显示踝/脚（校验仍 0.5）；示范窗骨骼改为 canonicalPoseFromUser，跟人当前姿态。",
+      "next": "完全 Reload → 身上应有踝/脚；切骨骼应跟俯卧撑撑地。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T01:08:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "修复 PipClipPane 热更新改 Hooks 顺序后 React 读 undefined.length 红屏；播放器不再放进 useState。",
+      "next": "完全 Reload（勿只热更新）→ 应播原片。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T01:05:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "NFR-010：原片不占满 RAM，只增安装包。播放改用 requireOptionalNativeModule + 本地 file://，避免误判无播放器/ATS 拦 Metro HTTP。",
+      "next": "Reload → 窗内应播 squat/pushup 原片。若仍提示无播放器再重装 Dev Client。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T00:58:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "示范窗样片改为入库轨迹对应的参考库原片（随站位换片）；点画面暂停/播放；倍速 0.5/1/1.5/2。不再用轨迹骨骼冒充原片。",
+      "next": "Reload → 应看到 squat/pushup 原片。点停/播、点倍速。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T00:40:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "示范窗默认识片循环；可切参考人+2D骨；点收起折出屏外，点「示」拉开。身上骨骼仍贴用户。",
+      "next": "Reload → 窗内应先播样片。收起/拉开、切「骨骼」跟蹲。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T00:22:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "示范窗 178×297（约+35%）；可拖到全屏任意位置，松手不吸附贴边。",
+      "next": "Reload → 窗更大、可拖走。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-18T00:12:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "身上改回 M12 前用户 2D 骨骼（始终跟踪身体）；关掉 guideMode/身上示范 Pose。样片初始姿势只留在示范窗参考人及其 2D 骨骼。",
+      "next": "Reload → 身上绿骨跟你动；右下窗可先是样片站姿，下蹲应变蹲。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-17T00:25:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "录屏 00-17-26（参考关）确认视觉真源是 2D 骨骼：细绿线+白边圆点。已更名：参考线→2D骨骼，示范层→示范骨骼。身上与小窗人共用同一套 drawSkeletonScene。",
+      "next": "完全 Reload → 身上/小人身上都是录屏那种 2D 骨骼。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-17T00:20:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "00:08 截图否决身上青色 3D 胶囊。已卸全屏 Overlay；身上改绿色 2D 示范参考骨架；小窗改 RN View 像素居中，跟相位重绘，不再赌 expo-gl 视口。",
+      "next": "完全 Reload → 身上绿线贴人；右下窗小人居中，下蹲应变蹲。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-17T00:08:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "用户要身上 T8 3D 参考骨（非 2D 线）+ 小窗人居中带 3D 线。已恢复 Overlay；视口等原生缓冲后再锁定，避免 drawingBuffer 左下角。",
+      "next": "完全 Reload → 身上青色 3D 骨贴人；右下窗小人居中+绿参考线。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T23:55:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "23:50 截图：全屏 3D 骨在左下巨物；小窗小人贴底裁出窗外。已撤全屏 GL；身上改贴合 2D 参考线；小窗 setSize=layout×dpr 一次，rig AABB 拟合，小人带细参考线。",
+      "next": "完全 Reload → 身上青色参考线贴人；右下窗内完整小人+线上骨架，不裁出窗。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T23:50:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "产品确认「跟相位但不贴身」。PRD 升 0.6.1：身上 3D 骨封死 T8 视口；参考人改右下小窗，canonicalPose 不 alignGhostToUser。",
+      "next": "完全 Reload → 身上青骨贴人；右下小窗人随下蹲相位动、不钉用户轮廓。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T23:30:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "23:23 录屏：人仍在左下角、比例怪、不跟 T8 参考骨。已撤第二套像素网格，改回 VT-P8 每段 Mesh 钉 buildRig3d；相机用布局宽高比。",
+      "next": "完全 Reload → 3D 骨+体积应叠在身上随深蹲动。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T00:28:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "00:23 截图：2D 青骨贴身、3D 人仍在左下角。drawingBufferWidth 是 viewport 快照不是视网膜缓冲。已改 setPixelRatio(dpr)+setSize(布局点)；关掉 2D 示范骨；人由 3D rig 关节驱动。",
+      "next": "完全 Reload → 3D 人应叠在身上，不再出现 2D 青骨。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T00:20:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "00:12 截图人仍在左下角。改回 T8 画幅：相机用预览像素 Ortho(0,W,H,0)，setSize 不每帧调用；2D 示范骨与 3D 同时开。坏 xbot 只是否决那份空网格，不是效果上限。",
+      "next": "完全 Reload → 3D 人应叠在身上（2D 青骨可对照）。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
     {
       "at": "2026-07-11T23:15:00+08:00",
       "module": "M0",
@@ -1032,6 +1828,168 @@
       "summary": "用户否决 2D/anatomyGuide；PRD 0.4.0 FR-068→3D；删 anatomyGuide；README/ROADMAP Phase8/MODULES M12/VT-P8 对齐；next_task=T8-1。",
       "next": "T8-1：3D 栈选型 Spike（OQ-005）",
       "human_action_needed": false
+    },
+    {
+      "at": "2026-08-13T00:24:00+08:00",
+      "module": "M12",
+      "task": "T8-1",
+      "result": "partial",
+      "summary": "PRD 升 0.5.0（Plan C 规格 + FR-080～083；评估动作锁定 squat+pushup）。OQ-005 选定 expo-gl + three@0.166。buildRig3d 单测绿；训练页接 Reference3DOverlay。待重装 Dev Client 验 VT-P8-001。",
+      "next": "用户重装 Dev Client 后回「VT-P8-001 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-13T00:40:00+08:00",
+      "module": "M12",
+      "task": "T8-1",
+      "result": "done",
+      "summary": "VT-P8-001 通过。去掉训练/准备页质量档（固定 high）与「自·侧」按钮（机位自动识别保留）。PRD 0.5.1。",
+      "next": "T8-2 squat side 轨迹→3D rig 贴合",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-13T00:53:00+08:00",
+      "module": "M12",
+      "task": "T8-2",
+      "result": "partial",
+      "summary": "侧面 rig 忽略未对齐 MediaPipe z，按体型重建左右厚度+躯干中轴；squat-side-v1 中段可出 rig。待 VT-P8-002。",
+      "next": "真机侧面深蹲 → 回「VT-P8-002 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-13T01:05:00+08:00",
+      "module": "M12",
+      "task": "T8-2",
+      "result": "done",
+      "summary": "用户确认 VT-P8-002 通过。侧面 3D 参考随下蹲相位运动、可开关、观感优于 2D。",
+      "next": "T8-3 简化肌肉/体积 + 画幅对齐",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-13T01:05:00+08:00",
+      "module": "M12",
+      "task": "T8-3",
+      "result": "partial",
+      "summary": "肌肉半径随体型缩放；躯干椭球体积；正交相机按 drawingBuffer 宽高比校正（poseToOrthoWorld）。render 单测覆盖体积与 ortho 映射。待真机 Reload 目视。",
+      "next": "真机 Reload 深蹲侧面 → 回「T8-3 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-13T01:08:00+08:00",
+      "module": "M12",
+      "task": "T8-3",
+      "result": "done",
+      "summary": "用户确认 T8-3 通过：肌肉体积与画幅对齐目视可接受。FR-081/082 done。",
+      "next": "T8-4 pushup side + 开关/性能",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-13T01:08:00+08:00",
+      "module": "M12",
+      "task": "T8-4",
+      "result": "partial",
+      "summary": "pushup-side-v1 驱动 3D（plank 身长厚度、上臂加粗）；训练页显示 FPS；关参考卸载 GL；姿态未变时跳过 rig 更新。待 VT-P8-003/004。",
+      "next": "真机俯卧撑侧面 → 回「VT-P8-003 通过」并报开/关参考 FPS",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T15:16:00+08:00",
+      "module": "M12",
+      "task": "T8-4",
+      "result": "partial",
+      "summary": "用户确认 VT-P8-003 通过：俯卧撑侧面 3D 参考随相位运动、可开关、延迟观感 <250ms。",
+      "next": "VT-P8-004 记开/关参考 FPS",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T15:17:00+08:00",
+      "module": "M12",
+      "task": "T8-4",
+      "result": "done",
+      "summary": "VT-P8-004 通过：G4B 开/关 3D 参考 FPS 均≈30（≥15）。T8-1～T8-4 完成，进入 M12-GATE。",
+      "next": "M12-GATE（人工确认）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T15:30:00+08:00",
+      "module": "M12",
+      "task": "M12-GATE",
+      "result": "passed",
+      "summary": "人工确认 M12-GATE 通过。VT-P8-001～004 齐。下一步改为细化 3D 人形（训记风格、仍轨迹驱动），不先扩第三动作。",
+      "next": "T9-1 程序化头/胸/骨盆/手足",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-08-15T15:30:00+08:00",
+      "module": "M13",
+      "task": "T9-1",
+      "result": "partial",
+      "summary": "PRD 0.6.0 + 计划文档。rig3d 补头/胸/骨盆/手足体积。待 Reload 目视 VT-P9-001。",
+      "next": "真机 Reload → 回「VT-P9-001 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T15:38:00+08:00",
+      "module": "M13",
+      "task": "T9-1",
+      "result": "done",
+      "summary": "用户签字 VT-P9-001 通过。几何已有头/胸/骨盆/手足，真机分块仍不明显，观感改由 T9-2 蒙皮承担。",
+      "next": "T9-2 蒙皮 GLB Spike（OQ-006）",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T15:50:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "接入 Mixamo X Bot GLB，Pose aim 驱动；加载失败回胶囊。待真机 VT-P9-003。",
+      "next": "真机 Reload → 回「VT-P9-003 通过」或描述问题",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T23:22:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "录屏：参考·胶囊、T9-1 分块色比例怪。改 XHR 加载 xbot.glb；失败原因上 HUD；回退只画 T8 青色胶囊+躯干。",
+      "next": "完全 Reload → 右上应变「参考·人」；仍胶囊则报底栏原因",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T23:48:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "根因是 xbot 身体网格全 0。已改 Mesh+CPU 蒙皮；自检 1374 顶点、站高 0.74/蹲 0.62 在相机内。网格空则回退胶囊。",
+      "next": "完全 Reload 看青色连体人 → 「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-15T23:55:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "录屏：碎三角贴左下角。根因合并丢 index + bind 缩放。改为 buildRig3d 铺带 index 网格；自检髋在体内、站 center≈hips。",
+      "next": "完全 Reload → 人应叠在身体上而非左下角。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T00:05:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "23:53 录屏：球体人贴左下角放大裁切。停用第二套网格；pixelRatio=1；全套头/胸/骨盆体积走 T8 关节坐标。栅格化剪影中心 0.62/0.54、身高 0.77。",
+      "next": "完全 Reload → 青人应叠在身体上。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-08-16T00:12:00+08:00",
+      "module": "M13",
+      "task": "T9-2",
+      "result": "partial",
+      "summary": "参考未叠身上且柱体观感差。改变径圆管连续人体；相机用 drawingBuffer 宽高比；GLView 铺满预览。2D/3D 像素投影单测通过；对齐到用户髋≈0.5。",
+      "next": "完全 Reload → 人应叠在身上且是连续人体。通过回「VT-P9-003 通过」",
+      "human_action_needed": true
     }
   ]
 }

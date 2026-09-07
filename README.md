@@ -1,23 +1,22 @@
 # Fitness Coach（健身动作指导）
 
-通过手机 App 与微信小程序，实时校验健身动作并叠加正确动作指导。
+通过手机 App 实时校验健身动作并叠加正确动作指导。**唯一交付：iOS / Android App。** 微信小程序已于 2026-09-07 放弃。
 
 ## 文档（开发前必读）
 
 | 文档 | 说明 |
 |------|------|
-| [docs/PRD.md](docs/PRD.md) | **产品需求真源**（当前 **0.4.0**） |
+| [docs/PRD.md](docs/PRD.md) | **产品需求真源**（当前 **0.6.53**） |
 | [docs/MODULES.md](docs/MODULES.md) | 模块依赖与主线 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 可执行路线图 |
 | [docs/VERIFICATION.md](docs/VERIFICATION.md) | 检验手册（VT） |
 | [docs/progress.json](docs/progress.json) | Loop / 任务队列真源 |
 | [docs/exercises/](docs/exercises/) | 动作规则与轨迹管线 |
-| [docs/session-compression-2026-08-12-plan-C.md](docs/session-compression-2026-08-12-plan-C.md) | **下一会话入口（Plan C）** |
 
 ## 目标平台
 
-- **手机 App**：iOS / Android（React Native + Expo Dev Client）
-- **微信小程序**（FPS 攻坚已暂停，见 backlog `MP-FPS`）
+- **手机 App**：iOS / Android（React Native + Expo Development Build）
+- Web 仅调试 `tools/dev-web`，不上架
 
 ## 仓库结构
 
@@ -26,25 +25,24 @@ fitness-coach/
 ├── docs/           # PRD、路线图、动作规则、进度
 ├── packages/       # core / pose-native / render / ui
 ├── apps/
-│   ├── mobile/     # Expo App（主阵地）
-│   └── miniprogram/# 微信小程序
+│   └── mobile/     # Expo App（唯一产品）
 ├── tools/          # trajectory-extract / trajectory-source-ingest / …
 └── media/          # 示范片源（大视频本地，勿提交）
 ```
 
-## 当前状态（2026-08-12）
+遗留 `apps/miniprogram`、`packages/pose-mp` 不维护。
+
+## 当前状态（2026-09-07）
 
 | 项 | 状态 |
 |----|------|
-| 模块门禁 | M0–M6 **done**（App 深蹲闭环、俯卧撑、语音、动作库等） |
-| 主线 | **M11 轨迹 + Plan C（FR-068 3D 骨骼+肌肉）** |
-| 轨迹 FR-067 | **done**（深蹲/俯卧撑真片轨迹可加载） |
-| 参考层 FR-068 | 2D 观感已否决；**下一任务 T8-1：3D 栈选型与 Spike** |
-| FR-069 / VT-P7-003 | 校准工具已有；真机抽测可延后，**不阻塞 Plan C** |
-| 小程序 | 壳可用；原生 FPS 攻坚 **parked** |
-| SDK | Expo SDK 54；姿态需 **Development Build**（不能 Expo Go） |
+| coachable | 20 条 App 真机齐（深蹲/俯卧撑 + Scout 10 + 胸 5 + 肩 5） |
+| 主线 | **App 上线**：付费苹果开发者 + TestFlight / App Store |
+| 小程序 | **放弃** |
+| 扩库 | 暂不加新动作 |
+| SDK | Expo SDK 54；姿态需 **Development Build** |
 
-真源以 `docs/progress.json` 与 PRD frontmatter 为准；本表若冲突以二者为准。
+真源以 `docs/progress.json` 与 PRD frontmatter 为准。
 
 ## 快速开始
 

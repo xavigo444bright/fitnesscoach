@@ -1,8 +1,8 @@
 ---
 document: MODULES
 product: fitness-coach
-version: 0.4.0
-last_updated: 2026-08-12
+version: 0.5.0
+last_updated: 2026-09-08
 plan: module-based
 depends_on:
   - docs/PRD.md
@@ -27,13 +27,9 @@ flowchart TD
     M2A --> M3
     MU --> M4[M4 App 壳]
     M3 --> M4
-    M0 --> M2B[M2B Pose - 小程序]
-    M1 --> M2B
-    MU --> M5[M5 小程序壳]
-    M2B --> M5
-    M3 --> M5
+    M4 --> M8[M8 课表与账号]
     M4 --> M6[M6 质量与交付]
-    M5 --> M6
+    M8 --> M6
 ```
 
 ---
@@ -54,9 +50,9 @@ flowchart TD
 
 **模块门禁 M0-GATE**
 
-- [ ] App：摄像头 + 骨骼 + FPS≥15
-- [ ] 小程序：至少一种 pose 方案可出点
-- [ ] `docs/spike-report.md` 完成，PRD §5.3 已更新
+- [x] App：摄像头 + 骨骼 + FPS≥15
+- [x] ~~小程序~~ **已取消（2026-09-07）**
+- [x] `docs/spike-report.md` 完成（历史记录；小程序方案不再跟进）
 
 **出口产物**：可构建的 monorepo + Spike 结论
 
@@ -139,22 +135,9 @@ flowchart TD
 
 ---
 
-## M2B — Pose 适配层（小程序）
+## M2B — Pose 适配层（小程序）**已取消（2026-09-07）**
 
-**职责**：`packages/pose-mp` — 按 Spike 方案实现；接口与 M2A 对齐。
-
-**依赖**：M0-GATE、M1-GATE（可与 M2A / M3 / M4 **并行**，但 M5 前必须完成）
-
-| Task ID | 内容 | 检验 |
-|---------|------|------|
-| M2B-T1 | 小程序构建接入 monorepo | VT-P5-001,002 |
-| M2B-T2 | pose-mp 实现（端侧或云端） | VT-P5-003 |
-| M2B-T3 | 与 core 输出 validate 结果一致（夹具级） | VT-P5-004 |
-
-**模块门禁 M2B-GATE**
-
-- [x] 微信真机：能出点并驱动 validate（2026-07-25：status=correct，FPS~4 记实值）
-- [x] 若云端：隐私授权流程就绪（方案 A 端侧，不适用）
+不再排期、不再验收。遗留 `packages/pose-mp` 不维护。
 
 ---
 
@@ -201,52 +184,39 @@ flowchart TD
 
 - [x] VT-P3B-M2 全流程场景通过
 - [x] UX-007：有效 rep 时屏幕中央绿色打勾动效可见
+- [x] UX-009：平板撑稳时中央绿圆显示进行中秒数；底栏为有效秒汇总（VT-P6-008 通过 2026-08-28）
 - [x] UX-008：半蹲后可点「查看上次问题」；下次做对出现「很好，蹲得更深了」类正反馈
 - [x] 录屏 `docs/evidence/M2.mp4`（若已录；未落盘可后续补）
 
 ---
 
-## M5 — 小程序应用壳（Mini Program Shell）
+## M5 — 小程序应用壳 **已取消（2026-09-07）**
 
-**职责**：`apps/miniprogram` 复用 M1 + M3，接入 M2B。
-
-**依赖**：M2B-GATE、M3-GATE、**MU-GATE**
-
-| Task ID | 内容 | 检验 |
-|---------|------|------|
-| M5-T1 | Canvas adapter 接 render | — |
-| M5-T2 | PG-001~005 小程序页面流 | VT-P5-005 |
-| M5-T3 | Ghost + 反馈对齐 App | VT-P5-006 |
-| M5-T4 | 包体 / 分包 | VT-P5-007 |
-| M5-T5 | 隐私弹窗（若云端） | VT-P5-008 |
-
-**模块门禁 M5-GATE（= M4 里程碑）**
-
-- [x] 微信真机深蹲全流程
-- [ ] 录屏 `docs/evidence/M4.mp4`（可选补）
+不再排期、不再验收。遗留 `apps/miniprogram` 不维护。
 
 ---
 
 ## M6 — 质量与交付（Quality & Release）
 
-**职责**：回归、矩阵、打包、文档收尾；**非功能**与发布准备。
+**职责**：回归、矩阵、打包、文档收尾；**非功能**与发布准备。现主线为 **App 上架**。
 
-**依赖**：M4-GATE、M5-GATE
+**依赖**：M4-GATE
 
 | Task ID | 内容 | 检验 |
 |---------|------|------|
-| M6-T1 | core 全量单测 + 双端 smoke | L0/L1 |
+| M6-T1 | core 全量单测 + App smoke | L0/L1 |
 | M6-T2 | App M1/M2 场景回归 | VT-P3A-M1, VT-P3B-M2 |
-| M6-T3 | 小程序 M2 场景回归 | VT-P5-006 |
-| M6-T4 | 测试矩阵 ≥2 台机 | VT-P4-004 |
-| M6-T5 | App 可分发包（Expo Go / dev APK） | VT-P4-005 简化 |
+| M6-T3 | ~~小程序回归~~ | **已取消** |
+| M6-T4 | 测试矩阵 ≥2 台机 | VT-P4-004（延期 backlog） |
+| M6-T5 | App 可分发包 / TestFlight | VT-P4-005；**当前主线** |
 | M6-T6 | 隐私说明文案 | VT-P4-006 |
-| M6-T7 | 更新 PRD / progress `complete` | — |
+| M6-T7 | 更新 PRD / progress | — |
 
-**模块门禁 M6-GATE（= 项目交付）**
+**模块门禁 M6-GATE**
 
-- [x] 双端可演示
-- [x] 文档与证据齐全（多机矩阵延期，见 progress backlog `VT-P4-004-MULTI`）
+- [x] App 可演示（深蹲闭环已过）
+- [ ] TestFlight / 上架包（付费苹果开发者）
+- [x] 文档与证据（多机矩阵延期，见 `VT-P4-004-MULTI`）
 
 ---
 
@@ -276,18 +246,66 @@ M0 → MU ─┘      M2B → M5 ↗
 
 ---
 
-## 扩展模块（后续，非 MVP）
+## 扩展模块
 
 | 模块 | 说明 |
 |------|------|
-| M7-exercises | 新动作升级：`*-rules` + 矩阵 + exercises（见 UPGRADE-QUEUE） |
-| M8-history | 历史、趋势、账号 |
-| M9-voice | 语音反馈（App 已落地，自用默认开） |
-| M10-store | 上架、支付、课程 |
-| M11-trajectory | 示范轨迹管线：提取 → 相位取样/对齐 → 校准工具（FR-067～069）；见 `trajectory-pipeline.md` |
-| **M12-ref3d** | **训练 3D 参考 Plan C（当前主线）**：轨迹驱动骨骼+肌肉（FR-068）；见 `session-compression-2026-08-12-plan-C.md` |
+| M7-exercises | 新动作升级：暂不排期 |
+| **M8-history** | **上线范围**：课表、记录、账号。任务见 `docs/app-ia.md` Phase 10 |
+| M9-voice | 已落地 |
+| M10-store | 上架材料；支付/课程不做 |
+| M11–M13 | 轨迹与训练参考 **done** |
 
-每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。**M12 优先于 FR-064 详情片与 APP-UPGRADE 下一批动作**；M11 轨迹产物由 M12 消费。
+每个扩展模块只依赖 M1-GATE + 对应 render/壳子接口。**M13 已过门禁**。当前队列 App 真机齐。**暂不扩新动作**。下一主线 **APP-SHELL**（`docs/app-ia.md`）。
+
+---
+
+## M12 — 训练 3D 参考 Plan C（**done**）
+
+**职责**：样片轨迹驱动的 3D 骨骼+简化肌肉叠加（FR-068 / FR-080～083）。**禁止**改规则引擎、禁止在 UI 写相位/计数。
+
+**依赖**：M6-GATE；M11 轨迹产物（T7-1/T7-2 done）  
+**评估动作**：仅 `squat` + `pushup`（先 side）
+
+| Task ID | 内容 | 检验 | 人工 |
+|---------|------|------|------|
+| T8-1 | OQ-005 选型 + expo-gl/three Spike | VT-P8-001 | 重装 Dev Client |
+| T8-2 | squat side：轨迹 Pose → 3D rig 上训练页 | VT-P8-002 | **done** |
+| T8-3 | 简化肌肉/体积 + 画幅对齐 | 目视体积+圆截面 | **done** |
+| T8-4 | pushup side；开关与性能 | VT-P8-003/004 | **done** |
+
+**模块门禁 M12-GATE**
+
+- [x] squat side 3D 参考可开关、随相位运动，用户确认优于 2D（VT-P8-002）
+- [x] pushup side 同上；延迟观感 <250ms（VT-P8-003）
+- [x] 开 3D 后推理仍可用（VT-P8-004，G4B FPS ≈30）
+
+**出口产物**：训练页 Plan C 参考层；选型文档 `docs/3d-stack-oq-005.md`
+
+---
+
+## M13 — 轨迹驱动人形 + 肌群（**done**）
+
+**职责**：身上恢复 M12 前的用户 2D 骨骼（始终贴合自己，含踝/脚）。示范窗默认循环播参考库原片（可暂停/调速），可切参考人+2D 骨骼（窗内拟合用户当前姿态；浅灰人体底 + catalog 登记的主动肌小色块）。**禁止**改规则引擎、禁止把样片姿势叠回用户身上。
+
+**依赖**：M12-GATE  
+**评估动作**：仍 squat + pushup（先 side）
+
+| Task ID | 内容 | 检验 | 人工 |
+|---------|------|------|------|
+| T9-1 | 程序化头/胸/骨盆/手足 | VT-P9-001 | **done**（签字放行） |
+| T9-2 | 身上用户 2D 骨骼贴合 + 示范窗（样片/骨骼 + 收起） | VT-P9-003 | **done**（2026-08-19 通过） |
+| T9-3 | 肌群色块 / 主动肌强调 | VT-P9-002 | **done**（2026-08-21 通过） |
+
+**模块门禁 M13-GATE**
+
+- [x] 示范窗默认循环播参考库原片（随站位换片，可暂停/调速）；可切骨骼模式看到参考人居中并跟人当前姿态；可收起/拉开
+- [x] 身上 2D 骨骼始终贴合用户（不是样片姿势、不是青色 3D 胶囊）
+- [x] 开参考后 FPS 仍 ≥15（随 VT-P9-002 签字）
+
+**人工确认**：2026-08-21 通过。
+
+**出口产物**：人形参考层；计划 `docs/3d-human-figure-plan.md`；交接 `docs/session-compression-M13-GATE.md`
 
 ---
 
@@ -303,6 +321,9 @@ M0 → MU ─┘      M2B → M5 ↗
 | M4 | VERIFICATION § Phase 3B（页面）+ Phase 4 部分 |
 | M2B/M5 | VERIFICATION § Phase 5 |
 | M6 | VERIFICATION § Phase 4 + 回归 §6 |
+| M11 | VERIFICATION § Phase 7 |
+| M12 | VERIFICATION § Phase 8（VT-P8-*） |
+| M13 | VERIFICATION § Phase 9（VT-P9-*） |
 
 ---
 
