@@ -8,7 +8,27 @@ import type { Phase } from "../types.js";
 /** 轨迹 schema 版本；解析时校验。 */
 export const TRAJECTORY_SCHEMA_VERSION = "1.0" as const;
 
-export type TrajectoryExerciseId = "squat" | "pushup";
+export type TrajectoryExerciseId =
+  | "squat"
+  | "pushup"
+  | "glute-bridge"
+  | "lunge"
+  | "plank"
+  | "db-row"
+  | "ohp"
+  | "bench-press"
+  | "rdl"
+  | "pullup"
+  | "db-fly"
+  | "dip"
+  | "incline-pushup"
+  | "cable-crossover"
+  | "chest-press-machine"
+  | "lateral-raise"
+  | "front-raise"
+  | "rear-delt-fly"
+  | "face-pull"
+  | "pike-pushup";
 
 export type TrajectorySourceType = "synthetic" | "video" | "pose_dump";
 
@@ -28,7 +48,7 @@ export interface TrajectoryLandmark {
 export interface TrajectoryFrame {
   t: number;
   phase?: Phase;
-  /** 驱动角（深蹲膝角 / 俯卧撑肘角） */
+  /** 驱动角（深蹲膝角 / 俯卧撑肘角 / 臀桥为 180−髋伸角，静息高、顶髋低） */
   driveDeg?: number;
   landmarks: TrajectoryLandmark[];
 }

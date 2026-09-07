@@ -502,3 +502,64 @@ export function selectCandidateWindows(
 
   return { durationSec, cameraHint, cameraHintSource, candidates, rejected };
 }
+
+export type ScoredWindows = ReturnType<typeof selectCandidateWindows>;
+
+/**
+ * 尚无该动作循环检测时：按 scout 建议入出点出一条候选（不冒充 squat/pushup 评分）。
+ */
+export function candidateFromLookWindow(
+  dump: PoseDump,
+  opts: {
+    cameraHint: CameraHint;
+    startSec?: number | null;
+    endSec?: number | null;
+    reason: string;
+  },
+): ScoredWindows {
+  const { durationSec } = prepareFrames(dump);
+  const startSec = opts.startSec ?? 0;
+  const endSec =
+    opts.endSec != null && opts.endSec > startSec ? opts.endSec : durationSec;
+  const clipDur = Math.max(0, endSec - startSec);
+  const candidate: WindowEvaluation = {
+    timeRange: { startSec, endSec },
+    score: 1,
+    breakdown: {
+      duration: 1,
+      reps: 0,
+      standEnds: 0,
+      armsDownStand: 0,
+      visibility: 1,
+      fullBody: 1,
+      camera: 1,
+    },
+    estimatedReps: 0,
+    cameraHint: opts.cameraHint,
+    cameraHintSource: "flag",
+    selected: true,
+    reasons: [opts.reason],
+  };
+  if (clipDur >= MIN_CLIP_SEC - 0.05) {
+    return {
+      durationSec,
+      cameraHint: opts.cameraHint,
+      cameraHintSource: "flag",
+      candidates: [candidate],
+      rejected: [],
+    };
+  }
+  return {
+    durationSec,
+    cameraHint: opts.cameraHint,
+    cameraHintSource: "flag",
+    candidates: [],
+    rejected: [
+      {
+        ...candidate,
+        selected: false,
+        reasons: [...candidate.reasons, "look-window shorter than MIN_CLIP_SEC"],
+      },
+    ],
+  };
+}

@@ -5,7 +5,25 @@
  */
 
 import {
+  DEFAULT_BENCH_PRESS_PHASE_CONFIG,
+  DEFAULT_DB_ROW_PHASE_CONFIG,
+  DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG,
+  DEFAULT_LUNGE_PHASE_CONFIG,
+  DEFAULT_OHP_PHASE_CONFIG,
+  DEFAULT_PLANK_PHASE_CONFIG,
   DEFAULT_PUSHUP_PHASE_CONFIG,
+  DEFAULT_PULLUP_PHASE_CONFIG,
+  DEFAULT_DB_FLY_PHASE_CONFIG,
+  DEFAULT_DIP_PHASE_CONFIG,
+  DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG,
+  DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG,
+  DEFAULT_LATERAL_RAISE_PHASE_CONFIG,
+  DEFAULT_FRONT_RAISE_PHASE_CONFIG,
+  DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
+  DEFAULT_FACE_PULL_PHASE_CONFIG,
+  DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_RDL_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
   type PhaseConfig,
 } from "../phase.js";
@@ -112,7 +130,43 @@ function currentConfig(
   const c =
     exerciseId === "pushup"
       ? DEFAULT_PUSHUP_PHASE_CONFIG
-      : DEFAULT_SQUAT_PHASE_CONFIG;
+      : exerciseId === "glute-bridge"
+        ? DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG
+        : exerciseId === "lunge"
+          ? DEFAULT_LUNGE_PHASE_CONFIG
+          : exerciseId === "plank"
+            ? DEFAULT_PLANK_PHASE_CONFIG
+            : exerciseId === "db-row"
+              ? DEFAULT_DB_ROW_PHASE_CONFIG
+              : exerciseId === "ohp"
+                ? DEFAULT_OHP_PHASE_CONFIG
+                : exerciseId === "bench-press"
+                  ? DEFAULT_BENCH_PRESS_PHASE_CONFIG
+                  : exerciseId === "rdl"
+                    ? DEFAULT_RDL_PHASE_CONFIG
+                    : exerciseId === "pullup"
+                      ? DEFAULT_PULLUP_PHASE_CONFIG
+                      : exerciseId === "db-fly"
+                        ? DEFAULT_DB_FLY_PHASE_CONFIG
+                        : exerciseId === "dip"
+                          ? DEFAULT_DIP_PHASE_CONFIG
+                          : exerciseId === "incline-pushup"
+                            ? DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG
+                            : exerciseId === "cable-crossover"
+                              ? DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG
+                              : exerciseId === "chest-press-machine"
+                                ? DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG
+                                : exerciseId === "lateral-raise"
+                                  ? DEFAULT_LATERAL_RAISE_PHASE_CONFIG
+                                  : exerciseId === "front-raise"
+                                    ? DEFAULT_FRONT_RAISE_PHASE_CONFIG
+                                    : exerciseId === "rear-delt-fly"
+                                      ? DEFAULT_REAR_DELT_FLY_PHASE_CONFIG
+                                      : exerciseId === "face-pull"
+                                        ? DEFAULT_FACE_PULL_PHASE_CONFIG
+                                        : exerciseId === "pike-pushup"
+                                          ? DEFAULT_PIKE_PUSHUP_PHASE_CONFIG
+                                : DEFAULT_SQUAT_PHASE_CONFIG;
   return {
     standAboveDeg: c.standAboveDeg,
     bottomBelowDeg: c.bottomBelowDeg,
@@ -129,6 +183,20 @@ export function proposePhaseThresholds(
   exerciseId: TrajectoryExerciseId = stats.exerciseId,
 ): ProposedPhaseThresholds {
   const current = currentConfig(exerciseId);
+  if (exerciseId === "glute-bridge") {
+    return {
+      exerciseId,
+      standAboveDeg: current.standAboveDeg,
+      bottomBelowDeg: current.bottomBelowDeg,
+      current,
+      deltaStand: 0,
+      deltaBottom: 0,
+      significant: false,
+      notes: [
+        "glute-bridge 驱动角量级与深蹲不同，禁止套 145–175 夹紧；改参走 glute-bridge-rules.md + RULE-BOUNDARY",
+      ],
+    };
+  }
   const notes: string[] = [];
 
   let standAboveDeg = current.standAboveDeg;

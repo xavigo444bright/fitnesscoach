@@ -8,6 +8,19 @@
 
 import { jointAngle } from "./angles.js";
 import {
+  dbFlyDriveDeg,
+  dbRowWorkingElbowAngle,
+  gluteBridgeHipAngle,
+  lungeWorkingKneeAngle,
+  meanVisibleElbowAngle,
+  preferredVisibleElbowAngle,
+  plankBodyLineDeg,
+  pullupWorkingElbowAngle,
+  rdlHipAngle,
+  lateralRaiseDriveDeg,
+  shoulderRaiseDriveDeg,
+} from "./phase.js";
+import {
   LandmarkIndex,
   type Phase,
   type Pose,
@@ -240,6 +253,479 @@ export const PUSHUP_RULES: EvaluableRule[] = [
       if (deg == null) return { triggered: false };
       // 理想 ≥170°；容差 10° → <160° 才报
       return { triggered: deg < 160, measuredDeg: deg };
+    },
+  },
+];
+
+/** 臀桥规则（与 glute-bridge-rules.md 一致）。lumbar-extension 为 P2，本版不报。 */
+export const GLUTE_BRIDGE_RULES: EvaluableRule[] = [
+  {
+    id: "hip-extension",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightKnee,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "髋没顶够，推到肩膝一线并收臀",
+    evaluate(pose) {
+      const deg = gluteBridgeHipAngle(pose);
+      if (deg == null) return { triggered: false };
+      // 目标 ≥140°；容差 10° → <130° 才报没顶够（侧摄 2D 常低估锁髋）
+      return { triggered: deg < 130, measuredDeg: deg };
+    },
+  },
+];
+
+/** 弓步规则（与 lunge-rules.md 一致）。膝内扣侧摄 P2 不报。 */
+export const LUNGE_RULES: EvaluableRule[] = [
+  {
+    id: "lunge-depth",
+    joints: {
+      a: LandmarkIndex.RightHip,
+      b: LandmarkIndex.RightKnee,
+      c: LandmarkIndex.RightAnkle,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "蹲得不够深，前膝再弯一些",
+    evaluate(pose) {
+      const deg = lungeWorkingKneeAngle(pose);
+      if (deg == null) return { triggered: false };
+      // 目标 <100°；容差 10° → ≥110° 才报不够深
+      return { triggered: deg >= 110, measuredDeg: deg };
+    },
+  },
+  {
+    id: "torso-upright",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightKnee,
+    },
+    severity: "warning",
+    phases: ["stand"],
+    toleranceDeg: 10,
+    message: "躯干前倾过多，挺胸收紧核心",
+    evaluate(pose) {
+      const deg = torsoLeanFromVertical(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg > 55, measuredDeg: deg };
+    },
+  },
+];
+
+/** 平板规则（与 plank-rules.md 一致）。侧支撑另开 id。 */
+export const PLANK_RULES: EvaluableRule[] = [
+  {
+    id: "body-line",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightAnkle,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "撅臀了，把腰放平",
+    evaluate(pose) {
+      const deg = plankBodyLineDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg < 160, measuredDeg: deg };
+    },
+  },
+];
+
+/** 哑铃划船（与 db-row-rules.md 一致）。 */
+export const DB_ROW_RULES: EvaluableRule[] = [
+  {
+    id: "row-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "拉得不够高，肘再往髋后收",
+    evaluate(pose) {
+      const deg = dbRowWorkingElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 110, measuredDeg: deg };
+    },
+  },
+];
+
+/** 站姿推举（与 ohp-rules.md 一致）。 */
+export const OHP_RULES: EvaluableRule[] = [
+  {
+    id: "torso-upright",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightKnee,
+    },
+    severity: "warning",
+    phases: ["stand"],
+    toleranceDeg: 10,
+    message: "腰过度后仰，收紧核心再推",
+    evaluate(pose) {
+      const deg = torsoLeanFromVertical(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg > 55, measuredDeg: deg };
+    },
+  },
+];
+
+/** 罗马尼亚硬拉（与 rdl-rules.md 一致）。圆背 P2。 */
+export const RDL_RULES: EvaluableRule[] = [
+  {
+    id: "rdl-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightKnee,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "铰链不够深，臀部再往后坐",
+    evaluate(pose) {
+      const deg = rdlHipAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 125, measuredDeg: deg };
+    },
+  },
+];
+
+/** 引体向上（与 pullup-rules.md 一致）。摆浪 P2。 */
+export const PULLUP_RULES: EvaluableRule[] = [
+  {
+    id: "pull-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "error",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "拉得不够高，下巴再过杆",
+    evaluate(pose) {
+      const deg = pullupWorkingElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 115, measuredDeg: deg };
+    },
+  },
+];
+
+/** 哑铃飞鸟（与 db-fly-rules.md 一致）。甩肩 / 肘打直 P2。 */
+export const DB_FLY_RULES: EvaluableRule[] = [
+  {
+    id: "fly-depth",
+    joints: {
+      a: LandmarkIndex.LeftWrist,
+      b: LandmarkIndex.LeftShoulder,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "打开不够深，手臂再打开一些",
+    evaluate(pose) {
+      const deg = dbFlyDriveDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 150, measuredDeg: deg };
+    },
+  },
+];
+
+/** 冠状面肩宽。3/4 侧身常 <0.08；正面常 ≳0.18。≥0.12 视为偏正，关掉 torso-lean。 */
+function coronalShoulderWidth(pose: Pose): number | null {
+  const ls = pose[LandmarkIndex.LeftShoulder];
+  const rs = pose[LandmarkIndex.RightShoulder];
+  if (!ls || !rs) return null;
+  return Math.hypot(ls.x - rs.x, ls.y - rs.y);
+}
+
+const FRONTISH_SHOULDER_WIDTH = 0.12;
+
+function isFrontishPose(pose: Pose): boolean {
+  const width = coronalShoulderWidth(pose);
+  return width != null && width >= FRONTISH_SHOULDER_WIDTH;
+}
+
+/** 双杠臂屈伸（与 dip-rules.md 一致）。肩过度下沉 / 凳上变式 P2。 */
+export const DIP_RULES: EvaluableRule[] = [
+  {
+    id: "dip-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "降得不够低，肩再往下沉一些",
+    evaluate(pose) {
+      const deg = preferredVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 115, measuredDeg: deg };
+    },
+  },
+  {
+    id: "torso-lean",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightKnee,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "躯干再往前倾一点，练胸",
+    evaluate(pose) {
+      const width = coronalShoulderWidth(pose);
+      if (width != null && width >= FRONTISH_SHOULDER_WIDTH) {
+        return { triggered: false, measuredDeg: width };
+      }
+      const deg = torsoLeanFromVertical(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg < 10, measuredDeg: deg };
+    },
+  },
+];
+
+/** 上斜俯卧撑（与 incline-pushup-rules.md 一致）。肘外展 P2。 */
+export const INCLINE_PUSHUP_RULES: EvaluableRule[] = [
+  {
+    id: "elbow-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "胸口再靠近支撑面",
+    evaluate(pose) {
+      if (isFrontishPose(pose)) return { triggered: false };
+      const deg = meanVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 120, measuredDeg: deg };
+    },
+  },
+  {
+    id: "body-line",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightAnkle,
+    },
+    severity: "error",
+    phases: [],
+    toleranceDeg: 10,
+    message: "臀部翘起或下沉，保持身体一条直线",
+    evaluate(pose) {
+      if (isFrontishPose(pose)) return { triggered: false };
+      const deg = pushupBodyLineDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg < 160, measuredDeg: deg };
+    },
+  },
+];
+
+/** 绳索夹胸（与 cable-crossover-rules.md 一致）。转腰代偿 P2。 */
+export const CABLE_CROSSOVER_RULES: EvaluableRule[] = [
+  {
+    id: "crossover-depth",
+    joints: {
+      a: LandmarkIndex.LeftWrist,
+      b: LandmarkIndex.LeftShoulder,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "打开不够开，手臂再向两侧打开",
+    evaluate(pose) {
+      const deg = dbFlyDriveDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 90, measuredDeg: deg };
+    },
+  },
+];
+
+/** 坐姿推胸器（与 chest-press-machine-rules.md 一致）。挺腰离垫 P2。 */
+export const CHEST_PRESS_MACHINE_RULES: EvaluableRule[] = [
+  {
+    id: "press-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "没收到胸口，再收回一些",
+    evaluate(pose) {
+      const deg = meanVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 105, measuredDeg: deg };
+    },
+  },
+];
+
+/** 哑铃侧平举（与 lateral-raise-rules.md 一致）。甩摆 / 耸肩 P2。 */
+export const LATERAL_RAISE_RULES: EvaluableRule[] = [
+  {
+    id: "raise-height",
+    joints: {
+      a: LandmarkIndex.RightHip,
+      b: LandmarkIndex.RightShoulder,
+      c: LandmarkIndex.RightElbow,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "再抬高一些，到大约肩的高度",
+    evaluate(pose) {
+      if (!isFrontishPose(pose)) return { triggered: false };
+      const deg = lateralRaiseDriveDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 125, measuredDeg: deg };
+    },
+  },
+];
+
+/** 哑铃前平举（与 front-raise-rules.md 一致）。甩摆 P2。 */
+export const FRONT_RAISE_RULES: EvaluableRule[] = [
+  {
+    id: "raise-height",
+    joints: {
+      a: LandmarkIndex.RightHip,
+      b: LandmarkIndex.RightShoulder,
+      c: LandmarkIndex.RightElbow,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "再抬高一些，到大约肩的高度",
+    evaluate(pose) {
+      if (isFrontishPose(pose)) return { triggered: false };
+      const deg = shoulderRaiseDriveDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 125, measuredDeg: deg };
+    },
+  },
+];
+
+/** 俯身飞鸟（与 rear-delt-fly-rules.md 一致）。起身代偿 P2。 */
+export const REAR_DELT_FLY_RULES: EvaluableRule[] = [
+  {
+    id: "fly-depth",
+    joints: {
+      a: LandmarkIndex.LeftWrist,
+      b: LandmarkIndex.LeftShoulder,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "打开不够开，手臂再向两侧打开",
+    evaluate(pose) {
+      const deg = dbFlyDriveDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 135, measuredDeg: deg };
+    },
+  },
+];
+
+/** 面拉（与 face-pull-rules.md 一致）。耸肩代偿 P2。 */
+export const FACE_PULL_RULES: EvaluableRule[] = [
+  {
+    id: "pull-height",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "再拉向面部一些",
+    evaluate(pose) {
+      const deg = meanVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 115, measuredDeg: deg };
+    },
+  },
+];
+
+/** 派克俯卧撑（与 pike-pushup-rules.md 一致）。肘外展 P2。 */
+export const PIKE_PUSHUP_RULES: EvaluableRule[] = [
+  {
+    id: "elbow-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "头再靠近地面一些",
+    evaluate(pose) {
+      if (isFrontishPose(pose)) return { triggered: false };
+      const deg = meanVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 120, measuredDeg: deg };
+    },
+  },
+  {
+    id: "pike-line",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightHip,
+      c: LandmarkIndex.RightAnkle,
+    },
+    severity: "error",
+    phases: [],
+    toleranceDeg: 10,
+    message: "把髋再抬高，保持倒 V",
+    evaluate(pose) {
+      if (isFrontishPose(pose)) return { triggered: false };
+      const deg = pushupBodyLineDeg(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg > 100, measuredDeg: deg };
+    },
+  },
+];
+
+/** 杠铃卧推（与 bench-press-rules.md 一致）。塌腰/弹杠 P2。 */
+export const BENCH_PRESS_RULES: EvaluableRule[] = [
+  {
+    id: "elbow-depth",
+    joints: {
+      a: LandmarkIndex.RightShoulder,
+      b: LandmarkIndex.RightElbow,
+      c: LandmarkIndex.RightWrist,
+    },
+    severity: "warning",
+    phases: ["bottom"],
+    toleranceDeg: 10,
+    message: "杠没落到胸口，再下放一些",
+    evaluate(pose) {
+      const deg = meanVisibleElbowAngle(pose);
+      if (deg == null) return { triggered: false };
+      return { triggered: deg >= 120, measuredDeg: deg };
     },
   },
 ];

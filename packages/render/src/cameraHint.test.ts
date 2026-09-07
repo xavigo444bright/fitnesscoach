@@ -37,6 +37,20 @@ describe("cameraHint (FR-068 front/side auto)", () => {
     );
   });
 
+  it("近景侧面：瞎猜宽髋不判成正面；髋出画仍可靠肩判侧", () => {
+    const stacked: Pose = [];
+    stacked[LandmarkIndex.LeftShoulder] = { x: 0.5, y: 0.3 };
+    stacked[LandmarkIndex.RightShoulder] = { x: 0.52, y: 0.3 };
+    stacked[LandmarkIndex.LeftHip] = { x: 0.2, y: 0.55, visibility: 0.35 };
+    stacked[LandmarkIndex.RightHip] = { x: 0.8, y: 0.55, visibility: 0.35 };
+    expect(inferCameraHint(stacked)).toBe("side");
+
+    const noHip: Pose = [];
+    noHip[LandmarkIndex.LeftShoulder] = { x: 0.5, y: 0.32 };
+    noHip[LandmarkIndex.RightShoulder] = { x: 0.52, y: 0.3 };
+    expect(inferCameraHint(noHip)).toBe("side");
+  });
+
   it("CameraHintLatch：行程中禁止切换，stand 可切", () => {
     const latch = new CameraHintLatch(4);
     for (let i = 0; i < 4; i += 1) {

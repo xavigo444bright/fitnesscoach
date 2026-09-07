@@ -1,0 +1,18 @@
+---
+description: 示范片与动作规则的生产分工（FR-088）
+globs: docs/exercises/**,packages/core/src/exercises/**,tools/trajectory-*/**
+alwaysApply: false
+---
+
+# 示范片 vs 规则
+
+核过的 look-window 是**示范窗原片**和 **2D 骨轨迹**的真源，不是 `*-rules.md` 阈值真源。
+
+写规则时对照 primary 样片：锁变式、推荐机位平面、驱动关节。阈值走文献 + RULE-BOUNDARY。禁止把示范者某一帧的角度抄成全用户报错线。
+
+- 握距宽/窄、节奏、体型 → 同一 catalog id；最多加示范片
+- 驱动/相位/对错集会打架 → 才拆新 id
+- `side` = 身体一侧，`front` = 脸朝镜头；不是「只能背面」。错平面则引导站位并关掉假阳性规则
+- 扩库顺序：核窗 → 裁参考片 → 轨迹 → 对照样片写规则。未核窗不裁、不写新动作规则。你一次授权一批后整批 ingest，不要再逐条确认下载。
+
+look-window：入点 = 第一条完整行程可读；出点 = 第 2 次 ROM 结束。不要圈多循环或讲解。窗内持续绕拍不能当 2D 轨迹真源。

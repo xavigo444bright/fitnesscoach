@@ -8,14 +8,23 @@ import { Animated, StyleSheet, Text, View } from 'react-native';
 type Props = {
   /** 传入当前 rep；增加时播一次。 */
   repCount: number;
+  /** hold_second 不计次打勾，改走中央 HoldTimerOverlay（UX-009）。 */
+  enabled?: boolean;
 };
 
-export default function CorrectCheckBurst({ repCount }: Props) {
+export default function CorrectCheckBurst({
+  repCount,
+  enabled = true,
+}: Props) {
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.6)).current;
   const prev = useRef(repCount);
 
   useEffect(() => {
+    if (!enabled) {
+      prev.current = repCount;
+      return;
+    }
     if (repCount <= prev.current) {
       prev.current = repCount;
       return;
@@ -51,7 +60,9 @@ export default function CorrectCheckBurst({ repCount }: Props) {
         }),
       ]),
     ]).start();
-  }, [repCount, opacity, scale]);
+  }, [repCount, enabled, opacity, scale]);
+
+  if (!enabled) return null;
 
   return (
     <View style={styles.wrap} pointerEvents="none">

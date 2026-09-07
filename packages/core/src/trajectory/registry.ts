@@ -25,9 +25,9 @@ const PUSHUP_BY_CAMERA: Record<TrajectoryCameraHint, DemoTrajectory> = {
   front: parseDemoTrajectory(PUSHUP_FRONT_V1),
 };
 
-/** 默认侧面（与 rules 推荐机位一致）。 */
+/** 默认侧面（与 rules 推荐机位一致）。运行时仅 squat/pushup；臀桥 JSON 另存不打包。 */
 export const BUNDLED_DEMO_TRAJECTORIES: Record<
-  TrajectoryExerciseId,
+  "squat" | "pushup",
   DemoTrajectory
 > = {
   squat: SQUAT_BY_CAMERA.side,
@@ -44,7 +44,9 @@ export function getDemoTrajectory(
   if (exerciseId === "pushup") {
     return PUSHUP_BY_CAMERA[cameraHint] ?? PUSHUP_BY_CAMERA.side;
   }
-  return BUNDLED_DEMO_TRAJECTORIES[exerciseId];
+  throw new Error(
+    `getDemoTrajectory: ${exerciseId} is not bundled (NFR-010); use on-disk JSON until coachable`,
+  );
 }
 
 /** 该动作是否已有指定机位轨迹。 */
@@ -55,7 +57,7 @@ export function hasDemoTrajectory(
   if (exerciseId === "squat" || exerciseId === "pushup") {
     return cameraHint === "side" || cameraHint === "front";
   }
-  return cameraHint === "side";
+  return false;
 }
 
 export function listDemoTrajectoryIds(): string[] {

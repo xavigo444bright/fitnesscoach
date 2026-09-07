@@ -2,7 +2,9 @@
 
 示范**片源获取**离线工具（FR-067 管线前端）：
 
-`可商用视频 URL / 本地片` → 下载 → Pose 分析 → 按样片标准评分裁剪 → `media/trajectory-source/<exercise>/_candidates/` + JSON 报告。
+**必须** `--scout-id`（清单 `docs/exercises/asset-scout/clips.json`）。新动作须先有机位规格 `docs/exercises/camera-planes/specs.json`（FR-089），否则加载清单失败。授权由仓库所有者确认，本工具不校验许可文本。
+
+清单条目 URL / 本地片 → 下载 → Pose 分析 → 按样片标准评分裁剪 → `media/trajectory-source/<exercise>/_candidates/` + JSON 报告。
 
 **默认不覆盖** `packages/core/trajectories/*.json` 正式轨迹。人工确认候选片后，再交给 `tools/trajectory-extract`。
 
@@ -49,35 +51,55 @@ pnpm install
 brew install yt-dlp ffmpeg
 ```
 
-## 一条命令：URL → 候选片
+只下全片（本地再按「行程可读」标定入出点）。一次授权后可逗号分隔整批，不要拆成 N 次命令：
 
 ```bash
 pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
-  --url 'https://example.com/path/demo.mp4' \
-  --exercise squat \
-  --camera side \
-  --license 'CC-BY-4.0; author; commercial-ok note'
+  --download-only --scout-id glute-bridge-side-01,lunge-side-01
 ```
+
+YouTube 检索不要 WebFetch watch 页：
+
+```bash
+pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
+  --yt-search "how to do a dip" --max 8
+```
+
+look-window 已核后只裁参考片（不下片、不 PoseDump）：
+
+```bash
+pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
+  --crop-only --scout-id glute-bridge-side-01
+```
+
+产出：`_candidates/<scout-id>.mp4` 与 `media/trajectory-source/<exercise>/<scout-id>.mp4`。不要把后续动作整库打进 App 包（NFR-010）。
+
+已裁参考片上提 PoseDump（`cameraStability=moving` 会跳过）：
+
+```bash
+pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
+  --pose-only --scout-id db-fly-three_quarter-01,db-fly-front-01
+```
+
+## 一条命令：scout-id → 候选片
+
+```bash
+pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
+  --scout-id squat-side-01
+```
+
+`--url` / `--exercise` / `--camera` 可省略（用清单）；若给出必须与该条一致。`--license` 仍可写入 provenance，**不是**下载开关。
 
 输出：
 
-- `media/trajectory-source/squat/_inbox/` — 原始下载 + 全片 `.pose.json`
-- `media/trajectory-source/squat/_candidates/squat-side-cand-01.mp4` — 入选片段
-- `media/trajectory-source/squat/_candidates/squat-ingest-report-*.json` — 评分与 provenance
-
-本地文件也可：
-
-```bash
-pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
-  --url ./clips/my-squat.mp4 --exercise squat --camera side \
-  --license 'owned / licensed for demo trajectory'
-```
+- `media/trajectory-source/<exercise>/_inbox/` — 原始下载 + 全片 `.pose.json`
+- `media/trajectory-source/<exercise>/_candidates/` — 入选片段 + 评分报告（含 `scoutId`）
 
 无外网时验证评分逻辑：
 
 ```bash
 pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
-  --dry-run --exercise squat --camera side
+  --dry-run --scout-id squat-side-01
 ```
 
 ## 人工确认后接 trajectory-extract
@@ -113,8 +135,9 @@ pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
 ## 法律 / 工程约束
 
 - **不**绕过 DRM、登录墙、付费墙；失败时工具会报错退出。
-- 报告内写入 provenance：`sourceUrl`、`fetchedAt`、`toolVersion`、yt-dlp/ffmpeg 版本、license/note。
-- `_inbox` 大视频与 `*.pose.json` gitignore；勿把未授权片源提交进库。
+- 报告内写入 provenance：`scoutId`、`sourceUrl`、`fetchedAt`、`toolVersion`、yt-dlp/ffmpeg 版本、license/note。
+- `_inbox` 大视频与 `*.pose.json` gitignore。
+- 选片规则见 [`docs/exercises/asset-scout.md`](../../docs/exercises/asset-scout.md)。
 
 ## 测试
 

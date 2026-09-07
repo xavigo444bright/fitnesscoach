@@ -12,7 +12,28 @@ import type {
 import { TRAJECTORY_SCHEMA_VERSION } from "./types.js";
 
 const PHASES = new Set<Phase>(["stand", "descend", "bottom", "ascend"]);
-const EXERCISES = new Set<TrajectoryExerciseId>(["squat", "pushup"]);
+const EXERCISES = new Set<TrajectoryExerciseId>([
+  "squat",
+  "pushup",
+  "glute-bridge",
+  "lunge",
+  "plank",
+  "db-row",
+  "ohp",
+  "bench-press",
+  "rdl",
+  "pullup",
+  "db-fly",
+  "dip",
+  "incline-pushup",
+  "cable-crossover",
+  "chest-press-machine",
+  "lateral-raise",
+  "front-raise",
+  "rear-delt-fly",
+  "face-pull",
+  "pike-pushup",
+]);
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v != null && !Array.isArray(v);

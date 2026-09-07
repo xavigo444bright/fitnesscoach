@@ -14,6 +14,29 @@ export {
   getTheme,
   type Theme,
 } from "./theme.js";
+export {
+  muscleFill,
+  type MuscleFillEmphasis,
+  type MuscleFillKind,
+} from "./muscleFill.js";
+export {
+  clampPipPosition,
+  collapsedTabPosition,
+  defaultPipPosition,
+  restoredPipPosition,
+  type PipPoint,
+} from "./pipPosition.js";
+
+export {
+  CLIP_PLAYBACK_RATES,
+  DEFAULT_CLIP_PLAYBACK_RATE,
+  clipPlayerInitialStatus,
+  clipShouldPlay,
+  formatClipPlaybackRate,
+  nextClipPlaybackRate,
+  shouldRestartClipLoop,
+  type ClipPlaybackRate,
+} from "./clipPlayback.js";
 
 export type {
   SemanticStatus,
@@ -26,6 +49,7 @@ export type {
   RepCounterProps,
   PlacementGuideProps,
   CountdownOverlayProps,
+  HoldTimerOverlayProps,
   SessionSummaryProps,
   CameraPreviewProps,
   SkeletonJoint,

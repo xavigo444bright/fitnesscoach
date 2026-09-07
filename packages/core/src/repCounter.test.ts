@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FIXTURES, buildSquatPose } from "./fixtures/index.js";
-import { countReps, initialRepCounterState, stepRep } from "./repCounter.js";
+import { countReps, abortOpenRepCycle, initialRepCounterState, stepRep } from "./repCounter.js";
 import type { Pose, RepCycleOutcome } from "./types.js";
 
 const frames = (pose: Pose, n: number) => Array.from({ length: n }, () => pose);
@@ -92,5 +92,22 @@ describe("VT-P1-005 / FR-052 rep 计数", () => {
     const state = countReps(seq, sparseCfg);
     expect(state.count).toBe(1);
     expect(state.reps[0].counted).toBe(true);
+  });
+
+  it("abortOpenRepCycle 丢弃未完成周期且不计次", () => {
+    let state = initialRepCounterState();
+    for (const p of [...frames(STAND, 6), ...frames(MID, 6)]) {
+      state = stepRep(state, p);
+    }
+    expect(state.phaseState.phase).not.toBe("stand");
+    const count = state.count;
+    state = abortOpenRepCycle(state);
+    expect(state.phaseState.phase).toBe("stand");
+    expect(state.count).toBe(count);
+    expect(state.lastOutcome).toBeNull();
+    for (const p of frames(STAND, 10)) {
+      state = stepRep(state, p);
+    }
+    expect(state.count).toBe(count);
   });
 });

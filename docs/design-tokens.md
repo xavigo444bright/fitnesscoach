@@ -1,7 +1,7 @@
 ---
 document: design-tokens
 product: fitness-coach
-version: 0.2.3
+version: 0.2.8
 status: confirmed
 confirmed_at: 2026-07-18
 confirmed_by: product (MU-T2)
@@ -25,7 +25,8 @@ depends_on:
 | `--color-correct` | `#22C55E` | 关节正确；FeedbackBar `recovered` |
 | `--color-warning` | `#EAB308` | 注意 |
 | `--color-error` | `#EF4444` | 错误；FeedbackBar `correcting` |
-| `--color-ghost` | `rgba(255, 255, 255, 0.4)` | Ghost 参考骨架（opacity ≈ 0.4） |
+| `--color-ghost` | `rgba(255, 255, 255, 0.4)` | 历史 Ghost token；训练页 2D 骨骼用 `--color-correct` |
+| `--color-ref-3d` | `#38BDF8` | 历史 3D 参考色；训练页身上不再用青色胶囊 |
 
 ### 1.2 训练主题（UI-012：相机页非纯白）
 
@@ -39,12 +40,25 @@ depends_on:
 | `--color-text-primary` | `#F8FAFC` | 非相机页正文 |
 | `--color-text-secondary` | `#94A3B8` | 辅助说明 |
 
+### 1.3 示范窗肌群色（FR-085 / T9-3）
+
+仅用于示范窗「骨骼」模式人体底，**不是**校验绿/黄/红，也**不叠到摄像头身上**。胸/骨盆/大腿用不同色相；主动肌提高不透明度。
+
+| Token | 值 | 用途 |
+|-------|-----|------|
+| `--color-muscle-rest` | `rgba(148, 163, 184, 0.34)` | 头/腰/手足等非强调体积 |
+| `--color-muscle-chest` / `-active` | 粉 `rgba(244, 114, 182, …)` | 胸；俯卧撑主动 |
+| `--color-muscle-pelvis` / `-active` | 橙 `rgba(251, 146, 60, …)` | 骨盆/臀；深蹲主动 |
+| `--color-muscle-thigh` / `-active` | 青绿 `rgba(45, 212, 191, …)` | 大腿；深蹲主动 |
+| `--color-muscle-arm` / `-active` | 靛 `rgba(129, 140, 248, …)` | 上臂；俯卧撑轻强调 |
+
 ```css
 :root {
   --color-correct: #22C55E;
   --color-warning: #EAB308;
   --color-error: #EF4444;
   --color-ghost: rgba(255, 255, 255, 0.4);
+  --color-ref-3d: #38BDF8;
   --color-bg: #0F172A;
   --color-surface: #1E293B;
   --color-overlay-scrim: rgba(0, 0, 0, 0.55);
@@ -52,6 +66,15 @@ depends_on:
   --color-primary: #3B82F6;
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #94A3B8;
+  --color-muscle-rest: rgba(148, 163, 184, 0.34);
+  --color-muscle-chest: rgba(244, 114, 182, 0.36);
+  --color-muscle-chest-active: rgba(244, 114, 182, 0.62);
+  --color-muscle-pelvis: rgba(251, 146, 60, 0.36);
+  --color-muscle-pelvis-active: rgba(251, 146, 60, 0.62);
+  --color-muscle-thigh: rgba(45, 212, 191, 0.32);
+  --color-muscle-thigh-active: rgba(45, 212, 191, 0.58);
+  --color-muscle-arm: rgba(129, 140, 248, 0.30);
+  --color-muscle-arm-active: rgba(129, 140, 248, 0.56);
 }
 ```
 
@@ -102,8 +125,13 @@ depends_on:
   --feedback-bar-min-height: 56;
   --feedback-bar-max-lines: 2;
   --bottom-bar-height: 64;
-  --placement-guide-aspect: 0.48; /* 大框贴底；示意近距全身 */
+  --placement-guide-aspect: 0.48; /* 历史值；框已铺满预览，不再按此裁安全区 */
   --ghost-opacity: 0.4;
+  --ref-3d-opacity: 0.82;
+  --ref-person-pip-width: 178;
+  --ref-person-pip-height: 297;
+  --ref-person-pip-tab-width: 44;
+  --ref-person-pip-tab-height: 56;
   --joint-color-ms: 150;         /* UX-002 */
   --rep-bump-ms: 300;            /* UX-003 */
   --correct-check-ms: 700;       /* UX-007 */
@@ -138,3 +166,7 @@ depends_on:
 | 0.2.1 | 2026-07-20 | 站位框 aspect 调整；允许更近机位可读反馈 |
 | 0.2.2 | 2026-07-20 | 站位框改为大框贴底（勿小框居中逼用户后退） |
 | 0.2.3 | 2026-07-22 | UX-007 有效 rep 绿色打勾时长 |
+| 0.2.4 | 2026-08-16 | 固定位参考人小窗宽高（PG-004 B2） |
+| 0.2.5 | 2026-08-18 | 示范窗 178×297（约 +35% 高）；可拖动 |
+| 0.2.6 | 2026-08-18 | 示范窗收起手柄 44×56 |
+| 0.2.8 | 2026-08-26 | 站位框铺满预览（FR-022）；`--placement-guide-aspect` 不再裁安全区 |

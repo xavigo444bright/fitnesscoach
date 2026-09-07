@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { FIXTURES, buildSquatPose } from "./fixtures/index.js";
+import { buildGluteBridgePose } from "./fixtures/gluteBridge.js";
 import {
+  DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG,
+  DEFAULT_LUNGE_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
+  gluteBridgeDriveDeg,
+  gluteBridgeHipAngle,
   initialPhaseState,
+  lungeWorkingKneeAngle,
   runPhaseSequence,
   squatKneeAngle,
   stepPhase,
@@ -71,5 +77,25 @@ describe("配置", () => {
     expect(DEFAULT_SQUAT_PHASE_CONFIG.standAboveDeg).toBe(160);
     expect(DEFAULT_SQUAT_PHASE_CONFIG.bottomBelowDeg).toBe(100);
     expect(DEFAULT_SQUAT_PHASE_CONFIG.confirmFrames).toBe(5);
+  });
+
+  it("臀桥驱动角 = 180 − 髋伸；阈值取自 glute-bridge-rules.md", () => {
+    const rest = buildGluteBridgePose({ hipDeg: 120 });
+    const peak = buildGluteBridgePose({ hipDeg: 172 });
+    expect(gluteBridgeHipAngle(rest)!).toBeCloseTo(120, 0);
+    expect(gluteBridgeHipAngle(peak)!).toBeCloseTo(172, 0);
+    expect(gluteBridgeDriveDeg(rest)!).toBeCloseTo(60, 0);
+    expect(gluteBridgeDriveDeg(peak)!).toBeCloseTo(8, 0);
+    expect(DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG.standAboveDeg).toBe(48);
+    expect(DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG.bottomBelowDeg).toBe(40);
+  });
+
+  it("弓步工作膝取更弯一侧；阈值取自 lunge-rules.md", () => {
+    const stand = buildSquatPose({ kneeDeg: 165, torsoLeanDeg: 10 });
+    const bottom = buildSquatPose({ kneeDeg: 85, torsoLeanDeg: 22 });
+    expect(lungeWorkingKneeAngle(stand)!).toBeGreaterThan(150);
+    expect(lungeWorkingKneeAngle(bottom)!).toBeLessThan(100);
+    expect(DEFAULT_LUNGE_PHASE_CONFIG.standAboveDeg).toBe(150);
+    expect(DEFAULT_LUNGE_PHASE_CONFIG.bottomBelowDeg).toBe(100);
   });
 });

@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "1.0",
+  "updatedAt": "2026-08-29",
+  "notes": "PRD 0.6.40 / FR-089。按最佳效果收片，可有可无不进清单。Phase E + Phase F 必收 = 下表 requiredClipCameras。Phase F 已核窗 authorized。",
+  "grandfatheredExerciseIds": [
+    "squat",
+    "pushup",
+    "glute-bridge",
+    "lunge",
+    "plank",
+    "db-row",
+    "ohp",
+    "bench-press",
+    "rdl",
+    "pullup"
+  ],
+  "exercises": {
+    "db-fly": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["three_quarter", "front"],
+      "cuePlanes": [
+        { "ruleId": "fly-depth", "planes": ["front", "three_quarter"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["three_quarter", "front"],
+      "placementNote": "仰卧平板飞鸟：训练时手机放凳侧 3/4。示范另需一条头侧/偏正看左右是否对称。",
+      "rationale": "锁变式为仰卧平板飞鸟。3/4 管开合幅度与计数；头侧/偏正（camera=front）管左右对称。纯侧不收录。"
+    },
+    "dip": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["three_quarter", "front"],
+      "cuePlanes": [
+        { "ruleId": "dip-depth", "planes": ["front", "three_quarter"] },
+        { "ruleId": "torso-lean", "planes": ["three_quarter"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["three_quarter", "front"],
+      "placementNote": "双杠斜前方 3/4 训练；示范另需正面看左右肘与肩。",
+      "rationale": "3/4 管肘深和躯干前倾；正面管左右是否对称。清侧场馆难摆，按「可有可无」不收录。"
+    },
+    "incline-pushup": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["side", "front"],
+      "cuePlanes": [
+        { "ruleId": "body-line", "planes": ["side"] },
+        { "ruleId": "pushup-depth", "planes": ["side"] },
+        { "ruleId": "elbow-flare", "planes": ["front"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["side", "front"],
+      "placementNote": "手撑高处，训练默认侧面（身体一线）。正面示范看手距与肘外展。",
+      "rationale": "与标准俯卧撑同一套：侧管一线/深度，正管手距和肘外展。不是可有可无。"
+    },
+    "cable-crossover": {
+      "evaluation": "front",
+      "countPlanes": ["front"],
+      "cuePlanes": [
+        { "ruleId": "crossover-depth", "planes": ["front"] }
+      ],
+      "defaultHint": "front",
+      "requiredClipCameras": ["front"],
+      "placementNote": "面对镜头站在龙门架中间，看清双臂划弧在胸前交汇。",
+      "rationale": "夹胸划弧在冠状面。3/4 只补转腰，按「可有可无」不收录。"
+    },
+    "chest-press-machine": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["side", "three_quarter"],
+      "cuePlanes": [
+        { "ruleId": "press-depth", "planes": ["side", "three_quarter"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["side", "three_quarter"],
+      "placementNote": "坐姿侧方训练看肘行程；3/4 在器械挡肘时仍可读、示范更好。",
+      "rationale": "侧管肘伸；3/4 补挡肘与示范。正对脸不收录。"
+    },
+    "lateral-raise": {
+      "evaluation": "front",
+      "countPlanes": ["front"],
+      "cuePlanes": [
+        { "ruleId": "raise-height", "planes": ["front"] }
+      ],
+      "defaultHint": "front",
+      "requiredClipCameras": ["front"],
+      "optionalClipCameras": ["three_quarter"],
+      "placementNote": "面对镜头站立，看清双臂向两侧抬至约肩高。",
+      "rationale": "侧平举行程在冠状面。侧面看不清左右是否对称、是否甩摆。3/4 只补示范，按可有可无不挡接线。"
+    },
+    "front-raise": {
+      "evaluation": "side",
+      "countPlanes": ["side"],
+      "cuePlanes": [
+        { "ruleId": "raise-height", "planes": ["side"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["side"],
+      "optionalClipCameras": ["front"],
+      "placementNote": "身体一侧入画，看清手臂在矢状面抬至肩高。",
+      "rationale": "前平举行程在矢状面。正面看不清抬起幅度。正面只补左右对称，可有可无。"
+    },
+    "rear-delt-fly": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["three_quarter", "side"],
+      "cuePlanes": [
+        { "ruleId": "fly-depth", "planes": ["three_quarter", "side"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["three_quarter"],
+      "optionalClipCameras": ["side"],
+      "placementNote": "髋铰链俯身，手机斜侧 3/4 看清双臂向两侧打开。",
+      "rationale": "俯身飞鸟开合在 3/4 最可读；清侧可计但场馆难摆，按可有可无。正对脸不收录。"
+    },
+    "face-pull": {
+      "evaluation": "dual_or_three_quarter",
+      "countPlanes": ["three_quarter", "front"],
+      "cuePlanes": [
+        { "ruleId": "pull-height", "planes": ["three_quarter", "front"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["three_quarter"],
+      "optionalClipCameras": ["front"],
+      "placementNote": "面对绳索，手机斜前方 3/4 看清拉向面部与外旋。",
+      "rationale": "面拉肘外展和外旋在 3/4 最清楚。正面可补对称。清侧不收录。"
+    },
+    "pike-pushup": {
+      "evaluation": "side",
+      "countPlanes": ["side"],
+      "cuePlanes": [
+        { "ruleId": "elbow-depth", "planes": ["side"] },
+        { "ruleId": "pike-line", "planes": ["side"] }
+      ],
+      "defaultHint": "side",
+      "requiredClipCameras": ["side"],
+      "optionalClipCameras": ["front"],
+      "placementNote": "倒 V 撑地，手机侧面看髋高与头向地面下降。",
+      "rationale": "与俯卧撑同一几何：侧管深度和倒 V 一线。正面只补手距，按可有可无不挡接线。"
+    }
+  }
+}

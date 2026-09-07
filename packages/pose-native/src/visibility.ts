@@ -6,8 +6,14 @@
 
 import type { Landmark, Pose } from "@fitness-coach/core";
 
-/** FR-032：visibility < 0.5 视为不可见。 */
+/** FR-032：visibility < 0.5 不参与校验。 */
 export const DEFAULT_VISIBILITY_THRESHOLD = 0.5;
+
+/**
+ * 绘制用更松阈值（FR-060）。
+ * 俯卧撑正面踝/脚常在 0.2–0.49，0.5 会把脚点整段抹掉。
+ */
+export const DRAW_VISIBILITY_THRESHOLD = 0.2;
 
 /**
  * 关键点是否达到可见阈值。

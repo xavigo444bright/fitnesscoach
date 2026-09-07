@@ -1,6 +1,5 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ExerciseId } from "./types.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,13 +29,20 @@ export const EXTRACT_VENV_PYTHON = path.join(
   "python",
 );
 
+export const INGEST_VENV_PYTHON = path.join(
+  INGEST_ROOT,
+  ".venv",
+  "bin",
+  "python",
+);
+
 export const POSE_MODEL = path.join(
   EXTRACT_ROOT,
   "models",
   "pose_landmarker_lite.task",
 );
 
-export function exerciseDirs(exerciseId: ExerciseId): {
+export function exerciseDirs(exerciseId: string): {
   root: string;
   inbox: string;
   candidates: string;

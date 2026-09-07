@@ -31,6 +31,10 @@ function norm(v: Vec2): Vec2 {
 export function buildPushupPose(opts: {
   elbowDeg: number;
   hipDrop?: number;
+  /** 膝放在肩-踝线上（衣摆：髋可垂、膝仍一线）。 */
+  kneesOnLine?: boolean;
+  /** 膝相对肩踝线再下沉（真塌髋时膝也离开一线）。 */
+  kneeDrop?: number;
 }): Pose {
   const { elbowDeg, hipDrop = 0 } = opts;
   const ankle: Vec2 = { x: 0.78, y: 0.7 };
@@ -56,6 +60,11 @@ export function buildPushupPose(opts: {
     y: elbow.y + fore * dir.y,
   };
 
+  const knee: Vec2 = {
+    x: shoulder.x + (ankle.x - shoulder.x) * 0.78,
+    y: shoulder.y + (ankle.y - shoulder.y) * 0.78,
+  };
+
   const pose: Pose = [];
   pose[LandmarkIndex.LeftShoulder] = lm(shoulder);
   pose[LandmarkIndex.RightShoulder] = lm(shoulder);
@@ -67,5 +76,12 @@ export function buildPushupPose(opts: {
   pose[LandmarkIndex.RightHip] = lm(hip);
   pose[LandmarkIndex.LeftAnkle] = lm(ankle);
   pose[LandmarkIndex.RightAnkle] = lm(ankle);
+  if (opts.kneesOnLine) {
+    pose[LandmarkIndex.LeftKnee] = lm(knee);
+    pose[LandmarkIndex.RightKnee] = lm(knee);
+  } else if (opts.kneeDrop != null) {
+    pose[LandmarkIndex.LeftKnee] = lm({ x: knee.x, y: knee.y + opts.kneeDrop });
+    pose[LandmarkIndex.RightKnee] = lm({ x: knee.x, y: knee.y + opts.kneeDrop });
+  }
   return pose;
 }

@@ -1,0 +1,218 @@
+diff --git a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt b/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
+--- a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
++++ b/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
+@@ -103,6 +103,7 @@
+           .setMinPoseDetectionConfidence(minPoseDetectionConfidence)
+           .setMinTrackingConfidence(minPoseTrackingConfidence)
+           .setMinPosePresenceConfidence(minPosePresenceConfidence)
++          .setNumPoses(DEFAULT_NUM_POSES)
+           .setRunningMode(runningMode)
+ 
+       // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
+@@ -219,7 +220,7 @@
+     const val DEFAULT_POSE_DETECTION_CONFIDENCE = 0.5F
+     const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
+     const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
+-    const val DEFAULT_NUM_POSES = 1
++    const val DEFAULT_NUM_POSES = 3
+     const val OTHER_ERROR = 0
+     const val GPU_ERROR = 1
+     const val MODEL_POSE_LANDMARKER_FULL = 0
+diff --git a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt b/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
+--- a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
++++ b/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
+@@ -261,37 +261,42 @@
+       if (_fragmentCameraBinding != null) {
+ 
+         val data = resultBundle.results.first()
+-        val landmarksArray: MutableList<Map<String, Any>> = mutableListOf()
++        val posesArray: MutableList<List<Map<String, Any>>> = mutableListOf()
+         val worldLandmarksArray: MutableList<Map<String, Any>> = mutableListOf()
+ 
+         val landmarks = data.landmarks()
+         val worldLandmarks = data.worldLandmarks()
+ 
+-        if (landmarks.isNotEmpty()) {
+-          for (landmark in landmarks[0]) {
+-            val landmarkData: Map<String, Any> = mapOf(
+-              "x" to landmark.x(),
+-              "y" to landmark.y(),
+-              "z" to landmark.z(),
+-              "visibility" to landmark.visibility().get(),
+-              "presence" to landmark.presence().get()
++        for (person in landmarks) {
++          val one: MutableList<Map<String, Any>> = mutableListOf()
++          for (landmark in person) {
++            one.add(
++              mapOf(
++                "x" to landmark.x(),
++                "y" to landmark.y(),
++                "z" to landmark.z(),
++                "visibility" to landmark.visibility().get(),
++                "presence" to landmark.presence().get()
++              )
+             )
+-            landmarksArray.add(landmarkData)
+           }
++          if (one.isNotEmpty()) {
++            posesArray.add(one)
++          }
+         }
+ 
+         worldLandmarks?.let {
+           if (it.isNotEmpty() && it[0].size == 33) {
+             for (worldLandmark in it[0]) {
+-              // Assuming similar structure for worldLandmark as for landmark
+-              val worldLandmarkData: Map<String, Any> = mapOf(
+-                "x" to worldLandmark.x(),
+-                "y" to worldLandmark.y(),
+-                "z" to worldLandmark.z(),
+-                "visibility" to worldLandmark.visibility().get(),
+-                "presence" to worldLandmark.presence().get()
++              worldLandmarksArray.add(
++                mapOf(
++                  "x" to worldLandmark.x(),
++                  "y" to worldLandmark.y(),
++                  "z" to worldLandmark.z(),
++                  "visibility" to worldLandmark.visibility().get(),
++                  "presence" to worldLandmark.presence().get()
++                )
+               )
+-              worldLandmarksArray.add(worldLandmarkData)
+             }
+           }
+         }
+@@ -299,12 +304,11 @@
+         val additionalData = mapOf(
+           "height" to resultBundle.inputImageHeight,
+           "width" to resultBundle.inputImageWidth,
+-//          "presentationTimeStamp" to resultBundle.presentationTimeStamp,
+-//          "frameNumber" to resultBundle.frameNumber,
+-//          "startTimestamp" to resultBundle.startTimestamp
+         )
+ 
++        val landmarksArray = if (posesArray.isNotEmpty()) posesArray[0] else emptyList()
+         val swiftDict: MutableMap<String, Any> = mutableMapOf(
++          "poses" to posesArray,
+           "landmarks" to landmarksArray,
+           "additionalData" to additionalData,
+           "worldLandmarks" to worldLandmarksArray
+diff --git a/ios/Configurations/DefaultConstants.swift b/ios/Configurations/DefaultConstants.swift
+--- a/ios/Configurations/DefaultConstants.swift
++++ b/ios/Configurations/DefaultConstants.swift
+@@ -12,7 +12,7 @@
+     
+     static let lineColor = UIColor(red: 255.0, green: 255.0, blue: 255.0, alpha: 1)
+     
+-    static var numPoses: Int = 1
++    static var numPoses: Int = 3
+     static var minPoseDetectionConfidence: Float = 0.5
+     static var minPosePresenceConfidence: Float = 0.5
+     static var minTrackingConfidence: Float = 0.5
+diff --git a/ios/ViewContoller/CameraView.swift b/ios/ViewContoller/CameraView.swift
+--- a/ios/ViewContoller/CameraView.swift
++++ b/ios/ViewContoller/CameraView.swift
+@@ -439,70 +439,47 @@
+              //   self!.frameCount =  self!.frameCount+1;
+              //   if(self!.frameCount > Int(limit)){
+                     self!.frameCount = 0
+-                    var results = poseLandmarkerResult.landmarks.first
+-                    var worldLandmarks = poseLandmarkerResult.worldLandmarks.first
+-
+-                    var swiftDict: [String: Any] = [:]
+-
+-                    if let landmarks = results {
+-                        var landmarksArray: [[String: Any]] = []
+-                        var worldLandmarksArray: [[String: Any]] = []
+-
+-                        for landmark in landmarks {
+-                            // Assuming landmark has `x` and `y` properties
+-                            let landmarkData: [String: Any] = [
++                    var posesArray: [[[String: Any]]] = []
++                    for poseLandmarks in poseLandmarkerResult.landmarks {
++                        var one: [[String: Any]] = []
++                        for landmark in poseLandmarks {
++                            one.append([
+                                 "x": landmark.x,
+                                 "y": landmark.y,
+                                 "z": landmark.z,
+                                 "visibility": landmark.visibility?.floatValue as Any,
+                                 "presence": landmark.presence?.floatValue as Any,
+-
+-                            ]
+-                            landmarksArray.append(landmarkData)
++                            ])
+                         }
+-
+-
+-                        if(worldLandmarks != nil){
+-                            for landmark in worldLandmarks! {
+-                                // Assuming landmark has `x` and `y` properties
+-                                let landmarkData: [String: Any] = [
+-                                    "x": landmark.x,
+-                                    "y": landmark.y,
+-                                    "z": landmark.z,
+-                                    "visibility": landmark.visibility?.floatValue as Any,
+-                                    "presence": landmark.presence?.floatValue as Any,
+-
+-                                ]
+-                                worldLandmarksArray.append(landmarkData)
+-                            }
++                        if !one.isEmpty {
++                            posesArray.append(one)
+                         }
+-
+-
+-                        //              var pixelBufferFromSampleBuffe = CMSampleBufferGetImageBuffer(self!.sampleBuffer)
+-                        //              var uiImage = uiImageFromPixelBuffer(pixelBufferFromSampleBuffe!)
+-                        //              var  dataFromUIImage =  dataFromUIImage(uiImage!)
+-                        //   var base64StringFromData = base64StringFromData(dataFromUIImage!)
+-
+-                        // Add the landmarks array to the swiftDict
+-
+-
+-                        swiftDict["landmarks"] = landmarksArray
+-                        swiftDict["additionalData"] = [
+-                            "height": self?.landmarkData.height ?? CGFloat(self!.isPortrait ? DefaultConstants.HEIGHT : DefaultConstants.WIDTH) ,
+-                            "width": self?.landmarkData.width ?? CGFloat(self!.isPortrait ? DefaultConstants.WIDTH : DefaultConstants.HEIGHT),
+-                            "presentationTimeStamp": self?.landmarkData.presentationTimeStamp ?? 0,
+-                            "frameNumber": self?.landmarkData.frameNumber ?? 0,
+-                            "startTimestamp" : self?.landmarkData.startTimestamp
+-                        ]
+-
+-                        swiftDict["worldLandmarks"] = worldLandmarksArray
+-
+-                        if self!.onLandmark != nil {
+-                            self!.onLandmark!(swiftDict)
++                    }
++                    var worldLandmarksArray: [[String: Any]] = []
++                    if let firstWorld = poseLandmarkerResult.worldLandmarks.first {
++                        for landmark in firstWorld {
++                            worldLandmarksArray.append([
++                                "x": landmark.x,
++                                "y": landmark.y,
++                                "z": landmark.z,
++                                "visibility": landmark.visibility?.floatValue as Any,
++                                "presence": landmark.presence?.floatValue as Any,
++                            ])
+                         }
+-                    } else {
+-                        // Handle the case where `results` is nil
+-                        //                print("No landmarks found")
++                    }
++                    var swiftDict: [String: Any] = [:]
++                    swiftDict["poses"] = posesArray
++                    swiftDict["landmarks"] = posesArray.first ?? []
++                    swiftDict["worldLandmarks"] = worldLandmarksArray
++                    swiftDict["additionalData"] = [
++                        "height": self?.landmarkData.height ?? CGFloat(self!.isPortrait ? DefaultConstants.HEIGHT : DefaultConstants.WIDTH) ,
++                        "width": self?.landmarkData.width ?? CGFloat(self!.isPortrait ? DefaultConstants.WIDTH : DefaultConstants.HEIGHT),
++                        "presentationTimeStamp": self?.landmarkData.presentationTimeStamp ?? 0,
++                        "frameNumber": self?.landmarkData.frameNumber ?? 0,
++                        "startTimestamp" : self?.landmarkData.startTimestamp
++                    ]
++                    if self!.onLandmark != nil {
++                        self!.onLandmark!(swiftDict)
+                     }
+               //  }
+                 

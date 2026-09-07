@@ -48,6 +48,7 @@ media/trajectory-source/**/_candidates/_user_pick/
 
 # 轨迹提取本地环境
 tools/trajectory-extract/.venv/
+tools/trajectory-source-ingest/.venv/
 tools/trajectory-extract/models/
 
 # Local package store / MediaPipe task dump

@@ -1,8 +1,6 @@
-# Session 压缩交接 — MP-FPS 小程序帧率专项（已暂停）
+# Session 压缩交接 — MP-FPS 小程序帧率专项（**已取消**）
 
-> **2026-08-04 产品决策：暂停小程序训练页攻坚，优先做完 App。**  
-> 代码保留，不删；恢复时从本文 + `docs/progress.json` backlog `MP-FPS` 接续。  
-> 开工前仍须按项目规则先读 `docs/PRD.md` → `docs/MODULES.md` → `docs/VERIFICATION.md`。
+> **2026-09-07 产品决策：彻底放弃微信小程序。** 本文仅作历史。`MP-FPS` backlog 已 `cancelled`。禁止再恢复小程序攻坚。
 
 ## 一、暂停时状态
 

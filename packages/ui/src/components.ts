@@ -52,6 +52,8 @@ export interface RepCounterProps {
   count: number;
   onEnd?: () => void;
   endLabel?: string;
+  /** 默认 Rep；平板支撑传「秒」。 */
+  caption?: string;
 }
 
 /** CMP-006 */
@@ -64,6 +66,14 @@ export interface PlacementGuideProps {
 export interface CountdownOverlayProps {
   /** 当前秒，如 3/2/1；null 表示隐藏。 */
   seconds: number | null;
+}
+
+/** CMP-015 — hold_second 中央计时（与 UX-007 打勾同位置同尺寸）。 */
+export interface HoldTimerOverlayProps {
+  /** 正在有效计时（撑稳）时为 true；暂停时隐藏。 */
+  active: boolean;
+  /** 本场已计入的有效整秒（与底栏汇总相同）。 */
+  seconds: number;
 }
 
 /** CMP-008 */

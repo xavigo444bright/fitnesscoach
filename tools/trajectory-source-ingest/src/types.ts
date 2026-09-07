@@ -1,7 +1,10 @@
 /** 示范片源 ingest 报告与评分类型（FR-067 片源侧） */
 
-export type ExerciseId = "squat" | "pushup";
+export type ExerciseId = string;
+/** Pose 提取与轨迹 meta：只有正/侧。 */
 export type CameraHint = "side" | "front";
+/** Scout 片源机位；3/4 提取时映射为 side。 */
+export type ScoutCamera = CameraHint | "three_quarter";
 
 export interface Provenance {
   sourceUrl: string;
@@ -15,6 +18,8 @@ export interface Provenance {
   poseScript?: string | null;
   note?: string;
   licenseNote?: string;
+  /** ASSET-SCOUT 条目 id（ingest 必填） */
+  scoutId?: string;
 }
 
 export interface TimeRangeSec {

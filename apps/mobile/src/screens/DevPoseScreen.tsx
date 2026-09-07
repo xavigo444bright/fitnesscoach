@@ -1,29 +1,42 @@
 /**
- * DevPose / 训练页共用管线：detect → filter → smooth → validate + 渲染叠加
+ * DevPose / 训练页共用管线：
+ * detect → smooth → filter(校验 0.5 / 绘制 0.2) → validate + 渲染叠加
  * M2A/M3 · M4-T4（variant=training → PG-004）
  */
 import {
+  ExerciseSubjectLock,
+  abortOpenRepCycle,
   hasDemoTrajectory,
+  initialLateralRaiseWristMemory,
   initialRepCounterState,
+  inferPoseUprightTurn,
+  invertQuarterTurn,
+  lateralRaiseDriveDeg,
   messageForRepReject,
+  poseUprightApplies,
+  PoseUprightLatch,
+  rotatePoseNormalized,
   stepRep,
   validate,
   type Phase,
+  type Pose,
+  type QuarterTurn,
   type TrajectoryCameraHint,
+  type ValidationResult,
   type ValidationStatus,
 } from '@fitness-coach/core';
 import {
   getExerciseSession,
+  driveAngleHud,
   type ExerciseId,
 } from '../exerciseSession';
 import {
-  AdaptiveQualityController,
+  DRAW_VISIBILITY_THRESHOLD,
   evaluateLowLight,
   filterByVisibility,
-  poseFromMediapipeEvent,
+  posesFromMediapipeEvent,
   PoseSmoother,
   timestampMsFromMediapipeEvent,
-  type QualityTier,
 } from '@fitness-coach/pose-native';
 import {
   applyJointColors,
@@ -31,18 +44,23 @@ import {
   buildSkeletonScene,
   celebrateFixedFaults,
   DEFAULT_FEEDBACK_BAR_CONFIG,
+  recoverMessageByIdFor,
+  allowSessionCount,
+  placementConfigFor,
+  composePlacementHint,
+  formatPlacementCoachHint,
   evaluatePlacement,
   initialLastFaultState,
   initialWiredFeedbackState,
   noteCycleFaults,
   CameraHintLatch,
-  GhostScaleSmoother,
   inferCameraHintDetailed,
-  inferSideFacingDetailed,
-  referencePoseFromTrajectory,
+  canonicalPoseFromUser,
+  filterPoseForOverlay,
+  isWrongCameraPlane,
+  liveSkeletonDrawSpec,
   repDisplayFromState,
   sealRejectedCycle,
-  SideFacingLatch,
   stepWiredFeedback,
   toggleFaultReview,
   type FeedbackBarItem,
@@ -63,13 +81,14 @@ import {
 } from 'react-native';
 import FeedbackBar from '../components/FeedbackBar';
 import CorrectCheckBurst from '../components/CorrectCheckBurst';
+import HoldTimerOverlay from '../components/HoldTimerOverlay';
 import LastFaultReview from '../components/LastFaultReview';
 import PlacementGuide from '../components/PlacementGuide';
+import ReferenceDemoWindow from '../components/ReferenceDemoWindow';
 import RepCounter from '../components/RepCounter';
 import SkeletonOverlay from '../components/SkeletonOverlay';
 import {
   getSessionCameraPrefs,
-  setSessionQuality,
   toggleSessionFacing,
 } from '../sessionCameraPrefs';
 import type { SessionSummaryData } from '../types/session';
@@ -80,6 +99,9 @@ import {
   setVoiceEnabled,
   speakCoach,
 } from '../voiceCoach';
+
+/** 姿态输入固定最高档（frameLimit 30 / 全分辨率），不再做质量降级。 */
+const POSE_FRAME_LIMIT = 30;
 
 function statusColor(status: ValidationStatus | '—'): string {
   switch (status) {
@@ -94,6 +116,130 @@ function statusColor(status: ValidationStatus | '—'): string {
   }
 }
 
+function jointsCueFor(id: ExerciseId): string {
+  if (id === 'pushup') return '肩、肘、髋、踝';
+  if (id === 'glute-bridge') return '肩、髋、膝';
+  if (id === 'lunge') return '肩、髋、膝、踝';
+  if (id === 'plank') return '肩、髋、踝';
+  if (id === 'db-row' || id === 'ohp' || id === 'bench-press') {
+    return '肩、肘、髋';
+  }
+  if (id === 'rdl') return '肩、髋、膝';
+  if (id === 'pullup') return '肩、肘';
+  if (id === 'db-fly') return '肩、腕';
+  if (id === 'dip') return '肩、肘';
+  if (id === 'incline-pushup') return '肩、肘、髋、踝';
+  if (id === 'cable-crossover') return '肩、腕';
+  if (id === 'chest-press-machine') return '肩、肘、髋';
+  if (id === 'lateral-raise' || id === 'front-raise') return '肩、肘';
+  if (id === 'rear-delt-fly') return '肩、腕';
+  if (id === 'face-pull') return '肩、肘';
+  if (id === 'pike-pushup') return '肩、肘、髋、踝';
+  return '髋、膝、踝';
+}
+
+function placementHintFor(
+  id: ExerciseId,
+  kind: 'empty' | 'fallback',
+): string {
+  if (id === 'pushup') {
+    return kind === 'empty'
+      ? '肩肘髋踝入画即可，不必顶满框'
+      : '肩肘髋踝入画即可，侧面看清身体一线';
+  }
+  if (id === 'glute-bridge') {
+    return kind === 'empty'
+      ? '肩髋膝入画即可，侧面仰卧'
+      : '肩髋膝入画即可，侧面看清顶髋';
+  }
+  if (id === 'lunge') {
+    return kind === 'empty'
+      ? '肩髋膝踝入画即可，侧面分腿'
+      : '肩髋膝踝入画即可，侧面看清前后腿';
+  }
+  if (id === 'plank') {
+    return kind === 'empty'
+      ? '请把手机放远并侧对镜头，肩髋踝入画后再计秒'
+      : '肩髋踝入画即可，侧面看清身体一线';
+  }
+  if (id === 'db-row') {
+    return kind === 'empty'
+      ? '肩肘髋入画即可，侧面划船'
+      : '肩肘髋入画即可，侧面看清拉收';
+  }
+  if (id === 'ohp') {
+    return kind === 'empty'
+      ? '肩肘髋入画即可，侧面站姿推举'
+      : '肩肘髋入画即可，侧面看清锁肘';
+  }
+  if (id === 'bench-press') {
+    return kind === 'empty'
+      ? '肩肘髋入画即可，侧面卧推'
+      : '肩肘髋入画即可，侧面看清触胸';
+  }
+  if (id === 'rdl') {
+    return kind === 'empty'
+      ? '肩髋膝入画即可，侧面髋铰链'
+      : '肩髋膝入画即可，侧面看清锁髋与铰链';
+  }
+  if (id === 'pullup') {
+    return kind === 'empty'
+      ? '肩肘入画即可，侧面引体'
+      : '肩肘入画即可，侧面看清过杆';
+  }
+  if (id === 'db-fly') {
+    return kind === 'empty'
+      ? '肩腕入画即可，凳侧 3/4 飞鸟'
+      : '肩腕入画即可，3/4 看清开合';
+  }
+  if (id === 'dip') {
+    return kind === 'empty'
+      ? '肩肘入画即可，双杠斜前方 3/4'
+      : '肩肘入画即可，3/4 看清屈伸与前倾';
+  }
+  if (id === 'incline-pushup') {
+    return kind === 'empty'
+      ? '肩肘髋踝入画即可，侧面手撑高处'
+      : '肩肘髋踝入画即可，侧面看清身体一线';
+  }
+  if (id === 'cable-crossover') {
+    return kind === 'empty'
+      ? '肩腕入画即可，面对龙门'
+      : '肩腕入画即可，正面看清开合';
+  }
+  if (id === 'chest-press-machine') {
+    return kind === 'empty'
+      ? '肩肘髋入画即可，侧面坐姿推胸'
+      : '肩肘髋入画即可，侧面看清收回';
+  }
+  if (id === 'lateral-raise') {
+    return kind === 'empty'
+      ? '肩肘入画即可，面对镜头侧平举'
+      : '肩肘入画即可，正面看清抬至肩高';
+  }
+  if (id === 'front-raise') {
+    return kind === 'empty'
+      ? '肩肘入画即可，侧面前平举'
+      : '肩肘入画即可，侧面看清前抬';
+  }
+  if (id === 'rear-delt-fly') {
+    return kind === 'empty'
+      ? '肩腕入画即可，斜侧 3/4 俯身飞鸟'
+      : '肩腕入画即可，3/4 看清打开';
+  }
+  if (id === 'face-pull') {
+    return kind === 'empty'
+      ? '肩肘入画即可，斜前方 3/4 面拉'
+      : '肩肘入画即可，3/4 看清拉向面部';
+  }
+  if (id === 'pike-pushup') {
+    return kind === 'empty'
+      ? '肩肘髋踝入画即可，侧面倒 V'
+      : '肩肘髋踝入画即可，侧面看清髋高与头向地面';
+  }
+  return '髋膝踝入画即可，不必顶满框';
+}
+
 export type DevPoseScreenProps = {
   /** debug = 开发 HUD；training = PG-004 正式训练页 */
   variant?: 'debug' | 'training';
@@ -102,6 +248,19 @@ export type DevPoseScreenProps = {
   /** 训练页「结束」回调，带回会话摘要 */
   onEnd?: (summary: SessionSummaryData) => void;
 };
+
+function richestCandidate(candidates: Pose[]): Pose | undefined {
+  let best: Pose | undefined;
+  let n = -1;
+  for (const p of candidates) {
+    const c = p.filter(Boolean).length;
+    if (c > n) {
+      n = c;
+      best = p;
+    }
+  }
+  return best;
+}
 
 export default function DevPoseScreen({
   variant = 'debug',
@@ -114,8 +273,10 @@ export default function DevPoseScreen({
   const [permission, requestPermission] = useCameraPermissions();
 
   const smootherRef = useRef(new PoseSmoother());
+  const subjectLockRef = useRef(new ExerciseSubjectLock(exercise.id));
+  const raiseWristMem = useRef(initialLateralRaiseWristMemory());
+  const uprightLatchRef = useRef(new PoseUprightLatch());
   const repRef = useRef(initialRepCounterState());
-  const qualityRef = useRef(new AdaptiveQualityController());
   const wiredFeedbackRef = useRef(initialWiredFeedbackState());
   const lastFaultRef = useRef(initialLastFaultState());
   const prevPhaseRef = useRef<Phase>('stand');
@@ -142,35 +303,26 @@ export default function DevPoseScreen({
   const [status, setStatus] = useState<ValidationStatus | '—'>('—');
   const [feedbackItems, setFeedbackItems] = useState<FeedbackBarItem[]>([]);
   const [repCount, setRepCount] = useState(0);
-  const [tier, setTier] = useState<QualityTier>('high');
-  const [manual, setManual] = useState(false);
-  const [frameLimit, setFrameLimit] = useState(30);
-  const [inputScale, setInputScale] = useState(1);
+  const [holdActive, setHoldActive] = useState(false);
   const [skeleton, setSkeleton] = useState<SkeletonScene | null>(null);
-  /** 示范轨迹参考骨架（FR-068）；默认开，可开关。 */
-  const [refSkeleton, setRefSkeleton] = useState<SkeletonScene | null>(null);
+  const [refCameraHint, setRefCameraHint] = useState<TrajectoryCameraHint>(
+    exercise.def.cameraHint,
+  );
+  const [canonicalPose, setCanonicalPose] = useState<Pose | null>(null);
+  const [lockPipToClip, setLockPipToClip] = useState(false);
   const [showReference, setShowReference] = useState(true);
   const showReferenceRef = useRef(true);
-  /** 示范轨迹机位：auto=按肩髋跨度识别；亦可手动锁侧/正 */
-  const [trajCameraMode, setTrajCameraMode] = useState<
-    'auto' | TrajectoryCameraHint
-  >('auto');
-  const trajCameraModeRef = useRef<'auto' | TrajectoryCameraHint>('auto');
-  const [trajCamera, setTrajCamera] = useState<TrajectoryCameraHint>('side');
-  const trajCameraRef = useRef<TrajectoryCameraHint>('side');
+  const trajCameraRef = useRef<TrajectoryCameraHint>(exercise.def.cameraHint);
   const cameraHintLatch = useRef(new CameraHintLatch(8));
-  /** 侧面朝向多帧锁定（左/右） */
-  const sideFacingLatch = useRef(new SideFacingLatch(8));
-  /** 参考骨尺度：站立平滑，行程冻结 */
-  const ghostScaleSmoother = useRef(new GhostScaleSmoother());
   useEffect(() => {
-    sideFacingLatch.current.reset();
     cameraHintLatch.current.reset();
-    ghostScaleSmoother.current.reset();
-    trajCameraModeRef.current = 'auto';
-    setTrajCameraMode('auto');
-    trajCameraRef.current = 'side';
-    setTrajCamera('side');
+    trajCameraRef.current = exercise.def.cameraHint;
+    setRefCameraHint(exercise.def.cameraHint);
+    setCanonicalPose(null);
+    subjectLockRef.current = new ExerciseSubjectLock(exercise.id);
+    raiseWristMem.current = initialLateralRaiseWristMemory();
+    uprightLatchRef.current.reset();
+    smootherRef.current.reset();
   }, [exercise.id]);
   const [placementVisible, setPlacementVisible] = useState(false);
   const [placementHint, setPlacementHint] = useState<string | null>(null);
@@ -188,27 +340,8 @@ export default function DevPoseScreen({
   );
   const [faultReviewing, setFaultReviewing] = useState(false);
 
-  const syncQualityUi = useCallback(() => {
-    const p = qualityRef.current.profile();
-    setTier(p.tier);
-    setManual(qualityRef.current.isManual());
-    setFrameLimit(p.frameLimit);
-    setInputScale(p.inputScale);
-  }, []);
-
-  /** 从准备页带入质量档。 */
-  useEffect(() => {
-    const prefs = getSessionCameraPrefs();
-    qualityRef.current.setManualTier(prefs.qualityTier);
-    if (!prefs.qualityManual) {
-      qualityRef.current.clearManual();
-    }
-    syncQualityUi();
-  }, [syncQualityUi]);
-
   /**
-   * MediaPipe 视图按 frameLimit/inputScale remount 后会回到默认前置；
-   * 偏好为后置时每次挂载后再 switch 一次。
+   * MediaPipe 挂载后：偏好为后置时再 switch 一次。
    */
   useEffect(() => {
     if (getSessionCameraPrefs().facing !== 'back') return;
@@ -220,7 +353,7 @@ export default function DevPoseScreen({
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [frameLimit, inputScale]);
+  }, []);
 
   const onLandmark = useCallback(
     (data: unknown) => {
@@ -231,24 +364,33 @@ export default function DevPoseScreen({
       const currentFps = times.length;
       setFps(currentFps);
 
-      const prevLimit = qualityRef.current.profile().frameLimit;
-      qualityRef.current.observeFps(currentFps, now);
-      const profile = qualityRef.current.profile();
-      if (profile.frameLimit !== prevLimit) {
-        syncQualityUi();
+      const candidates = posesFromMediapipeEvent(data);
+      const prevTurn = uprightLatchRef.current.value;
+      let turn: QuarterTurn = 0;
+      if (poseUprightApplies(exercise.id)) {
+        const probe = richestCandidate(candidates);
+        turn = probe
+          ? uprightLatchRef.current.update(inferPoseUprightTurn(probe))
+          : uprightLatchRef.current.value;
       }
-
-      const detected = poseFromMediapipeEvent(data);
+      if (turn !== prevTurn) {
+        smootherRef.current.reset();
+        subjectLockRef.current.reset();
+      }
+      const oriented =
+        turn === 0
+          ? candidates
+          : candidates.map((p) => rotatePoseNormalized(p, turn));
+      const detected = subjectLockRef.current.pick(oriented);
+      if (subjectLockRef.current.didSwitch()) {
+        smootherRef.current.reset();
+      }
       if (!detected) {
         setLandmarkCount(0);
         setSkeleton(null);
-        setRefSkeleton(null);
+        setCanonicalPose(null);
         setPlacementVisible(true);
-        setPlacementHint(
-          exercise.id === 'pushup'
-            ? '肩肘髋踝入画即可，不必顶满框'
-            : '髋膝踝入画即可，不必顶满框',
-        );
+        setPlacementHint(placementHintFor(exercise.id, 'empty'));
         setLowLightHint(null);
         return;
       }
@@ -256,46 +398,176 @@ export default function DevPoseScreen({
       const light = evaluateLowLight(detected);
       setLowLightHint(light.hint);
 
-      if (!qualityRef.current.shouldProcessFrame()) return;
-
       const ts = timestampMsFromMediapipeEvent(data, now);
-      const filtered = filterByVisibility(detected);
-      const smoothed = smootherRef.current.smooth(filtered, ts);
-      const placement = evaluatePlacement(smoothed);
-      if (placement.reason === 'ok') {
+      const smoothed = smootherRef.current.smooth(detected, ts);
+      const forRules = filterByVisibility(smoothed);
+      const forDrawUpright = filterByVisibility(
+        smoothed,
+        DRAW_VISIBILITY_THRESHOLD,
+      );
+      const forDrawCamera =
+        turn === 0
+          ? forDrawUpright
+          : rotatePoseNormalized(forDrawUpright, invertQuarterTurn(turn));
+      // 平板/划船/推举/卧推：绘制阈值喂引擎（踝/肘 vis 常 0.2–0.5）
+      const lowVisEngine =
+        exercise.id === 'plank' ||
+        exercise.id === 'db-row' ||
+        exercise.id === 'ohp' ||
+        exercise.id === 'bench-press' ||
+        exercise.id === 'rdl' ||
+        exercise.id === 'pullup' ||
+        exercise.id === 'db-fly' ||
+        exercise.id === 'dip' ||
+        exercise.id === 'incline-pushup' ||
+        exercise.id === 'chest-press-machine' ||
+        exercise.id === 'lateral-raise' ||
+        exercise.id === 'front-raise' ||
+        exercise.id === 'rear-delt-fly' ||
+        exercise.id === 'face-pull' ||
+        exercise.id === 'pike-pushup';
+      const forEngine = lowVisEngine ? forDrawUpright : forRules;
+      const placement = evaluatePlacement(
+        forDrawCamera,
+        placementConfigFor(exercise.id),
+      );
+      const camInf = inferCameraHintDetailed(forEngine);
+      const sideOnly =
+        exercise.def.cameraHint === 'side' &&
+        !hasDemoTrajectory(exercise.id, 'front');
+      const frontOnly = exercise.id === 'lateral-raise';
+      const angleFn =
+        exercise.id === 'lateral-raise'
+          ? (pose: Pose) =>
+              lateralRaiseDriveDeg(
+                pose,
+                raiseWristMem.current,
+                turn === 0
+                  ? pose
+                  : rotatePoseNormalized(pose, invertQuarterTurn(turn)),
+              )
+          : exercise.angleFn;
+      // FR-022：能算出驱动角则允许计数；正面误判只提示不冻
+      const driveLive = angleFn(forEngine);
+      const planeWrong = isWrongCameraPlane({
+        requireSidePlane: sideOnly,
+        requireFrontPlane: frontOnly,
+        observedCamera: camInf.hint,
+        observedConfidence: camInf.confidence,
+      });
+      const allowCount = allowSessionCount(placement, driveLive);
+      if (allowCount) {
         placementOkStreak.current += 1;
       } else {
         placementOkStreak.current = 0;
       }
       // 连续 ~0.5s ok 再藏框，减少图1/图2 来回闪
-      const showPlacement =
-        placement.visible || placementOkStreak.current < 12;
-      const prevPhase = prevPhaseRef.current;
-      const nextRep = stepRep(repRef.current, smoothed, {
-        phaseConfig: exercise.phaseConfig,
-        rules: exercise.rules,
-        angleFn: exercise.angleFn,
-        depthRuleId: exercise.depthRuleId,
-        exerciseId: exercise.id,
+      const composedHint = composePlacementHint(placement, {
+        recommendedCamera: exercise.def.cameraHint,
+        observedCamera: camInf.hint,
+        jointsCue: jointsCueFor(exercise.id),
+        holdSecond: exercise.countMode === 'hold_second',
+        floorHold:
+          exercise.id === 'plank' ||
+          exercise.id === 'pushup' ||
+          exercise.id === 'incline-pushup' ||
+          exercise.id === 'pike-pushup',
+        requireFrontPlane: frontOnly,
       });
+      const showPlacement =
+        (!allowCount &&
+          (placement.visible || placementOkStreak.current < 12)) ||
+        planeWrong;
+      const freezeCount = frontOnly && planeWrong;
+      const engineActive = subjectLockRef.current.isExerciseActive();
+      if (!engineActive) {
+        raiseWristMem.current = initialLateralRaiseWristMemory();
+      }
+      const prevPhase = prevPhaseRef.current;
+      const nextRep = !engineActive
+        ? abortOpenRepCycle(repRef.current)
+        : allowCount && !freezeCount
+          ? stepRep(repRef.current, forEngine, {
+              phaseConfig: exercise.phaseConfig,
+              rules: exercise.rules,
+              angleFn,
+              depthRuleId: exercise.depthRuleId,
+              exerciseId: exercise.id,
+              countMode: exercise.countMode,
+              nowMs: now,
+            })
+          : { ...repRef.current, lastOutcome: null };
       repRef.current = nextRep;
       const phaseNow = nextRep.phaseState.phase;
       prevPhaseRef.current = phaseNow;
 
-      if (prevPhase === 'stand' && phaseNow === 'descend') {
+      if (engineActive && prevPhase === 'stand' && phaseNow === 'descend') {
         lastFaultRef.current = beginFaultCycle(lastFaultRef.current);
       }
 
-      const result = validate(smoothed, phaseNow, exercise.rules);
-      const driveAngle = exercise.angleFn(smoothed);
-      const wired = stepWiredFeedback(wiredFeedbackRef.current, result, now);
+      const idleValidation: ValidationResult = {
+        status: 'correct',
+        messages: [],
+        results: [],
+      };
+      const result = engineActive
+        ? validate(forEngine, phaseNow, exercise.rules)
+        : idleValidation;
+      const driveAngle = angleFn(forEngine);
+      const recoverMap = recoverMessageByIdFor(exercise.id);
+      const wired = engineActive
+        ? stepWiredFeedback(
+            wiredFeedbackRef.current,
+            result,
+            now,
+            undefined,
+            {
+              ...DEFAULT_FEEDBACK_BAR_CONFIG,
+              recoverMessageById: recoverMap,
+            },
+          )
+        : {
+            state: initialWiredFeedbackState(),
+            items: [] as FeedbackBarItem[],
+            newCues: [],
+            displayValidation: idleValidation,
+          };
       wiredFeedbackRef.current = wired.state;
+      if (!engineActive) {
+        rejectHintRef.current = null;
+        recoverItemsRef.current = [];
+        recoverUntil.current = 0;
+        rejectHintUntil.current = 0;
+      }
+      const drawSpec = liveSkeletonDrawSpec({
+        requireSidePlane: sideOnly,
+        requireFrontPlane: frontOnly,
+        observedCamera: camInf.hint,
+        observedConfidence: camInf.confidence,
+        pose: forDrawCamera,
+        strictDrawVisibility: lowVisEngine,
+        exerciseId: exercise.id,
+      });
+      const drawPose = drawSpec.drawLive
+        ? filterPoseForOverlay(
+            forDrawCamera,
+            drawSpec.nearSide,
+            drawSpec.minVisibility,
+            drawSpec.limbPolicy,
+          )
+        : forDrawCamera;
       // 骨骼色用 latch 后的 validate，避免噪声一帧把黄骨刷绿
-      const scene = applyJointColors(
-        buildSkeletonScene(smoothed),
-        wired.displayValidation,
-        exercise.rules,
-      );
+      const scene = drawSpec.drawLive
+        ? applyJointColors(
+            buildSkeletonScene(drawPose, {
+              nearSide: drawSpec.nearSide,
+              limbPolicy: drawSpec.limbPolicy,
+              minVisibility: drawSpec.minVisibility,
+            }),
+            wired.displayValidation,
+            exercise.rules,
+          )
+        : null;
       for (const cue of wired.newCues) {
         const prev = issueCounts.current[cue.id];
         issueCounts.current[cue.id] = {
@@ -328,7 +600,7 @@ export default function DevPoseScreen({
         recover = [];
       }
 
-      if (nextRep.lastOutcome?.type === 'rejected') {
+      if (engineActive && nextRep.lastOutcome?.type === 'rejected') {
         const msg = messageForRepReject(
           nextRep.lastOutcome.reason,
           exercise.id,
@@ -351,14 +623,14 @@ export default function DevPoseScreen({
           message: msg,
           severity: 'error',
         });
-      } else if (nextRep.lastOutcome?.type === 'counted') {
+      } else if (engineActive && nextRep.lastOutcome?.type === 'counted') {
         if (nextRep.count !== lastSpokenRep.current) {
           lastSpokenRep.current = nextRep.count;
           speakCoach(`${nextRep.count}`);
         }
         const celebrated = celebrateFixedFaults(
           lastFaultRef.current,
-          DEFAULT_FEEDBACK_BAR_CONFIG.recoverMessageById,
+          recoverMap,
         );
         lastFaultRef.current = celebrated.state;
         if (celebrated.recovered.length > 0) {
@@ -414,12 +686,12 @@ export default function DevPoseScreen({
       setFaultIssues(lastFaultRef.current.issues);
       setFaultReviewing(lastFaultRef.current.reviewing);
       setRepCount(repUi.count);
+      setHoldActive(repUi.holdActive);
       setSkeleton(scene);
-      // 正/侧面：自动识别（肩髋跨度）；行程中锁定，stand 可切换
+      // 正/侧面：按肩髋跨度自动识别；行程中锁定，stand 可切换（无手动开关）
       let camHint: TrajectoryCameraHint = trajCameraRef.current;
-      const mode = trajCameraModeRef.current;
-      if (mode === 'auto' && hasDemoTrajectory(exercise.id, 'front')) {
-        const camInf = inferCameraHintDetailed(smoothed);
+      if (hasDemoTrajectory(exercise.id, 'front')) {
+        const camInf = inferCameraHintDetailed(forRules);
         const latched = cameraHintLatch.current.update(camInf.hint, {
           confidence: camInf.confidence,
           allowFlip: phaseNow === 'stand',
@@ -427,51 +699,30 @@ export default function DevPoseScreen({
         if (latched === 'side' || latched === 'front') {
           camHint = latched;
         }
-      } else if (mode === 'side' || mode === 'front') {
-        camHint = mode;
       }
       if (camHint !== trajCameraRef.current) {
         trajCameraRef.current = camHint;
-        // 正侧切换只重置尺度；保留朝向锁定，避免转身/切机位时双重突变
-        ghostScaleSmoother.current.reset();
-        setTrajCamera(camHint);
       }
-      // 侧面朝左/右：仅 stand 可更新；行程锁定（避免下蹲中途翻转）
-      const userFacing =
-        camHint === 'side'
-          ? (() => {
-              const inf = inferSideFacingDetailed(smoothed);
-              return sideFacingLatch.current.update(inf.facing, {
-                confidence: inf.confidence,
-                allowFlip: phaseNow === 'stand',
-              });
-            })()
-          : 0;
-      const refPose = referencePoseFromTrajectory(
-        exercise.id,
-        smoothed,
-        phaseNow,
-        driveAngle,
-        {
-          enabled: showReferenceRef.current,
-          cameraHint: camHint,
-          userFacing,
-          scaleSmoother: ghostScaleSmoother.current,
-          updateScale: phaseNow === 'stand',
-        },
-      );
-      setRefSkeleton(refPose ? buildSkeletonScene(refPose) : null);
+      const canonPose =
+        drawSpec.followUserInPip
+          ? canonicalPoseFromUser(drawPose, {
+              enabled: showReferenceRef.current,
+              cameraHint: camHint,
+              exerciseId: exercise.id,
+            })
+          : null;
+      setCanonicalPose(canonPose);
+      setLockPipToClip(!drawSpec.followUserInPip);
+      setRefCameraHint(camHint);
       setPlacementVisible(showPlacement);
       setPlacementHint(
-        showPlacement
-          ? (placement.hint ??
-              (exercise.id === 'pushup'
-                ? '肩肘髋踝入画即可，侧面看清身体一线'
-                : '髋膝踝入画即可，不必顶满框'))
-          : null,
+        composedHint ??
+          (placement.visible
+            ? (placement.hint ?? placementHintFor(exercise.id, 'fallback'))
+            : null),
       );
     },
-    [syncQualityUi, exercise],
+    [exercise],
   );
 
   const onToggleFaultReview = useCallback(() => {
@@ -489,35 +740,21 @@ export default function DevPoseScreen({
     setShowReference((prev) => {
       const next = !prev;
       showReferenceRef.current = next;
-      if (!next) setRefSkeleton(null);
+      if (!next) {
+        setCanonicalPose(null);
+      }
       return next;
     });
   }, []);
 
-  /** 循环：自动 → 侧 → 正 → 自动 */
-  const onToggleTrajCamera = useCallback(() => {
-    if (!hasDemoTrajectory(exercise.id, 'front')) return;
-    setTrajCameraMode((prev) => {
-      const next: 'auto' | TrajectoryCameraHint =
-        prev === 'auto' ? 'side' : prev === 'side' ? 'front' : 'auto';
-      trajCameraModeRef.current = next;
-      cameraHintLatch.current.reset();
-      sideFacingLatch.current.reset();
-      ghostScaleSmoother.current.reset();
-      if (next === 'side' || next === 'front') {
-        trajCameraRef.current = next;
-        setTrajCamera(next);
-      }
-      return next;
-    });
-  }, [exercise.id]);
-
   const onResetReps = useCallback(() => {
     repRef.current = initialRepCounterState();
+    raiseWristMem.current = initialLateralRaiseWristMemory();
     lastFaultRef.current = initialLastFaultState();
     lastSpokenRep.current = 0;
     prevPhaseRef.current = 'stand';
     setRepCount(0);
+    setHoldActive(false);
     setPhase('stand');
     setFaultIssues([]);
     setFaultReviewing(false);
@@ -545,19 +782,6 @@ export default function DevPoseScreen({
     }
     onResetReps();
   }, [onEnd, buildSummary, onResetReps]);
-
-  const onCycleQuality = useCallback(() => {
-    qualityRef.current.cycleManual();
-    const p = qualityRef.current.profile();
-    setSessionQuality(p.tier, true);
-    syncQualityUi();
-  }, [syncQualityUi]);
-
-  const onAutoQuality = useCallback(() => {
-    qualityRef.current.clearManual();
-    setSessionQuality(qualityRef.current.profile().tier, false);
-    syncQualityUi();
-  }, [syncQualityUi]);
 
   const onFlipCamera = useCallback(() => {
     try {
@@ -599,29 +823,42 @@ export default function DevPoseScreen({
     );
   }
 
-  const kneeText = kneeDeg == null ? '—' : `${kneeDeg.toFixed(1)}°`;
-  const camW = Math.max(160, Math.floor(width * inputScale));
-  const camH = Math.max(160, Math.floor(height * inputScale));
+  const hudAngle = driveAngleHud(exercise.id, kneeDeg);
+  const kneeText =
+    hudAngle.displayDeg == null ? '—' : `${hudAngle.displayDeg.toFixed(1)}°`;
+  const camW = Math.max(160, Math.floor(width));
+  const camH = Math.max(160, Math.floor(height));
 
   return (
     <View style={styles.container}>
       <View style={styles.cameraWrap}>
         <View style={{ width: camW, height: camH }}>
           <RNMediapipe
-            key={`mp-${frameLimit}-${inputScale}`}
+            key="mp-high"
             width={camW}
             height={camH}
             onLandmark={onLandmark}
-            frameLimit={frameLimit}
+            frameLimit={POSE_FRAME_LIMIT}
+            face={false}
+            leftArm={false}
+            rightArm={false}
+            leftWrist={false}
+            rightWrist={false}
+            torso={false}
+            leftLeg={false}
+            rightLeg={false}
+            leftAnkle={false}
+            rightAnkle={false}
           />
           <SkeletonOverlay
             scene={skeleton}
-            ghost={showReference ? refSkeleton : null}
-            guideMode={showReference}
             width={camW}
             height={camH}
           />
-          <PlacementGuide visible={placementVisible} hint={placementHint} />
+          <PlacementGuide
+            visible={placementVisible}
+            hint={formatPlacementCoachHint(placementHint)}
+          />
         </View>
       </View>
 
@@ -633,6 +870,9 @@ export default function DevPoseScreen({
 
       {isTraining ? (
         <View style={styles.trainingTop} pointerEvents="box-none">
+          <Text style={styles.fpsChip} pointerEvents="none">
+            FPS {fps}
+          </Text>
           <FeedbackBar items={feedbackItems} />
           <LastFaultReview
             issues={faultIssues}
@@ -650,7 +890,7 @@ export default function DevPoseScreen({
           />
           <Text style={styles.hudTitle}>DevPose · 调试</Text>
           <Text style={styles.hudText}>
-            {exercise.id === 'pushup' ? '肘角' : '膝角'}:{' '}
+            {hudAngle.label}:{' '}
             <Text style={styles.hudEm}>{kneeText}</Text>
             {' · '}
             {exercise.def.name}
@@ -663,9 +903,7 @@ export default function DevPoseScreen({
           </Text>
           <Text style={styles.hudText}>phase: {phase}</Text>
           <Text style={styles.hudMuted}>
-            关键点 {landmarkCount} · FPS {fps} · quality {tier}
-            {manual ? ' (手动)' : ' (自动)'} · scale {inputScale} · lim{' '}
-            {frameLimit}
+            关键点 {landmarkCount} · FPS {fps}
           </Text>
         </View>
       )}
@@ -682,26 +920,6 @@ export default function DevPoseScreen({
         </Pressable>
         <Pressable
           style={styles.actionBtn}
-          onPress={onCycleQuality}
-          accessibilityRole="button"
-          accessibilityLabel={`质量档 ${tier}`}
-          hitSlop={8}
-        >
-          <Text style={styles.actionBtnText}>质量 {tier}</Text>
-        </Pressable>
-        {manual ? (
-          <Pressable
-            style={styles.actionBtn}
-            onPress={onAutoQuality}
-            accessibilityRole="button"
-            accessibilityLabel="恢复自动质量"
-            hitSlop={8}
-          >
-            <Text style={styles.actionBtnText}>自动</Text>
-          </Pressable>
-        ) : null}
-        <Pressable
-          style={styles.actionBtn}
           onPress={onToggleVoice}
           accessibilityRole="button"
           accessibilityLabel={voiceOn ? '关闭语音' : '打开语音'}
@@ -715,47 +933,41 @@ export default function DevPoseScreen({
           style={styles.actionBtn}
           onPress={onToggleReference}
           accessibilityRole="button"
-          accessibilityLabel={showReference ? '关闭示范参考骨架' : '打开示范参考骨架'}
+          accessibilityLabel={showReference ? '关闭示范窗' : '打开示范窗'}
           hitSlop={8}
         >
           <Text style={styles.actionBtnText}>
             {showReference ? '参考开' : '参考关'}
           </Text>
         </Pressable>
-        {hasDemoTrajectory(exercise.id, 'front') ? (
-          <Pressable
-            style={styles.actionBtn}
-            onPress={onToggleTrajCamera}
-            accessibilityRole="button"
-            accessibilityLabel={
-              trajCameraMode === 'auto'
-                ? `机位自动（当前${trajCamera === 'side' ? '侧面' : '正面'}），点击改为手动`
-                : trajCameraMode === 'side'
-                  ? '手动侧面轨迹，点击改为正面'
-                  : '手动正面轨迹，点击改回自动'
-            }
-            hitSlop={8}
-          >
-            <Text style={styles.actionBtnText}>
-              {trajCameraMode === 'auto'
-                ? trajCamera === 'side'
-                  ? '自·侧'
-                  : '自·正'
-                : trajCameraMode === 'side'
-                  ? '轨·侧'
-                  : '轨·正'}
-            </Text>
-          </Pressable>
-        ) : null}
       </View>
 
-      <CorrectCheckBurst repCount={repCount} />
+      {showReference ? (
+        <ReferenceDemoWindow
+          screenW={width}
+          screenH={height}
+          pose={canonicalPose}
+          cameraHint={refCameraHint}
+          exerciseId={exercise.id}
+          forceClip={lockPipToClip}
+        />
+      ) : null}
+
+      <CorrectCheckBurst
+        repCount={repCount}
+        enabled={exercise.countMode !== 'hold_second'}
+      />
+      <HoldTimerOverlay
+        active={exercise.countMode === 'hold_second' && holdActive}
+        seconds={repCount}
+      />
 
       <View style={styles.bottomBar}>
         <RepCounter
           count={repCount}
           onEnd={isTraining ? onEndSession : onResetReps}
           endLabel={isTraining ? '结束' : '重置'}
+          caption={exercise.id === 'plank' ? '秒' : 'Rep'}
         />
       </View>
       <StatusBar style="light" />
@@ -922,6 +1134,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+  },
+  fpsChip: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 6,
   },
   bottomBar: {
     position: 'absolute',

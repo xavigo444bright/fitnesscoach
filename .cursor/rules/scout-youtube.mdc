@@ -1,0 +1,21 @@
+---
+description: YouTube 检索与示范片下载必须整批走 yt-dlp，禁止逐条 WebFetch
+globs: docs/exercises/asset-scout/**,tools/trajectory-source-ingest/**
+alwaysApply: true
+---
+
+# YouTube / scout 网络
+
+YouTube 检索、探活、下载一律走 `pnpm --filter @fitness-coach/trajectory-source-ingest`（`--yt-search` / `--yt-probe` / `--download-only`）或本机 `yt-dlp`。在**一次** Shell 里完成整批，网络权限要一次 `all` 即可。
+
+用户对一批 clips 回复授权（含改窗）后：立刻
+
+`--download-only --scout-id id1,id2,...`
+
+再 `--crop-only` 同一批。不要再逐条问、不要拆成 N 次要权限的命令。
+
+禁止：
+
+- WebFetch `youtube.com` / `youtu.be` watch 页（会让用户逐条点允许）
+- 把同一批 download 拆成多条 Shell
+- 为凑满 15s 把第三循环或讲解圈进 look-window；proposed 查找带默认 ≤10s，≥2 次完整 ROM 即停

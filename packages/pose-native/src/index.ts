@@ -19,12 +19,15 @@ export {
 } from "./oneEuro.js";
 export {
   DEFAULT_VISIBILITY_THRESHOLD,
+  DRAW_VISIBILITY_THRESHOLD,
   filterByVisibility,
   isVisible,
 } from "./visibility.js";
 export {
   extractMediapipeLandmarks,
+  extractMediapipePoseLists,
   poseFromMediapipeEvent,
+  posesFromMediapipeEvent,
   timestampMsFromMediapipeEvent,
 } from "./mediapipe.js";
 export {

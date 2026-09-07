@@ -3,11 +3,40 @@
  */
 
 import {
+  DEFAULT_BENCH_PRESS_PHASE_CONFIG,
+  DEFAULT_DB_ROW_PHASE_CONFIG,
+  DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG,
+  DEFAULT_LUNGE_PHASE_CONFIG,
+  DEFAULT_OHP_PHASE_CONFIG,
+  DEFAULT_PLANK_PHASE_CONFIG,
   DEFAULT_PUSHUP_PHASE_CONFIG,
+  DEFAULT_PULLUP_PHASE_CONFIG,
+  DEFAULT_DB_FLY_PHASE_CONFIG,
+  DEFAULT_DIP_PHASE_CONFIG,
+  DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG,
+  DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG,
+  DEFAULT_LATERAL_RAISE_PHASE_CONFIG,
+  DEFAULT_FRONT_RAISE_PHASE_CONFIG,
+  DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
+  DEFAULT_FACE_PULL_PHASE_CONFIG,
+  DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_RDL_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
+  dbRowWorkingElbowAngle,
+  gluteBridgeDriveDeg,
   initialPhaseState,
+  lungeWorkingKneeAngle,
+  meanVisibleElbowAngle,
+  preferredVisibleElbowAngle,
+  plankDriveDeg,
+  pullupWorkingElbowAngle,
   pushupElbowAngle,
+  rdlHipAngle,
+  dbFlyDriveDeg,
   squatKneeAngle,
+  lateralRaiseDriveDeg,
+  shoulderRaiseDriveDeg,
   stepPhaseWithAngle,
   type PhaseConfig,
 } from "../phase.js";
@@ -52,15 +81,60 @@ function driveAngle(
   exerciseId: TrajectoryExerciseId,
   pose: Pose,
 ): number | null {
-  return exerciseId === "pushup"
-    ? pushupElbowAngle(pose)
-    : squatKneeAngle(pose);
+  if (exerciseId === "pushup") return pushupElbowAngle(pose);
+  if (exerciseId === "glute-bridge") return gluteBridgeDriveDeg(pose);
+  if (exerciseId === "lunge") return lungeWorkingKneeAngle(pose);
+  if (exerciseId === "plank") return plankDriveDeg(pose);
+  if (exerciseId === "db-row") return dbRowWorkingElbowAngle(pose);
+  if (exerciseId === "ohp" || exerciseId === "bench-press") {
+    return meanVisibleElbowAngle(pose);
+  }
+  if (exerciseId === "dip") return preferredVisibleElbowAngle(pose);
+  if (exerciseId === "rdl") return rdlHipAngle(pose);
+  if (exerciseId === "pullup") return pullupWorkingElbowAngle(pose);
+  if (exerciseId === "db-fly" || exerciseId === "cable-crossover") {
+    return dbFlyDriveDeg(pose);
+  }
+  if (exerciseId === "incline-pushup" || exerciseId === "chest-press-machine") {
+    return meanVisibleElbowAngle(pose);
+  }
+  if (exerciseId === "lateral-raise") {
+    return lateralRaiseDriveDeg(pose);
+  }
+  if (exerciseId === "front-raise") {
+    return shoulderRaiseDriveDeg(pose);
+  }
+  if (exerciseId === "rear-delt-fly") return dbFlyDriveDeg(pose);
+  if (exerciseId === "face-pull") return meanVisibleElbowAngle(pose);
+  if (exerciseId === "pike-pushup") return meanVisibleElbowAngle(pose);
+  return squatKneeAngle(pose);
 }
 
 function phaseConfigFor(exerciseId: TrajectoryExerciseId): PhaseConfig {
-  return exerciseId === "pushup"
-    ? DEFAULT_PUSHUP_PHASE_CONFIG
-    : DEFAULT_SQUAT_PHASE_CONFIG;
+  if (exerciseId === "pushup") return DEFAULT_PUSHUP_PHASE_CONFIG;
+  if (exerciseId === "glute-bridge") return DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG;
+  if (exerciseId === "lunge") return DEFAULT_LUNGE_PHASE_CONFIG;
+  if (exerciseId === "plank") return DEFAULT_PLANK_PHASE_CONFIG;
+  if (exerciseId === "db-row") return DEFAULT_DB_ROW_PHASE_CONFIG;
+  if (exerciseId === "ohp") return DEFAULT_OHP_PHASE_CONFIG;
+  if (exerciseId === "bench-press") return DEFAULT_BENCH_PRESS_PHASE_CONFIG;
+  if (exerciseId === "rdl") return DEFAULT_RDL_PHASE_CONFIG;
+  if (exerciseId === "pullup") return DEFAULT_PULLUP_PHASE_CONFIG;
+  if (exerciseId === "db-fly") return DEFAULT_DB_FLY_PHASE_CONFIG;
+  if (exerciseId === "dip") return DEFAULT_DIP_PHASE_CONFIG;
+  if (exerciseId === "incline-pushup") return DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG;
+  if (exerciseId === "cable-crossover") {
+    return DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG;
+  }
+  if (exerciseId === "chest-press-machine") {
+    return DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG;
+  }
+  if (exerciseId === "lateral-raise") return DEFAULT_LATERAL_RAISE_PHASE_CONFIG;
+  if (exerciseId === "front-raise") return DEFAULT_FRONT_RAISE_PHASE_CONFIG;
+  if (exerciseId === "rear-delt-fly") return DEFAULT_REAR_DELT_FLY_PHASE_CONFIG;
+  if (exerciseId === "face-pull") return DEFAULT_FACE_PULL_PHASE_CONFIG;
+  if (exerciseId === "pike-pushup") return DEFAULT_PIKE_PUSHUP_PHASE_CONFIG;
+  return DEFAULT_SQUAT_PHASE_CONFIG;
 }
 
 /** 离线提取：确认帧放宽，避免示范片尾刚站直却裁不出循环 */
@@ -267,6 +341,79 @@ export function normalizeLoopFrames(
 }
 
 /**
+ * 臀桥：look-window 常从顶髋切入，不是 rest→peak→rest。
+ * rest = 驱动角最大（髋贴地）；其后 peak = 驱动角最小（锁髋）；
+ * 若峰后未回到静息则镜像下行。禁止套深蹲 stand→bottom 开局假设。
+ */
+export function reconstructGluteBridgeLoop(
+  frames: RawTrajectoryFrame[],
+): RawTrajectoryFrame[] | null {
+  if (frames.length < MIN_LOOP_FRAMES) return null;
+  const cfg = extractPhaseConfigFor("glute-bridge");
+
+  let restI = -1;
+  let restA = Number.NEGATIVE_INFINITY;
+  for (let i = 0; i < frames.length; i += 1) {
+    const a = driveAngle("glute-bridge", frames[i]!.pose);
+    if (a != null && a > restA) {
+      restA = a;
+      restI = i;
+    }
+  }
+  if (restI < 0 || restA < cfg.bottomBelowDeg + 15) return null;
+
+  let peakAfter = -1;
+  let peakAfterA = Number.POSITIVE_INFINITY;
+  for (let i = restI; i < frames.length; i += 1) {
+    const a = driveAngle("glute-bridge", frames[i]!.pose);
+    if (a != null && a < peakAfterA) {
+      peakAfterA = a;
+      peakAfter = i;
+    }
+  }
+
+  if (peakAfter > restI + 2 && peakAfterA <= cfg.bottomBelowDeg) {
+    let rest2 = -1;
+    for (let i = peakAfter + 2; i < frames.length; i += 1) {
+      const a = driveAngle("glute-bridge", frames[i]!.pose);
+      if (a != null && a >= cfg.standAboveDeg) {
+        rest2 = i;
+        break;
+      }
+    }
+    if (rest2 > peakAfter && rest2 - restI + 1 >= MIN_LOOP_FRAMES) {
+      return frames.slice(restI, rest2 + 1);
+    }
+    const down = frames.slice(restI, peakAfter + 1);
+    const up = down.slice(0, -1).reverse();
+    const merged = [...down, ...up];
+    return merged.length >= MIN_LOOP_FRAMES ? merged : null;
+  }
+
+  let peakBefore = -1;
+  let peakBeforeA = Number.POSITIVE_INFINITY;
+  for (let i = 0; i <= restI; i += 1) {
+    const a = driveAngle("glute-bridge", frames[i]!.pose);
+    if (a != null && a < peakBeforeA) {
+      peakBeforeA = a;
+      peakBefore = i;
+    }
+  }
+  if (
+    peakBefore >= 0 &&
+    restI - peakBefore >= 2 &&
+    peakBeforeA <= cfg.bottomBelowDeg
+  ) {
+    const toRest = frames.slice(peakBefore, restI + 1);
+    const down = toRest.slice().reverse();
+    const up = down.slice(0, -1).reverse();
+    const merged = [...down, ...up];
+    return merged.length >= MIN_LOOP_FRAMES ? merged : null;
+  }
+  return null;
+}
+
+/**
  * 片源只到最低点未起身时：下行段 + 时间反转作上行，拼成可用单循环。
  */
 export function reconstructLoopFromPartial(
@@ -309,7 +456,23 @@ export function extractDemoTrajectory(
   let loopFrameRange: [number, number];
   let notes = opts.meta?.notes;
 
-  if (loop && loop.end - loop.start + 1 >= MIN_LOOP_FRAMES) {
+  if (opts.exerciseId === "glute-bridge") {
+    const rebuilt = reconstructGluteBridgeLoop(smoothed);
+    if (!rebuilt) {
+      throw new Error(
+        `extractDemoTrajectory: no usable glute-bridge loop ` +
+          `(loops=${loops.length}, frames=${smoothed.length})`,
+      );
+    }
+    slice = rebuilt;
+    loopFrameRange = [0, smoothed.length - 1];
+    notes = [
+      notes,
+      "glute-bridge: rest=max drive → peak=min drive after rest; mirrored if clip ends at lockout",
+    ]
+      .filter(Boolean)
+      .join("; ");
+  } else if (loop && loop.end - loop.start + 1 >= MIN_LOOP_FRAMES) {
     slice = smoothed.slice(loop.start, loop.end + 1);
     loopFrameRange = [loop.start, loop.end];
   } else {
@@ -380,7 +543,9 @@ export function extractFromPoseDump(
     id: string;
     preferRepIndex?: number;
     notes?: string;
-    /** 默认 true：canonical 站立举手则抛错（防参考骨畸形入库） */
+    /**
+     * 站立类默认 true。臀桥等仰卧默认 false，勿套垂臂站立门。
+     */
     assertStandQuality?: boolean;
   },
 ): DemoTrajectory {
@@ -407,7 +572,10 @@ export function extractFromPoseDump(
       notes: opts.notes,
     },
   });
-  if (opts.assertStandQuality !== false) {
+  const needsStand =
+    opts.assertStandQuality ??
+    (opts.exerciseId === "squat" || opts.exerciseId === "pushup");
+  if (needsStand) {
     assertCanonicalStandQuality(traj);
   }
   return traj;

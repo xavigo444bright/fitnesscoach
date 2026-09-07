@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   cuesFromValidation,
   initialFeedbackBarState,
+  recoverMessageByIdFor,
   stepFeedbackBar,
   type FeedbackBarCue,
 } from "./feedbackBar.js";
@@ -73,5 +74,45 @@ describe("stepFeedbackBar (M3-T3 / VT-P3A-003 / FR-045)", () => {
       ],
     });
     expect(cues).toEqual([{ id: "a", severity: "error", message: "x" }]);
+  });
+});
+
+describe("recoverMessageByIdFor", () => {
+  it("划船 recovered 不说深蹲", () => {
+    const map = recoverMessageByIdFor("db-row");
+    expect(map["rep-shallow"]).toMatch(/拉/);
+    expect(map["row-depth"]).toMatch(/拉/);
+    expect(map["rep-shallow"]).not.toMatch(/蹲/);
+  });
+
+  it("RDL / 引体 / 飞鸟 recovered 不说深蹲", () => {
+    expect(recoverMessageByIdFor("rdl")["rep-shallow"]).toMatch(/铰链/);
+    expect(recoverMessageByIdFor("pullup")["rep-shallow"]).toMatch(/拉/);
+    expect(recoverMessageByIdFor("db-fly")["rep-shallow"]).toMatch(/打开/);
+    expect(recoverMessageByIdFor("dip")["rep-shallow"]).toMatch(/降/);
+    expect(recoverMessageByIdFor("incline-pushup")["rep-shallow"]).toMatch(/降/);
+    expect(recoverMessageByIdFor("cable-crossover")["rep-shallow"]).toMatch(/打开/);
+    expect(recoverMessageByIdFor("chest-press-machine")["rep-shallow"]).toMatch(/收/);
+    expect(recoverMessageByIdFor("lateral-raise")["rep-shallow"]).toMatch(/抬/);
+    expect(recoverMessageByIdFor("front-raise")["rep-shallow"]).toMatch(/抬/);
+    expect(recoverMessageByIdFor("rear-delt-fly")["rep-shallow"]).toMatch(/打开/);
+    expect(recoverMessageByIdFor("face-pull")["rep-shallow"]).toMatch(/拉/);
+    expect(recoverMessageByIdFor("pike-pushup")["rep-shallow"]).toMatch(/降/);
+    expect(recoverMessageByIdFor("rdl")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("pullup")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("db-fly")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("dip")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("incline-pushup")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("cable-crossover")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("chest-press-machine")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("lateral-raise")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("front-raise")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("rear-delt-fly")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("face-pull")["rep-shallow"]).not.toMatch(/蹲/);
+    expect(recoverMessageByIdFor("pike-pushup")["rep-shallow"]).not.toMatch(/蹲/);
+  });
+
+  it("深蹲仍用蹲得更深", () => {
+    expect(recoverMessageByIdFor("squat")["rep-shallow"]).toMatch(/蹲/);
   });
 });

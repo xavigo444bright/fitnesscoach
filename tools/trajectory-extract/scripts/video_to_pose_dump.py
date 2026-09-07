@@ -25,7 +25,7 @@ from mediapipe.tasks.python import vision
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--video", required=True)
-    ap.add_argument("--exercise", required=True, choices=["squat", "pushup"])
+    ap.add_argument("--exercise", required=True, help="catalog exercise id, e.g. squat / glute-bridge")
     ap.add_argument("--camera", default="side", choices=["side", "front"])
     ap.add_argument("--out", required=True)
     ap.add_argument(

@@ -8,10 +8,12 @@
 import type { RepCounterState } from "@fitness-coach/core";
 
 export interface RepDisplay {
-  /** 已计入的有效次数（深度不足不计入）。 */
+  /** 已计入的有效次数（深度不足不计入）。hold_second 为有效秒数汇总。 */
   count: number;
   /** 最近一次结算是否计入；尚无结算则为 null。 */
   lastCounted: boolean | null;
+  /** hold_second：当前是否在有效计时（中央计时用）；往返 rep 恒为 false。 */
+  holdActive: boolean;
 }
 
 export function repDisplayFromState(state: RepCounterState): RepDisplay {
@@ -19,5 +21,6 @@ export function repDisplayFromState(state: RepCounterState): RepDisplay {
   return {
     count: state.count,
     lastCounted: last ? last.counted : null,
+    holdActive: state.holdAnchorMs != null,
   };
 }

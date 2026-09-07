@@ -460,6 +460,10 @@ export const BODY_LANDMARK_INDEXES: readonly number[] = [
   LandmarkIndex.RightKnee,
   LandmarkIndex.LeftAnkle,
   LandmarkIndex.RightAnkle,
+  LandmarkIndex.LeftHeel,
+  LandmarkIndex.RightHeel,
+  LandmarkIndex.LeftFootIndex,
+  LandmarkIndex.RightFootIndex,
 ];
 
 export function bodyOnlyPose(pose: Pose): Pose {

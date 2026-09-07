@@ -6,6 +6,18 @@ export function argValue(args: string[], name: string): string | undefined {
   return args[i + 1];
 }
 
+/** 重复出现的 `--flag a --flag b` 全部收下（不含逗号拆分）。 */
+export function argValues(args: string[], name: string): string[] {
+  const out: string[] = [];
+  for (let i = 0; i < args.length; i += 1) {
+    if (args[i] === name && args[i + 1] != null && args[i + 1] !== "") {
+      out.push(args[i + 1]!);
+      i += 1;
+    }
+  }
+  return out;
+}
+
 export function hasFlag(args: string[], name: string): boolean {
   return args.includes(name);
 }

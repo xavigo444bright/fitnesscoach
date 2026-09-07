@@ -12,6 +12,7 @@ import {
   runCapture,
   slugFromUrlOrPath,
 } from "./util.js";
+import { EXTRACT_VENV_PYTHON, INGEST_VENV_PYTHON } from "./paths.js";
 
 export interface DownloadResult {
   localPath: string;
@@ -31,14 +32,45 @@ async function exists(p: string): Promise<boolean> {
 const DRM_HINT =
   /DRM|login required|Sign in|age.?restrict|premium|members.?only|Private video|HTTP Error 403|HTTP Error 401|This video is not available/i;
 
+export async function runYtDlp(
+  args: string[],
+  timeoutMs: number,
+): Promise<{ code: number; stdout: string; stderr: string; via: string }> {
+  const pathVer = await runCapture("yt-dlp", ["--version"], {
+    timeoutMs: 10_000,
+  }).catch(() => null);
+  if (pathVer && pathVer.code === 0) {
+    const r = await runCapture("yt-dlp", args, { timeoutMs });
+    return { ...r, via: "yt-dlp" };
+  }
+  const pythons = [INGEST_VENV_PYTHON, EXTRACT_VENV_PYTHON];
+  for (const py of pythons) {
+    const pyVer = await runCapture(py, ["-m", "yt_dlp", "--version"], {
+      timeoutMs: 15_000,
+    }).catch(() => null);
+    if (!pyVer || pyVer.code !== 0) continue;
+    const r = await runCapture(py, ["-m", "yt_dlp", ...args], { timeoutMs });
+    return { ...r, via: `${py} -m yt_dlp` };
+  }
+  return {
+    code: 1,
+    stdout: "",
+    stderr: "yt-dlp missing on PATH and in ingest/extract venvs",
+    via: "missing",
+  };
+}
+
 export async function resolveOrDownloadVideo(opts: {
   input: string;
   inboxDir: string;
   exerciseId: string;
+  /** 默认 `<exercise>-<url-slug>`；scout 下载用 clip id 便于本地重裁对照 */
+  fileStem?: string;
 }): Promise<DownloadResult> {
   await mkdir(opts.inboxDir, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const slug = slugFromUrlOrPath(opts.input);
+  const slug =
+    opts.fileStem ?? `${opts.exerciseId}-${slugFromUrlOrPath(opts.input)}`;
 
   if (!isHttpUrl(opts.input)) {
     const abs = path.resolve(opts.input);
@@ -46,20 +78,14 @@ export async function resolveOrDownloadVideo(opts: {
       throw new Error(`local video not found: ${abs}`);
     }
     const ext = path.extname(abs) || ".mp4";
-    const dest = path.join(
-      opts.inboxDir,
-      `${opts.exerciseId}-${slug}-${stamp}${ext}`,
-    );
+    const dest = path.join(opts.inboxDir, `${slug}-${stamp}${ext}`);
     await copyFile(abs, dest);
     return { localPath: dest, method: "local-copy" };
   }
 
   if (looksLikeDirectVideoUrl(opts.input)) {
     const ext = path.extname(new URL(opts.input).pathname) || ".mp4";
-    const dest = path.join(
-      opts.inboxDir,
-      `${opts.exerciseId}-${slug}-${stamp}${ext}`,
-    );
+    const dest = path.join(opts.inboxDir, `${slug}-${stamp}${ext}`);
     const r = await runCapture(
       "curl",
       ["-L", "--fail", "--retry", "2", "-o", dest, opts.input],
@@ -77,34 +103,27 @@ export async function resolveOrDownloadVideo(opts: {
     return { localPath: dest, method: "curl" };
   }
 
-  // yt-dlp：不传 cookies / 不尝试破解；失败信息含登录/DRM 则明确拒绝
-  const outTpl = path.join(
-    opts.inboxDir,
-    `${opts.exerciseId}-${slug}-${stamp}.%(ext)s`,
-  );
-  const ver = await runCapture("yt-dlp", ["--version"], { timeoutMs: 10_000 });
+  const outTpl = path.join(opts.inboxDir, `${slug}-${stamp}.%(ext)s`);
+  const dlArgs = [
+    "--no-playlist",
+    "--no-warnings",
+    "-f",
+    "mp4/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+    "--merge-output-format",
+    "mp4",
+    "-o",
+    outTpl,
+    "--print",
+    "after_move:filepath",
+    opts.input,
+  ];
+  const ver = await runYtDlp(["--version"], 15_000);
   if (ver.code !== 0) {
     throw new Error(
-      "yt-dlp not found. Install yt-dlp, or pass a local path / direct .mp4 URL.",
+      `yt-dlp not found (${ver.via}). Create tools/trajectory-source-ingest/.venv and pip install yt-dlp.`,
     );
   }
-  const r = await runCapture(
-    "yt-dlp",
-    [
-      "--no-playlist",
-      "--no-warnings",
-      "-f",
-      "mp4/bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-      "--merge-output-format",
-      "mp4",
-      "-o",
-      outTpl,
-      "--print",
-      "after_move:filepath",
-      opts.input,
-    ],
-    { timeoutMs: 900_000 },
-  );
+  const r = await runYtDlp(dlArgs, 900_000);
   const combined = `${r.stdout}\n${r.stderr}`;
   if (r.code !== 0) {
     if (DRM_HINT.test(combined)) {

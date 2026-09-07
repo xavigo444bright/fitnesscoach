@@ -4,7 +4,11 @@
  * 正面：左右肩/髋水平间距大；侧面：左右点几乎叠在同一竖线。
  */
 
-import { LandmarkIndex, type Pose } from "@fitness-coach/core";
+import {
+  LandmarkIndex,
+  landmarkReliable,
+  type Pose,
+} from "@fitness-coach/core";
 
 export type CameraHint = "side" | "front";
 
@@ -34,52 +38,13 @@ function pairSpan(
   return Math.abs(a.x - b.x);
 }
 
-/**
- * 由肩/髋（及踝）水平跨度相对躯干高度推断机位。
- */
-export function inferCameraHintDetailed(pose: Pose): CameraHintInference {
-  const ls = pose[LandmarkIndex.LeftShoulder];
-  const rs = pose[LandmarkIndex.RightShoulder];
-  const lh = pose[LandmarkIndex.LeftHip];
-  const rh = pose[LandmarkIndex.RightHip];
-  const shoulder = mid(ls, rs);
-  const hip = mid(lh, rh);
-  if (!shoulder || !hip) {
-    return { hint: 0, confidence: 0, spanRatio: 0 };
-  }
+/** 髋/踝出画或 vis 偏低时不当作机位证据（近景躺姿瞎猜髋会把侧面判成正面）。 */
+const HINT_HIP_MIN_VIS = 0.5;
+/** 无可信髋时用肩水平跨度绝对值分正侧（近景躯干高会失真）。 */
+const HINT_SHOULDER_SPAN_FRONT = 0.22;
+const HINT_SHOULDER_SPAN_SIDE = 0.1;
 
-  const torsoH = Math.abs(hip.y - shoulder.y);
-  if (torsoH < 0.04) {
-    return { hint: 0, confidence: 0, spanRatio: 0 };
-  }
-
-  // 仅用肩/髋水平跨度；踝距在分腿站立时易把侧面误判成正面
-  const spans: number[] = [];
-  const sh = pairSpan(ls, rs);
-  const hp = pairSpan(lh, rh);
-  if (sh != null) spans.push(sh);
-  if (hp != null) spans.push(hp);
-
-  if (spans.length === 0) {
-    return { hint: 0, confidence: 0, spanRatio: 0 };
-  }
-
-  const avgSpan = spans.reduce((s, v) => s + v, 0) / spans.length;
-  let spanRatio = avgSpan / torsoH;
-
-  // 矢状深度：侧面站立时髋–踝水平偏移相对躯干更大
-  const ankle = mid(
-    pose[LandmarkIndex.LeftAnkle],
-    pose[LandmarkIndex.RightAnkle],
-  );
-  if (ankle) {
-    const depthRatio = Math.abs(ankle.x - hip.x) / torsoH;
-    if (depthRatio >= 0.35 && spanRatio < 0.7) {
-      spanRatio *= 0.72; // 压低正面倾向
-    }
-  }
-
-  // 经验阈值：侧面常 <0.32，正面常 >0.62（中间死区避免 3/4 抖切）
+function classifySpanRatio(spanRatio: number): CameraHintInference {
   if (spanRatio >= 0.62) {
     const confidence = Math.min(1, (spanRatio - 0.62) / 0.4 + 0.55);
     return { hint: "front", confidence, spanRatio };
@@ -89,6 +54,89 @@ export function inferCameraHintDetailed(pose: Pose): CameraHintInference {
     return { hint: "side", confidence, spanRatio };
   }
   return { hint: 0, confidence: 0.2, spanRatio };
+}
+
+/**
+ * 由肩/髋（及踝）水平跨度相对躯干高度推断机位。
+ * 髋不可靠时不拿瞎猜髋宽当正面；肩已叠成侧视时忽略宽髋。
+ */
+export function inferCameraHintDetailed(pose: Pose): CameraHintInference {
+  const ls = pose[LandmarkIndex.LeftShoulder];
+  const rs = pose[LandmarkIndex.RightShoulder];
+  const lh = pose[LandmarkIndex.LeftHip];
+  const rh = pose[LandmarkIndex.RightHip];
+  const lsOk = landmarkReliable(ls);
+  const rsOk = landmarkReliable(rs);
+  const lhOk = landmarkReliable(lh, { minVis: HINT_HIP_MIN_VIS });
+  const rhOk = landmarkReliable(rh, { minVis: HINT_HIP_MIN_VIS });
+  const shoulder = mid(lsOk ? ls : undefined, rsOk ? rs : undefined);
+  const hip = mid(lhOk ? lh : undefined, rhOk ? rh : undefined);
+  const sh = lsOk && rsOk ? pairSpan(ls, rs) : null;
+  const hp = lhOk && rhOk ? pairSpan(lh, rh) : null;
+
+  if (!shoulder) {
+    return { hint: 0, confidence: 0, spanRatio: 0 };
+  }
+
+  if (!hip) {
+    if (sh == null) return { hint: 0, confidence: 0, spanRatio: 0 };
+    if (sh >= HINT_SHOULDER_SPAN_FRONT) {
+      const spanRatio = sh / 0.3;
+      return {
+        hint: "front",
+        confidence: Math.min(1, (sh - HINT_SHOULDER_SPAN_FRONT) / 0.2 + 0.55),
+        spanRatio,
+      };
+    }
+    if (sh <= HINT_SHOULDER_SPAN_SIDE) {
+      const spanRatio = sh / 0.3;
+      return {
+        hint: "side",
+        confidence: Math.min(1, (HINT_SHOULDER_SPAN_SIDE - sh) / 0.1 + 0.55),
+        spanRatio,
+      };
+    }
+    return { hint: 0, confidence: 0.2, spanRatio: sh / 0.3 };
+  }
+
+  const torsoH = Math.abs(hip.y - shoulder.y);
+  if (torsoH < 0.04) {
+    return { hint: 0, confidence: 0, spanRatio: 0 };
+  }
+
+  const spans: number[] = [];
+  if (sh != null) spans.push(sh);
+  if (hp != null) {
+    const shR = sh != null ? sh / torsoH : null;
+    const hpR = hp / torsoH;
+    if (shR != null && shR <= 0.34 && hpR >= 0.5) {
+      // 肩已侧视，不要被出画/瞎猜的宽髋拉成正面
+    } else {
+      spans.push(hp);
+    }
+  }
+
+  if (spans.length === 0) {
+    return { hint: 0, confidence: 0, spanRatio: 0 };
+  }
+
+  const avgSpan = spans.reduce((s, v) => s + v, 0) / spans.length;
+  let spanRatio = avgSpan / torsoH;
+
+  const la = pose[LandmarkIndex.LeftAnkle];
+  const ra = pose[LandmarkIndex.RightAnkle];
+  const ankle = mid(
+    landmarkReliable(la, { minVis: HINT_HIP_MIN_VIS }) ? la : undefined,
+    landmarkReliable(ra, { minVis: HINT_HIP_MIN_VIS }) ? ra : undefined,
+  );
+  if (ankle) {
+    const depthRatio = Math.abs(ankle.x - hip.x) / torsoH;
+    if (depthRatio >= 0.35 && spanRatio < 0.7) {
+      spanRatio *= 0.72;
+    }
+  }
+
+  return classifySpanRatio(spanRatio);
 }
 
 export function inferCameraHint(pose: Pose): CameraHint | 0 {

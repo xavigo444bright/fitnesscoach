@@ -1,5 +1,4 @@
 import { synthesizePoseDump, type PoseDump } from "@fitness-coach/core";
-import type { ExerciseId } from "./types.js";
 
 /**
  * 将合成 PoseDump 的时间轴拉伸到目标时长（保持帧序与 rep 结构）。
@@ -28,7 +27,7 @@ export function stretchPoseDumpDuration(
 
 /** dry-run 默认夹具：多 rep + 时长落在样片标准内 */
 export function dryRunPoseDump(
-  exerciseId: ExerciseId,
+  exerciseId: "squat" | "pushup",
   targetDurationSec = 12,
 ): PoseDump {
   const base = synthesizePoseDump(exerciseId, 3);

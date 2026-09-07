@@ -13,7 +13,7 @@ pnpm --filter @fitness-coach/mobile start   # 或: pnpm --filter @fitness-coach/
 
 真机打开已安装的 Dev Client，扫码连接 Metro。若 Metro 因 `EMFILE` 退出，在启动前执行 `ulimit -n 65536`。
 
-新增原生依赖（如 `expo-speech`、`expo-av`）后若运行时报模块缺失，需重装 Dev Client：
+新增原生依赖（如 `expo-speech`、`expo-av`、**`expo-gl`**）后若运行时报模块缺失，需重装 Dev Client：
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm use 24

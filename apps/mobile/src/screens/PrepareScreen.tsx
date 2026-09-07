@@ -1,13 +1,11 @@
 /**
- * PG-003 训练准备（M4-T3 / FR-070 / FR-022）
- * 摄像头预览 + 站位框 + 3-2-1 倒计时（可跳过）
- * 支持翻转摄像头与质量档（偏好带入训练页）
+ * PG-003 训练准备（FR-022）
+ * 摄像头预览 + 站位文案；点开始即进训练（无 3-2-1）。
  */
-import type { QualityTier } from '@fitness-coach/pose-native';
 import { colors, fontSize, layout, space } from '@fitness-coach/ui';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -15,13 +13,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import CountdownOverlay from '../components/CountdownOverlay';
 import PlacementGuide from '../components/PlacementGuide';
 import {
-  cycleSessionQuality,
   getSessionCameraPrefs,
   setSessionFacing,
-  setSessionQuality,
   type CameraFacing,
 } from '../sessionCameraPrefs';
 
@@ -32,58 +27,14 @@ type Props = {
 
 export default function PrepareScreen({ onReady, onBack }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
-  const [seconds, setSeconds] = useState<number | null>(null);
-  const [running, setRunning] = useState(false);
-  const finished = useRef(false);
 
   const initial = getSessionCameraPrefs();
   const [facing, setFacing] = useState<CameraFacing>(initial.facing);
-  const [tier, setTier] = useState<QualityTier>(initial.qualityTier);
-  const [manual, setManual] = useState(initial.qualityManual);
-
-  useEffect(() => {
-    if (!running) return;
-    finished.current = false;
-    setSeconds(3);
-    const id = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev == null) return prev;
-        if (prev <= 1) {
-          clearInterval(id);
-          if (!finished.current) {
-            finished.current = true;
-            setTimeout(() => onReady(), 0);
-          }
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [running, onReady]);
-
-  const skip = () => {
-    finished.current = true;
-    setRunning(false);
-    setSeconds(null);
-    onReady();
-  };
 
   const onFlip = () => {
     const next: CameraFacing = facing === 'front' ? 'back' : 'front';
     setFacing(next);
     setSessionFacing(next);
-  };
-
-  const onCycleQuality = () => {
-    const next = cycleSessionQuality();
-    setTier(next);
-    setManual(true);
-  };
-
-  const onAutoQuality = () => {
-    setManual(false);
-    setSessionQuality(tier, false);
   };
 
   if (!permission) {
@@ -116,9 +67,8 @@ export default function PrepareScreen({ onReady, onBack }: Props) {
       <CameraView style={StyleSheet.absoluteFill} facing={facing} />
       <PlacementGuide
         visible
-        hint="髋膝踝入画即可，不必顶满框"
+        hint="整幅画面都可用，髋膝踝入画即可"
       />
-      <CountdownOverlay seconds={seconds} />
 
       <View style={styles.topBar}>
         <Pressable onPress={onBack} style={styles.backBtn}>
@@ -136,38 +86,12 @@ export default function PrepareScreen({ onReady, onBack }: Props) {
         >
           <Text style={styles.actionBtnText}>翻转</Text>
         </Pressable>
-        <Pressable
-          style={styles.actionBtn}
-          onPress={onCycleQuality}
-          accessibilityRole="button"
-          accessibilityLabel={`质量档 ${tier}`}
-          hitSlop={8}
-        >
-          <Text style={styles.actionBtnText}>质量 {tier}</Text>
-        </Pressable>
-        {manual ? (
-          <Pressable
-            style={styles.actionBtn}
-            onPress={onAutoQuality}
-            accessibilityRole="button"
-            accessibilityLabel="恢复自动质量"
-            hitSlop={8}
-          >
-            <Text style={styles.actionBtnText}>自动</Text>
-          </Pressable>
-        ) : null}
       </View>
 
       <View style={styles.bottom}>
-        {!running ? (
-          <Pressable style={styles.button} onPress={() => setRunning(true)}>
-            <Text style={styles.buttonText}>开始倒计时</Text>
-          </Pressable>
-        ) : (
-          <Pressable style={styles.skip} onPress={skip}>
-            <Text style={styles.skipText}>跳过</Text>
-          </Pressable>
-        )}
+        <Pressable style={styles.button} onPress={onReady}>
+          <Text style={styles.buttonText}>开始训练</Text>
+        </Pressable>
       </View>
       <StatusBar style="light" />
     </View>
@@ -262,17 +186,6 @@ const styles = StyleSheet.create({
     color: colors.overlayText,
     fontSize: fontSize.body,
     fontWeight: '700',
-  },
-  skip: {
-    minHeight: layout.touchMin,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-  },
-  skipText: {
-    color: colors.overlayText,
-    fontSize: fontSize.body,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
   },
   link: {
     marginTop: space.md,

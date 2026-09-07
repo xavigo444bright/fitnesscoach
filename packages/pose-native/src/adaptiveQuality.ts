@@ -1,8 +1,8 @@
 /**
  * @fitness-coach/pose-native — 自适应质量 / 分辨率降级（M2A-T5，VT-P2-006）
  *
- * MediaPipe 原生层难动态改分辨率时，用 frameLimit + processEveryN + inputScale
- * 近似降载；UI 可手动切档，也可按 FPS 自动降/升。
+ * 历史门禁：低端机可按 FPS 降档。2026-08-13 产品决定 App **固定 high**，
+ * 训练页不再接线本控制器；保留单测与 API，以备日后低端机回退。
  */
 
 export type QualityTier = "high" | "medium" | "low";

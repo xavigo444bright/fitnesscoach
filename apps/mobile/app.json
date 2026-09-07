@@ -4,8 +4,11 @@
     "slug": "fitness-coach",
     "version": "0.1.0",
     "scheme": "fitness-coach",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,

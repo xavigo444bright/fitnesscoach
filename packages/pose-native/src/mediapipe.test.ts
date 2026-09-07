@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   extractMediapipeLandmarks,
   poseFromMediapipeEvent,
+  posesFromMediapipeEvent,
   timestampMsFromMediapipeEvent,
 } from "./mediapipe.js";
 
@@ -50,5 +51,24 @@ describe("mediapipe adapter (M2A-T4)", () => {
   it("returns null when no landmarks", () => {
     expect(poseFromMediapipeEvent({})).toBeNull();
     expect(poseFromMediapipeEvent(null)).toBeNull();
+  });
+
+  it("poses 数组按人拆开，landmarks 仍是第一人", () => {
+    const personA = Array.from({ length: 33 }, (_, i) => ({
+      x: 0.2,
+      y: i / 33,
+      visibility: 1,
+    }));
+    const personB = Array.from({ length: 33 }, (_, i) => ({
+      x: 0.8,
+      y: i / 33,
+      visibility: 1,
+    }));
+    const event = { landmarks: personA, poses: [personA, personB] };
+    expect(extractMediapipeLandmarks(event)?.[0]).toMatchObject({ x: 0.2 });
+    const all = posesFromMediapipeEvent(event);
+    expect(all).toHaveLength(2);
+    expect(all[0]![0]).toMatchObject({ x: 0.2 });
+    expect(all[1]![0]).toMatchObject({ x: 0.8 });
   });
 });

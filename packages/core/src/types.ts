@@ -14,10 +14,21 @@ export interface Landmark {
 }
 
 /**
- * MediaPipe/MoveNet 关键点索引（深蹲侧面所需子集，见 squat-rules.md）。
+ * MediaPipe/MoveNet 关键点索引（与 MediaPipe Pose 33 点对齐，见 squat-rules.md）。
  * App 用 MediaPipe 33 点；小程序 MoveNet 17 点需在 pose 适配层映射到同一语义。
  */
 export enum LandmarkIndex {
+  Nose = 0,
+  LeftEyeInner = 1,
+  LeftEye = 2,
+  LeftEyeOuter = 3,
+  RightEyeInner = 4,
+  RightEye = 5,
+  RightEyeOuter = 6,
+  LeftEar = 7,
+  RightEar = 8,
+  MouthLeft = 9,
+  MouthRight = 10,
   LeftShoulder = 11,
   RightShoulder = 12,
   LeftElbow = 13,
@@ -30,6 +41,10 @@ export enum LandmarkIndex {
   RightKnee = 26,
   LeftAnkle = 27,
   RightAnkle = 28,
+  LeftHeel = 29,
+  RightHeel = 30,
+  LeftFootIndex = 31,
+  RightFootIndex = 32,
 }
 
 /** 一帧姿态：按索引存放的关键点数组（缺失点为 undefined）。 */
@@ -116,6 +131,12 @@ export interface RepCounterState {
   depthFaultThisCycle: boolean;
   /** 本帧结算结果；无结算则为 null。 */
   lastOutcome: RepCycleOutcome | null;
+  /** 静力动作累计毫秒（仅 countMode=hold_second）。 */
+  holdAccumMs: number;
+  holdAnchorMs: number | null;
+  /** 当前周期内驱动角最小/最大（侧平举最小行程）。 */
+  cycleDriveMin: number | null;
+  cycleDriveMax: number | null;
 }
 
 /** 一个动作的完整定义（角度、规则、相位阈值集合）。 */

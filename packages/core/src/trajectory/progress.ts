@@ -3,7 +3,25 @@
  */
 
 import {
+  DEFAULT_BENCH_PRESS_PHASE_CONFIG,
+  DEFAULT_DB_ROW_PHASE_CONFIG,
+  DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG,
+  DEFAULT_LUNGE_PHASE_CONFIG,
+  DEFAULT_OHP_PHASE_CONFIG,
+  DEFAULT_PLANK_PHASE_CONFIG,
   DEFAULT_PUSHUP_PHASE_CONFIG,
+  DEFAULT_PULLUP_PHASE_CONFIG,
+  DEFAULT_DB_FLY_PHASE_CONFIG,
+  DEFAULT_DIP_PHASE_CONFIG,
+  DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG,
+  DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG,
+  DEFAULT_LATERAL_RAISE_PHASE_CONFIG,
+  DEFAULT_FRONT_RAISE_PHASE_CONFIG,
+  DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
+  DEFAULT_FACE_PULL_PHASE_CONFIG,
+  DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_RDL_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
   type PhaseConfig,
 } from "../phase.js";
@@ -16,9 +34,30 @@ function clamp01(x: number): number {
 }
 
 function cfgFor(exerciseId: TrajectoryExerciseId): PhaseConfig {
-  return exerciseId === "pushup"
-    ? DEFAULT_PUSHUP_PHASE_CONFIG
-    : DEFAULT_SQUAT_PHASE_CONFIG;
+  if (exerciseId === "pushup") return DEFAULT_PUSHUP_PHASE_CONFIG;
+  if (exerciseId === "glute-bridge") return DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG;
+  if (exerciseId === "lunge") return DEFAULT_LUNGE_PHASE_CONFIG;
+  if (exerciseId === "plank") return DEFAULT_PLANK_PHASE_CONFIG;
+  if (exerciseId === "db-row") return DEFAULT_DB_ROW_PHASE_CONFIG;
+  if (exerciseId === "ohp") return DEFAULT_OHP_PHASE_CONFIG;
+  if (exerciseId === "bench-press") return DEFAULT_BENCH_PRESS_PHASE_CONFIG;
+  if (exerciseId === "rdl") return DEFAULT_RDL_PHASE_CONFIG;
+  if (exerciseId === "pullup") return DEFAULT_PULLUP_PHASE_CONFIG;
+  if (exerciseId === "db-fly") return DEFAULT_DB_FLY_PHASE_CONFIG;
+  if (exerciseId === "dip") return DEFAULT_DIP_PHASE_CONFIG;
+  if (exerciseId === "incline-pushup") return DEFAULT_INCLINE_PUSHUP_PHASE_CONFIG;
+  if (exerciseId === "cable-crossover") {
+    return DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG;
+  }
+  if (exerciseId === "chest-press-machine") {
+    return DEFAULT_CHEST_PRESS_MACHINE_PHASE_CONFIG;
+  }
+  if (exerciseId === "lateral-raise") return DEFAULT_LATERAL_RAISE_PHASE_CONFIG;
+  if (exerciseId === "front-raise") return DEFAULT_FRONT_RAISE_PHASE_CONFIG;
+  if (exerciseId === "rear-delt-fly") return DEFAULT_REAR_DELT_FLY_PHASE_CONFIG;
+  if (exerciseId === "face-pull") return DEFAULT_FACE_PULL_PHASE_CONFIG;
+  if (exerciseId === "pike-pushup") return DEFAULT_PIKE_PUSHUP_PHASE_CONFIG;
+  return DEFAULT_SQUAT_PHASE_CONFIG;
 }
 
 function mid(
@@ -201,7 +240,14 @@ export function standProgressOf(trajectory: DemoTrajectory): number {
   for (const f of frames) {
     // 深蹲帧不当站立参考
     if (f.phase === "bottom") continue;
-    if (f.driveDeg != null && f.driveDeg < 120) continue;
+    // 深蹲/俯卧撑：过低驱动角不是站立参考。臀桥驱动角本身 <120。
+    if (
+      trajectory.exerciseId !== "glute-bridge" &&
+      f.driveDeg != null &&
+      f.driveDeg < 120
+    ) {
+      continue;
+    }
     const pose = poseFromFrame(f);
     let score = scoreStandPose(pose);
     if (f.phase === "stand") score += 0.8;

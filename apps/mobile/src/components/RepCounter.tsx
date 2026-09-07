@@ -12,6 +12,7 @@ export default function RepCounter({
   count,
   onEnd,
   endLabel = '结束',
+  caption = 'Rep',
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
   const prevCount = useRef(count);
@@ -31,7 +32,7 @@ export default function RepCounter({
   return (
     <View style={styles.bar}>
       <View style={styles.repBlock}>
-        <Text style={styles.caption}>Rep</Text>
+        <Text style={styles.caption}>{caption}</Text>
         <Animated.Text style={[styles.count, { transform: [{ scale }] }]}>
           {count}
         </Animated.Text>

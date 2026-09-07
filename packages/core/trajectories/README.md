@@ -2,6 +2,8 @@
 
 | 文件 | exerciseId | 说明 |
 |------|------------|------|
+| `glute-bridge-side-v1.json` | glute-bridge | 磁盘产物；**未**打包进 registry（NFR-010） |
+| `lunge-side-v1.json` | lunge | 磁盘产物；**未**打包进 registry（NFR-010）；源片 `lunge-side-02` |
 | `squat-side-v1.json` | squat | **默认侧面**（垂臂、行程完整） |
 | `squat-side-v2.json` | squat | 备查（ingest；举手帧多，不作默认） |
 | `squat-side-v3.json` / `v4.json` | squat | 同片源另两段候选（备查） |

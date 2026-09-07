@@ -21,4 +21,4 @@
 
 大文件 gitignore。放好后在对话里说一声即可。
 
-从可商用 URL **自动下载并筛选候选片**：见 [`tools/trajectory-source-ingest/README.md`](../../tools/trajectory-source-ingest/README.md)（产出 `_inbox/` / `_candidates/`，需人工确认后再提轨迹）。
+从可商用 URL **自动下载并筛选候选片**：须先登记 `docs/exercises/asset-scout/clips.json`，再 `ingest --scout-id …`（见 [`tools/trajectory-source-ingest/README.md`](../../tools/trajectory-source-ingest/README.md)）。

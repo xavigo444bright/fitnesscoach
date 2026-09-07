@@ -25,12 +25,37 @@ function usage(): never {
   console.error(`trajectory-extract
 
 Commands:
-  synthesize --exercise squat|pushup [--out dir] [--id id]
+  synthesize --exercise squat|pushup|glute-bridge|lunge|plank|db-row|ohp|bench-press|rdl|pullup|db-fly|dip|incline-pushup|cable-crossover|chest-press-machine|lateral-raise|front-raise|rear-delt-fly|face-pull|pike-pushup [--out dir] [--id id]
   synthesize --all --out dir
-  from-dump --input pose-dump.json --exercise squat|pushup [--out dir] [--id id]
-  dump-synthetic --exercise squat|pushup [--out file]   # 写出中间 PoseDump 样例
+  from-dump --input pose-dump.json --exercise squat|pushup|glute-bridge|lunge|plank|db-row|ohp|bench-press|rdl|pullup|db-fly|dip|incline-pushup|cable-crossover|chest-press-machine|lateral-raise|front-raise|rear-delt-fly|face-pull|pike-pushup [--out dir] [--id id]
+  dump-synthetic --exercise squat|pushup|glute-bridge|lunge|plank|db-row|ohp|bench-press|rdl|pullup|db-fly|dip|incline-pushup|cable-crossover|chest-press-machine|lateral-raise|front-raise|rear-delt-fly|face-pull|pike-pushup [--out file]
 `);
   process.exit(1);
+}
+
+function isExerciseId(v: string | undefined): v is TrajectoryExerciseId {
+  return (
+    v === "squat" ||
+    v === "pushup" ||
+    v === "glute-bridge" ||
+    v === "lunge" ||
+    v === "plank" ||
+    v === "db-row" ||
+    v === "ohp" ||
+    v === "bench-press" ||
+    v === "rdl" ||
+    v === "pullup" ||
+    v === "db-fly" ||
+    v === "dip" ||
+    v === "incline-pushup" ||
+    v === "cable-crossover" ||
+    v === "chest-press-machine" ||
+    v === "lateral-raise" ||
+    v === "front-raise" ||
+    v === "rear-delt-fly" ||
+    v === "face-pull" ||
+    v === "pike-pushup"
+  );
 }
 
 function argValue(args: string[], name: string): string | undefined {
@@ -72,10 +97,8 @@ async function main(): Promise<void> {
       }
       return;
     }
-    const exercise = argValue(argv, "--exercise") as
-      | TrajectoryExerciseId
-      | undefined;
-    if (exercise !== "squat" && exercise !== "pushup") usage();
+    const exercise = argValue(argv, "--exercise");
+    if (!isExerciseId(exercise)) usage();
     const id = argValue(argv, "--id");
     const traj = synthesizeDemoTrajectory(exercise, id ? { id } : undefined);
     const file = await writeTrajectory(traj, outDir);
@@ -85,26 +108,31 @@ async function main(): Promise<void> {
 
   if (cmd === "from-dump") {
     const input = argValue(argv, "--input");
-    const exercise = argValue(argv, "--exercise") as
-      | TrajectoryExerciseId
-      | undefined;
-    if (!input || (exercise !== "squat" && exercise !== "pushup")) usage();
+    const exercise = argValue(argv, "--exercise");
+    if (!input || !isExerciseId(exercise)) usage();
     const outDir =
       argValue(argv, "--out") ??
       path.resolve(process.cwd(), "../../packages/core/trajectories");
     const id = argValue(argv, "--id") ?? `${exercise}-side-v1`;
     const dump = JSON.parse(await readFile(input, "utf8")) as PoseDump;
-    const traj = extractFromPoseDump(dump, { exerciseId: exercise, id });
+    const traj = extractFromPoseDump(dump, {
+      exerciseId: exercise,
+      id,
+      notes:
+        exercise === "glute-bridge"
+          ? "from glute-bridge-side-01.mp4 (scout look-window); not bundled (NFR-010)"
+          : exercise === "lunge"
+            ? "from lunge-side-02.mp4 (scout look-window); not bundled (NFR-010)"
+            : undefined,
+    });
     const file = await writeTrajectory(traj, outDir);
     console.log(`wrote ${file} frames=${traj.frames.length}`);
     return;
   }
 
   if (cmd === "dump-synthetic") {
-    const exercise = argValue(argv, "--exercise") as
-      | TrajectoryExerciseId
-      | undefined;
-    if (exercise !== "squat" && exercise !== "pushup") usage();
+    const exercise = argValue(argv, "--exercise");
+    if (!isExerciseId(exercise)) usage();
     const out =
       argValue(argv, "--out") ??
       path.resolve(process.cwd(), `${exercise}-pose-dump.json`);

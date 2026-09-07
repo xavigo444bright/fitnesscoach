@@ -2,7 +2,7 @@
   "name": "fitness-coach",
   "private": true,
   "version": "0.0.0",
-  "description": "健身动作指导 — 手机 App + 微信小程序",
+  "description": "健身动作指导 — 手机 App",
   "scripts": {
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
@@ -13,6 +13,11 @@
     "node": ">=20"
   },
   "packageManager": "pnpm@9.15.0",
+  "pnpm": {
+    "patchedDependencies": {
+      "@thinksys/react-native-mediapipe@0.0.21": "patches/@thinksys__react-native-mediapipe@0.0.21.patch"
+    }
+  },
   "dependencies": {
     "resolve": "1.22.12"
   }

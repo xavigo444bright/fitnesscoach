@@ -38,6 +38,142 @@ export const DEFAULT_FEEDBACK_BAR_CONFIG: FeedbackBarConfig = {
   },
 };
 
+/** 按动作覆盖 recovered 文案，避免划船打出深蹲句。 */
+export function recoverMessageByIdFor(
+  exerciseId: string,
+): Record<string, string> {
+  const base = DEFAULT_FEEDBACK_BAR_CONFIG.recoverMessageById;
+  if (exerciseId === "db-row") {
+    return {
+      ...base,
+      "rep-shallow": "很好，拉得更高了",
+      "row-depth": "很好，拉得更高了",
+    };
+  }
+  if (exerciseId === "pushup") {
+    return {
+      ...base,
+      "rep-shallow": "很好，降得更低了",
+      "elbow-depth": "很好，降得更低了",
+      "body-line": "很好，身体更直了",
+    };
+  }
+  if (exerciseId === "ohp") {
+    return {
+      ...base,
+      "rep-shallow": "很好，推得更直了",
+      "torso-upright": "很好，躯干更稳了",
+    };
+  }
+  if (exerciseId === "bench-press") {
+    return {
+      ...base,
+      "rep-shallow": "很好，放到胸口了",
+      "elbow-depth": "很好，放到胸口了",
+    };
+  }
+  if (exerciseId === "glute-bridge") {
+    return {
+      ...base,
+      "rep-shallow": "很好，髋顶得更高了",
+    };
+  }
+  if (exerciseId === "lunge") {
+    return {
+      ...base,
+      "rep-shallow": "很好，蹲得更深了",
+    };
+  }
+  if (exerciseId === "plank") {
+    return {
+      ...base,
+      "rep-shallow": "很好，撑住了",
+      "body-line": "很好，腰放平了",
+    };
+  }
+  if (exerciseId === "rdl") {
+    return {
+      ...base,
+      "rep-shallow": "很好，铰链更深了",
+      "rdl-depth": "很好，铰链更深了",
+    };
+  }
+  if (exerciseId === "pullup") {
+    return {
+      ...base,
+      "rep-shallow": "很好，拉得更高了",
+      "pull-depth": "很好，拉得更高了",
+    };
+  }
+  if (exerciseId === "db-fly") {
+    return {
+      ...base,
+      "rep-shallow": "很好，打开得更开了",
+      "fly-depth": "很好，打开得更开了",
+    };
+  }
+  if (exerciseId === "dip") {
+    return {
+      ...base,
+      "rep-shallow": "很好，降得更低了",
+      "dip-depth": "很好，降得更低了",
+      "torso-lean": "很好，前倾练胸了",
+    };
+  }
+  if (exerciseId === "incline-pushup") {
+    return {
+      ...base,
+      "rep-shallow": "很好，降得更低了",
+      "elbow-depth": "很好，降得更低了",
+      "body-line": "很好，身体一条线了",
+    };
+  }
+  if (exerciseId === "cable-crossover") {
+    return {
+      ...base,
+      "rep-shallow": "很好，打开得更开了",
+      "crossover-depth": "很好，打开得更开了",
+    };
+  }
+  if (exerciseId === "chest-press-machine") {
+    return {
+      ...base,
+      "rep-shallow": "很好，收得更近了",
+      "press-depth": "很好，收得更近了",
+    };
+  }
+  if (exerciseId === "lateral-raise" || exerciseId === "front-raise") {
+    return {
+      ...base,
+      "rep-shallow": "很好，抬得更高了",
+      "raise-height": "很好，抬得更高了",
+    };
+  }
+  if (exerciseId === "rear-delt-fly") {
+    return {
+      ...base,
+      "rep-shallow": "很好，打开得更开了",
+      "fly-depth": "很好，打开得更开了",
+    };
+  }
+  if (exerciseId === "face-pull") {
+    return {
+      ...base,
+      "rep-shallow": "很好，拉得更近了",
+      "pull-height": "很好，拉得更近了",
+    };
+  }
+  if (exerciseId === "pike-pushup") {
+    return {
+      ...base,
+      "rep-shallow": "很好，降得更低了",
+      "elbow-depth": "很好，降得更低了",
+      "pike-line": "很好，倒 V 稳住了",
+    };
+  }
+  return base;
+}
+
 const SEV_RANK: Record<"error" | "warning", number> = {
   error: 2,
   warning: 1,

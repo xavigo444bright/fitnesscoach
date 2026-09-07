@@ -3,6 +3,7 @@ import type { Pose } from "@fitness-coach/core";
 import { LandmarkIndex, validate } from "@fitness-coach/core";
 import {
   DEFAULT_VISIBILITY_THRESHOLD,
+  DRAW_VISIBILITY_THRESHOLD,
   filterByVisibility,
   isVisible,
 } from "./visibility.js";
@@ -25,6 +26,31 @@ function occludedLeftLegPose(): Pose {
 describe("VT-P2-004 visibility 过滤", () => {
   it("默认阈值 0.5（FR-032）", () => {
     expect(DEFAULT_VISIBILITY_THRESHOLD).toBe(0.5);
+  });
+
+  it("绘制阈值 0.2：弱可见踝可画、仍不进校验（FR-060）", () => {
+    expect(DRAW_VISIBILITY_THRESHOLD).toBe(0.2);
+    const pose: Pose = [];
+    pose[LandmarkIndex.RightAnkle] = { x: 0.55, y: 0.8, visibility: 0.3 };
+    pose[LandmarkIndex.RightHeel] = { x: 0.54, y: 0.84, visibility: 0.25 };
+    pose[LandmarkIndex.RightKnee] = { x: 0.55, y: 0.55, visibility: 0.9 };
+    expect(filterByVisibility(pose)[LandmarkIndex.RightAnkle]).toBeUndefined();
+    expect(filterByVisibility(pose)[LandmarkIndex.RightHeel]).toBeUndefined();
+    const drawn = filterByVisibility(pose, DRAW_VISIBILITY_THRESHOLD);
+    expect(drawn[LandmarkIndex.RightAnkle]).toEqual({
+      x: 0.55,
+      y: 0.8,
+      visibility: 0.3,
+    });
+    expect(drawn[LandmarkIndex.RightHeel]).toEqual({
+      x: 0.54,
+      y: 0.84,
+      visibility: 0.25,
+    });
+    expect(drawn[LandmarkIndex.RightKnee]).toBeTruthy();
+    expect(isVisible({ x: 0, y: 0, visibility: 0.19 }, DRAW_VISIBILITY_THRESHOLD)).toBe(
+      false,
+    );
   });
 
   it("visibility < 阈值 → 不可见；≥ 阈值 → 可见", () => {
