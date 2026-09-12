@@ -1,9 +1,9 @@
 {
   "version": "0.6.59",
   "plan": "module-based",
-  "last_updated": "2026-09-08T00:45:00+08:00",
+  "last_updated": "2026-09-12T23:44:00+08:00",
   "status": "in_progress",
-  "blocker": "2 Tab 已定（docs/app-ia.md 0.2.0）。下一编码：APP-SHELL。勿 arm。",
+  "blocker": "T15-R 绑定输入被键盘挡住已改。等人再验。口令 T15 通过。勿 arm sleeper。",
   "focus": "app",
   "backlog": [
     {
@@ -86,16 +86,16 @@
     {
       "id": "APP-SHELL",
       "title": "2 Tab 壳 + OLED token（FR-110）",
-      "note": "docs/app-ia.md 0.2.0：首页（训练|动作）、记录（记录|我的）。无中间蓝圆。未开始编码。",
+      "note": "T10-5 真机通过。2 Tab + 跟练栈收口。",
       "before": "launch",
-      "status": "planned"
+      "status": "done"
     },
     {
       "id": "APP-LOG",
       "title": "训记式训练容量 / 课表（FR-091/092）",
-      "note": "波次 2–5 见 app-ia：先 CORE 再 UI，再首页/日历/PR/模板。禁止先抄训记未点名功能。",
+      "note": "T12 / T13 / T14 通过。已结束课可左滑删除。PR 另单。",
       "before": "launch",
-      "status": "spec"
+      "status": "in_progress"
     },
     {
       "id": "APP-UI",
@@ -107,19 +107,19 @@
     {
       "id": "APP-ACCOUNT",
       "title": "账号体系（FR-100）",
-      "note": "波次 6。可与课表 UI 后半并行。首发不上传。",
+      "note": "T15 已编码：游客欢迎 + 四登录本机绑定，不上传。等人真机。",
       "before": "launch",
-      "status": "spec"
+      "status": "in_progress"
     }
   ],
   "loop": {
-    "interval": "20m",
+    "interval": "task",
     "mode": "paused_human",
-    "started_at": "2026-08-11T00:05:00+08:00",
-    "stopped_at": "2026-08-28T00:50:00+08:00",
-    "stop_reason": "明日带新 Release 验收。勿 arm。",
+    "started_at": "2026-09-10T00:01:00+08:00",
+    "stopped_at": null,
+    "stop_reason": null,
     "stop_after_next_tick": false,
-    "note": "paused_human。勿 arm。2 Tab 已定。下一编码 APP-SHELL（等用户下令）。"
+    "note": "T15-R 绑定 sheet 避开键盘。paused_human。口令 T15 通过。勿 arm sleeper。"
   },
   "current_module": "M13",
   "modules": {
@@ -205,10 +205,10 @@
       ]
     }
   },
-  "next_task": "APP-SHELL",
+  "next_task": "T15",
   "queue": [
-    "APP-SHELL",
-    "APP-LOG-CORE",
+    "APP-ACCOUNT",
+    "APP-TRAIN-CHROME",
     "APP-DISTRIBUTE"
   ],
   "completed_tasks": [
@@ -283,7 +283,16 @@
     "T9-1",
     "T9-2",
     "T9-3",
-    "M13-GATE"
+    "M13-GATE",
+    "T10-1",
+    "T10-2",
+    "T10-3",
+    "T10-4",
+    "T10-5",
+    "T11-1",
+    "T12",
+    "T13",
+    "T14"
   ],
   "completed_gates": [
     "M0-GATE",
@@ -299,6 +308,168 @@
     "M13-GATE"
   ],
   "iteration_log": [
+    {
+      "at": "2026-09-12T23:44:00+08:00",
+      "module": "M8",
+      "task": "T15-R",
+      "result": "partial",
+      "summary": "绑定手机/邮箱 sheet 用 KeyboardAvoidingView 抬到键盘上；我的自重 ScrollView 跟键盘让位。退出登录仍写游客身份，Reload 不出欢迎页是规格（有身份进首页，不是频控）。未改叠加层。未 arm。",
+      "next": "用户再验绑定输入与 T15。口令：T15 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:36:00+08:00",
+      "module": "M8",
+      "task": "T15",
+      "result": "partial",
+      "summary": "APP-ACCOUNT：无身份欢迎页；先去训练=游客；我的可绑 Apple/手机/邮箱/微信或退出。身份与课表分文件，绑定不丢记录。无原生 Apple 模块，点 Apple 为本机绑定。core 445 测绿，ui 24，mobile tsc 绿。未改叠加层。未 arm。",
+      "next": "用户真机三步。口令：T15 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:35:00+08:00",
+      "module": "M8",
+      "task": "T14",
+      "result": "ok",
+      "summary": "用户下令自动 T14 通过。补已结束课左滑删除（首页今日模块 + 记录当天卡）。未做 PR / 云同步。未 arm。",
+      "next": "已接 T15 账号。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-09-12T23:28:00+08:00",
+      "module": "M8",
+      "task": "T14-R",
+      "result": "partial",
+      "summary": "T14 打回：存模板改为摘要旁书签；首页新建训练出浮层选自由训练或模板，不再并排按钮。未改叠加层。未 arm。",
+      "next": "用户再验 T14。口令：T14 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:21:00+08:00",
+      "module": "M8",
+      "task": "T14",
+      "result": "partial",
+      "summary": "APP-TEMPLATE：存课为模板、套用生成新课、本机 JSON 持久化。未做 PR / 账号 / 铬。core 442 测绿，ui 24，mobile tsc 绿。未改叠加层。未 arm。",
+      "next": "用户真机两步。口令：T14 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:18:00+08:00",
+      "module": "M8",
+      "task": "T13",
+      "result": "ok",
+      "summary": "用户确认 T13 通过。记录月历收口。未做 PR / 模板。未 arm。下一 APP-TEMPLATE / T14，等人下令再开发。",
+      "next": "等人说继续后开发 T14（保存/套用模板）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:17:00+08:00",
+      "module": "M8",
+      "task": "T13",
+      "result": "partial",
+      "summary": "APP-HOME-HIST：记录·记录顶部月历；trainedCalendarDays / workoutsOnCalendarDay 走本地日。未做 PR / 模板 / 英雄卡。core 441 测绿，ui 24，mobile tsc 绿。未改叠加层。未 arm。",
+      "next": "用户真机两步。口令：T13 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:12:00+08:00",
+      "module": "M8",
+      "task": "T12",
+      "result": "ok",
+      "summary": "用户确认 T12 通过。已结束课编辑底栏改为保存并回上级。APP-LOG-UI 收口。未 arm。下一 APP-HOME-HIST / T13，等人下令再开发。",
+      "next": "等人说继续后开发 T13（日历点进当天课）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-12T23:06:00+08:00",
+      "module": "M8",
+      "task": "T12-R4",
+      "result": "partial",
+      "summary": "T12 四次打回：suggestedWeightKg 不再回落自重；首页今日多课模块，点进才编辑，改一节不覆盖其他课。core 439 测绿，ui 24，mobile tsc 绿。未做日历。未 arm。",
+      "next": "用户再验 T12。口令：T12 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-11T02:37:00+08:00",
+      "module": "M8",
+      "task": "T12-R3",
+      "result": "partial",
+      "summary": "T12 三次打回：结束课前落主题；记一组钉 dock；自重与容量同行；记录用本地日；空 placeholder 按 8 次记组；已结束可改并同步记录列表。core 437 测绿，ui 24，mobile tsc 绿。未做日历。未 arm。",
+      "next": "用户再验 T12。口令：T12 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-11T02:02:00+08:00",
+      "module": "M8",
+      "task": "T12-R2",
+      "result": "partial",
+      "summary": "T12 二次打回：自重改到我的+训练小格；复制图标在删旁；主题+动作聚合；结束课写入记录列表；休息/加动作/结束课钉在底栏上。core 434 测绿，ui 24，mobile tsc 绿。未做日历。未 arm。",
+      "next": "用户再验 T12。口令：T12 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T01:12:00+08:00",
+      "module": "M8",
+      "task": "T12-R",
+      "result": "partial",
+      "summary": "T12 真机打回返工：行内改/删组、复制上一组、自重填 kg、结束课后训练页只读回看、分段到内容 24pt。core 432 测绿，ui 24 测绿，mobile tsc 绿。未改叠加层。未做日历。loop paused_human 等第二次真机。未 arm。",
+      "next": "用户再验 T12。口令：T12 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T00:55:00+08:00",
+      "module": "M8",
+      "task": "T12",
+      "result": "partial",
+      "summary": "APP-LOG-UI：首页·训练组表、详情加入本节、跟练结束 FR-093 sheet、组间倒计时。core 429 测绿，ui 24 测绿，mobile tsc 绿。未改叠加层。结构审查与 PM 目的核通过。loop paused_human 等真机。未 arm。未勾 T12。",
+      "next": "用户真机三步。口令：T12 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T00:45:00+08:00",
+      "module": "M8",
+      "task": "T11-1",
+      "result": "ok",
+      "summary": "APP-LOG-CORE：课/组/容量 FR-094、上次重量、跟练落组函数、JSON 往返 + 本机文件适配。core 427 测绿。无组表 UI。结构审查与 PM 目的核通过。默认可跳过真机。未 arm。下一 T12 等人下令。",
+      "next": "等人说继续后开发 T12（首页组表 + FR-093 sheet + 休息倒计时）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T00:35:00+08:00",
+      "module": "M4",
+      "task": "T10-5",
+      "result": "ok",
+      "summary": "用户确认 T10-5 通过。APP-SHELL 收口（2 Tab + 分段 + 跟练全屏栈 + 绿骨/示范窗）。未 arm。下一 APP-LOG-CORE / T11-1，等人下令再开发。",
+      "next": "等人说继续后开发 T11-1（课表内核，默认可跳过真机）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T00:22:00+08:00",
+      "module": "M4",
+      "task": "T10-5",
+      "result": "partial",
+      "summary": "T10-2～T10-5 编码完成：2 Tab + 浮动底栏 + 页内分段 + 跟练全屏栈。ui 24 测绿，mobile tsc 绿。结构审查通过。PM 目的核通过。loop paused_human 等真机。未 arm。未勾 T10-5。",
+      "next": "用户重装 Dev Client 后验 T10-5 五步。口令：T10-5 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-10T00:06:00+08:00",
+      "module": "M4",
+      "task": "T10-1",
+      "result": "ok",
+      "summary": "OLED 真黑 + 白胶囊 CTA + Barlow 字族名进 tokens/ui theme。pose 绿黄红未改。ui 21 测绿。结构审查通过。PM 目的核通过。无真机。loop running 按工单节奏，未 arm 20m。",
+      "next": "T10-2+T10-3",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-09-09T23:54:00+08:00",
+      "module": "M4",
+      "task": "T10-1",
+      "result": "partial",
+      "summary": "PM 派工 APP-SHELL/T10-1（OLED tokens）。测完须结构审查 + PM 目的核。真机攒 T10-5。看板 app-launch-status canvas。loop 勿 arm。",
+      "next": "开发执行 T10-1。",
+      "human_action_needed": false
+    },
     {
       "at": "2026-09-08T00:45:00+08:00",
       "module": "M4",

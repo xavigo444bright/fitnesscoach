@@ -9,7 +9,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.fitnesscoach.mobile",

@@ -6,6 +6,7 @@ export {
   colors,
   fontSize,
   fontWeight,
+  fontFamily,
   space,
   radius,
   layout,
@@ -37,6 +38,19 @@ export {
   shouldRestartClipLoop,
   type ClipPlaybackRate,
 } from "./clipPlayback.js";
+
+export {
+  DEFAULT_HOME_SEGMENT,
+  DEFAULT_LOG_SEGMENT,
+  FULLSCREEN_STACK_ROUTES,
+  HOME_SEGMENTS,
+  LOG_SEGMENTS,
+  SHELL_TABS,
+  isFullscreenStackRoute,
+  shellTabCount,
+  type FullscreenStackRoute,
+  type ShellTabKey,
+} from "./shellNav.js";
 
 export type {
   SemanticStatus,

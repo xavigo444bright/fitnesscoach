@@ -2,7 +2,8 @@
 
 Master applies. Deviations:
 
-- Session header like match hero: exercise name large; sets remaining as the “score.”
-- Per-exercise **standings-like rows**: set #, reps, kg, rest. Primary number = kg or reps.
-- After camera stop: modal table to edit reps then enter weight (FR-093). Sheet uses Surface `#121212`, white CTA.
-- Rest timer: full-screen dim + huge Barlow Condensed seconds; white pill Skip / Stop.
+- Session header: **theme title** + exercise aggregation (name · sets), then volume.
+- Bodyweight lives in 记录 → 我的; training shows a small override cell.
+- Per-exercise standings rows: set #, reps/kg, **copy icon**, delete.
+- Dock 休息 / 加动作 / 结束课 above the floating tab bar.
+- Ended sessions appear in 记录 → 记录 (list). Calendar still later.

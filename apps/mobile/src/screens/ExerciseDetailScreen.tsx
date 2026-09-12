@@ -11,11 +11,14 @@ import {
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ExerciseDemoPlayer from '../components/ExerciseDemoPlayer';
+import ShellButton from '../components/ShellButton';
 
 type Props = {
   exerciseId: string;
   onBack: () => void;
+  onJoin: () => void;
   onStart: () => void;
 };
 
@@ -37,8 +40,10 @@ const CAMERA_COPY = {
 export default function ExerciseDetailScreen({
   exerciseId,
   onBack,
+  onJoin,
   onStart,
 }: Props) {
+  const insets = useSafeAreaInsets();
   const entry = getCatalogEntry(exerciseId);
   if (!entry) {
     return (
@@ -107,17 +112,16 @@ export default function ExerciseDetailScreen({
         ) : null}
       </ScrollView>
 
-      <Pressable
-        style={[styles.cta, !coachable && styles.ctaDisabled]}
-        onPress={coachable ? onStart : undefined}
-        disabled={!coachable}
-        accessibilityRole="button"
-        accessibilityLabel={coachable ? '开始训练' : '即将支持教练'}
-      >
-        <Text style={[styles.ctaText, !coachable && styles.ctaTextDisabled]}>
-          {coachable ? '开始训练' : '即将支持教练'}
-        </Text>
-      </Pressable>
+      <View style={[styles.ctaCol, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <ShellButton label="加入本节" onPress={onJoin} />
+        <View style={{ height: space.sm }} />
+        <ShellButton
+          variant="ghost"
+          label={coachable ? '跟练' : '即将支持教练'}
+          onPress={onStart}
+          disabled={!coachable}
+        />
+      </View>
       <StatusBar style="light" />
     </View>
   );
@@ -220,23 +224,7 @@ const styles = StyleSheet.create({
     color: colors.warning,
     fontSize: fontSize.caption,
   },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.sm,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ctaDisabled: {
-    backgroundColor: colors.surface,
-    opacity: 0.85,
-  },
-  ctaText: {
-    color: colors.overlayText,
-    fontSize: fontSize.body,
-    fontWeight: '700',
-  },
-  ctaTextDisabled: {
-    color: colors.textSecondary,
+  ctaCol: {
+    gap: 0,
   },
 });

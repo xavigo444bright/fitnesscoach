@@ -50,3 +50,5 @@ export * from "./fixtures/raise.js";
 export * from "./boundary/index.js";
 export * from "./trajectory/index.js";
 export * from "./subjectSelect.js";
+export * from "./workoutLog/index.js";
+export * from "./account/index.js";

@@ -1,90 +1,54 @@
-import { isCoachableId } from '@fitness-coach/core';
-import { useCallback, useState } from 'react';
-import type { ExerciseId } from './src/exerciseSession';
-import DevPoseScreen from './src/screens/DevPoseScreen';
-import ExerciseDetailScreen from './src/screens/ExerciseDetailScreen';
-import ExerciseLibraryScreen from './src/screens/ExerciseLibraryScreen';
-import PrepareScreen from './src/screens/PrepareScreen';
-import SessionSummaryScreen from './src/screens/SessionSummaryScreen';
-import TrainingScreen from './src/screens/TrainingScreen';
-import type { SessionSummaryData } from './src/types/session';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { colors } from '@fitness-coach/ui';
+import { hydrateAccount } from './src/accountStorage';
+import RootNavigator from './src/navigation/RootNavigator';
+import { hydrateWorkoutLog } from './src/workoutLogStorage';
 
-type Screen =
-  | 'library'
-  | 'detail'
-  | 'prepare'
-  | 'training'
-  | 'summary'
-  | 'devpose';
+const navTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: colors.bg,
+    card: colors.bg,
+    primary: colors.cta,
+    text: colors.textPrimary,
+    border: colors.border,
+  },
+};
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('library');
-  const [catalogId, setCatalogId] = useState('squat');
-  const [exerciseId, setExerciseId] = useState<ExerciseId>('squat');
-  const [summary, setSummary] = useState<SessionSummaryData | null>(null);
+  const [ready, setReady] = useState(false);
 
-  const goTraining = useCallback(() => setScreen('training'), []);
-
-  const endTraining = useCallback((data: SessionSummaryData) => {
-    setSummary(data);
-    setScreen('summary');
+  useEffect(() => {
+    void Promise.all([hydrateWorkoutLog(), hydrateAccount()]).then(() => {
+      setReady(true);
+    });
   }, []);
 
-  if (screen === 'summary' && summary) {
-    return (
-      <SessionSummaryScreen
-        summary={summary}
-        onRetry={() => setScreen('prepare')}
-        onBack={() => {
-          setSummary(null);
-          setScreen('library');
-        }}
-      />
-    );
-  }
-
-  if (screen === 'training') {
-    return (
-      <TrainingScreen exerciseId={exerciseId} onEnd={endTraining} />
-    );
-  }
-
-  if (screen === 'devpose') {
-    return <DevPoseScreen variant="debug" exerciseId="squat" />;
-  }
-
-  if (screen === 'prepare') {
-    return (
-      <PrepareScreen
-        onBack={() => setScreen('detail')}
-        onReady={goTraining}
-      />
-    );
-  }
-
-  if (screen === 'detail') {
-    return (
-      <ExerciseDetailScreen
-        exerciseId={catalogId}
-        onBack={() => setScreen('library')}
-        onStart={() => {
-          if (isCoachableId(catalogId)) {
-            setExerciseId(catalogId);
-            setScreen('prepare');
-          }
-        }}
-      />
-    );
+  if (!ready) {
+    return <GestureHandlerRootView style={styles.root} />;
   }
 
   return (
-    <ExerciseLibraryScreen
-      onSelectExercise={(id) => {
-        setCatalogId(id);
-        if (isCoachableId(id)) setExerciseId(id);
-        setScreen('detail');
-      }}
-      onOpenDevPose={() => setScreen('devpose')}
-    />
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+        <NavigationContainer theme={navTheme}>
+          <RootNavigator />
+        </NavigationContainer>
+        <StatusBar style="light" />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+});

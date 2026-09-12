@@ -1,7 +1,7 @@
 ---
 document: design-tokens
 product: fitness-coach
-version: 0.2.8
+version: 0.3.0
 status: confirmed
 confirmed_at: 2026-07-18
 confirmed_by: product (MU-T2)
@@ -28,17 +28,26 @@ depends_on:
 | `--color-ghost` | `rgba(255, 255, 255, 0.4)` | 历史 Ghost token；训练页 2D 骨骼用 `--color-correct` |
 | `--color-ref-3d` | `#38BDF8` | 历史 3D 参考色；训练页身上不再用青色胶囊 |
 
-### 1.2 训练主题（UI-012：相机页非纯白）
+### 1.2 壳层 OLED（T10-1 / MASTER）
+
+训练叠加层仍用 1.1 绿黄红。壳层底与 CTA 走本组。`--color-primary` 仅为历史训练钮蓝，**新壳 CTA 用 `--color-cta`**。
 
 | Token | 值 | 用途 |
 |-------|-----|------|
-| `--color-bg` | `#0F172A` | 页面/训练底 |
-| `--color-surface` | `#1E293B` | 卡片、底栏底 |
+| `--color-bg` | `#000000` | OLED 真黑页底 |
+| `--color-surface` | `#121212` | 卡片、sheet |
+| `--color-surface-raised` | `#1A1A1A` | 嵌套行 |
 | `--color-overlay-scrim` | `rgba(0, 0, 0, 0.55)` | 反馈条底衬 |
 | `--color-overlay-text` | `#FFFFFF` | 叠加层主文案 |
-| `--color-primary` | `#3B82F6` | 主按钮 |
-| `--color-text-primary` | `#F8FAFC` | 非相机页正文 |
-| `--color-text-secondary` | `#94A3B8` | 辅助说明 |
+| `--color-cta` | `#FFFFFF` | 白胶囊主按钮底 |
+| `--color-on-cta` | `#000000` | 白胶囊上的字 |
+| `--color-primary` | `#3B82F6` | 历史训练钮；T16 再迁 |
+| `--color-border` | `#2A2A2A` | 发丝边 |
+| `--color-tab-bar` | `rgba(10, 10, 10, 0.92)` | 浮动底栏 |
+| `--color-tab-active` | `#FFFFFF` | 选中 Tab |
+| `--color-tab-inactive` | `#737373` | 未选中 Tab |
+| `--color-text-primary` | `#FFFFFF` | 壳层正文 |
+| `--color-text-secondary` | `#A3A3A3` | 辅助 / 表头 |
 
 ### 1.3 示范窗肌群色（FR-085 / T9-3）
 
@@ -59,13 +68,20 @@ depends_on:
   --color-error: #EF4444;
   --color-ghost: rgba(255, 255, 255, 0.4);
   --color-ref-3d: #38BDF8;
-  --color-bg: #0F172A;
-  --color-surface: #1E293B;
+  --color-bg: #000000;
+  --color-surface: #121212;
+  --color-surface-raised: #1A1A1A;
   --color-overlay-scrim: rgba(0, 0, 0, 0.55);
   --color-overlay-text: #FFFFFF;
+  --color-cta: #FFFFFF;
+  --color-on-cta: #000000;
   --color-primary: #3B82F6;
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
+  --color-border: #2A2A2A;
+  --color-tab-bar: rgba(10, 10, 10, 0.92);
+  --color-tab-active: #FFFFFF;
+  --color-tab-inactive: #737373;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A3A3A3;
   --color-muscle-rest: rgba(148, 163, 184, 0.34);
   --color-muscle-chest: rgba(244, 114, 182, 0.36);
   --color-muscle-chest-active: rgba(244, 114, 182, 0.62);
@@ -80,19 +96,27 @@ depends_on:
 
 ## 2. Typography
 
-单位：App 用 sp/dp 等价数字；小程序用 px（见 UI.md §5，允许像素差）。
+单位：App 用 sp/dp 等价数字。壳层字族 **Barlow Condensed / Barlow**（逻辑名）；未装字体前 RN 用 System。
 
-| Token | App | 小程序 | 用途 |
-|-------|-----|--------|------|
-| `--font-title` | 20 bold | 18 bold | 页面标题 |
-| `--font-feedback` | 18 semibold | 16 semibold | FeedbackBar |
-| `--font-body` | 16 regular | 14 regular | 正文 |
-| `--font-caption` | 14 regular | 12 regular | 辅助 / Rep 旁注 |
-| `--font-rep` | 28 bold | 24 bold | Rep 大数字 |
+| Token | App | 用途 |
+|-------|-----|------|
+| `--font-family-display` | BarlowCondensed-SemiBold | 壳层标题 |
+| `--font-family-body` | Barlow-Regular | 正文 / 数字 |
+| `--font-family-fallback` | System | 字体未进包前 |
+| `--font-title` | 20 bold | 页面标题（训练铬仍用） |
+| `--font-display` | 28 | 壳层屏标题 |
+| `--font-feedback` | 18 semibold | FeedbackBar |
+| `--font-body` | 16 regular | 正文 |
+| `--font-caption` | 14 regular | 辅助 / Rep 旁注 |
+| `--font-rep` | 28 bold | Rep 大数字 |
 
 ```css
 :root {
+  --font-family-display: BarlowCondensed-SemiBold;
+  --font-family-body: Barlow-Regular;
+  --font-family-fallback: System;
   --font-title-size: 20;
+  --font-display-size: 28;
   --font-feedback-size: 18;
   --font-body-size: 16;
   --font-caption-size: 14;
@@ -114,6 +138,9 @@ depends_on:
   --space-xl: 32;
   --radius-sm: 8;
   --radius-md: 16;
+  --radius-pill: 999;
+  --radius-tab-bar: 28;
+  --tab-bar-inset: 12;
   --touch-min: 44; /* pt/dp，主按钮触控下限 */
 }
 ```
@@ -170,3 +197,4 @@ depends_on:
 | 0.2.5 | 2026-08-18 | 示范窗 178×297（约 +35% 高）；可拖动 |
 | 0.2.6 | 2026-08-18 | 示范窗收起手柄 44×56 |
 | 0.2.8 | 2026-08-26 | 站位框铺满预览（FR-022）；`--placement-guide-aspect` 不再裁安全区 |
+| 0.3.0 | 2026-09-10 | T10-1：OLED 真黑、白胶囊 CTA、Barlow 字族名；pose 绿黄红不变 |

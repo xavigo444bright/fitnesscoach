@@ -22,6 +22,9 @@ import ExerciseCard from '../components/ExerciseCard';
 type Props = {
   onSelectExercise: (id: string) => void;
   onOpenDevPose?: () => void;
+  /** 嵌在首页「动作」段时藏掉重复大标题 */
+  embedded?: boolean;
+  contentBottomInset?: number;
 };
 
 const CAMERA_HINT_LABEL: Record<string, string> = {
@@ -39,13 +42,25 @@ function cardSubtitle(e: ExerciseCatalogEntry): string {
 export default function ExerciseLibraryScreen({
   onSelectExercise,
   onOpenDevPose,
+  embedded = false,
+  contentBottomInset,
 }: Props) {
   const byPart = catalogByBodyPart();
 
   return (
-    <View style={styles.root}>
-      <Text style={styles.title}>健身教练</Text>
-      <Text style={styles.sub}>自用 Dev Client · 语音默认开</Text>
+    <View
+      style={[
+        styles.root,
+        embedded && styles.rootEmbedded,
+        contentBottomInset != null && { paddingBottom: contentBottomInset },
+      ]}
+    >
+      {embedded ? null : (
+        <>
+          <Text style={styles.title}>健身教练</Text>
+          <Text style={styles.sub}>自用 Dev Client · 语音默认开</Text>
+        </>
+      )}
       <ScrollView
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
@@ -89,6 +104,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingTop: 56,
     paddingBottom: 24,
+  },
+  rootEmbedded: {
+    paddingHorizontal: 0,
+    paddingTop: space.sm,
+    paddingBottom: 0,
   },
   title: {
     color: colors.textPrimary,
