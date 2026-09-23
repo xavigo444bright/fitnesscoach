@@ -47,8 +47,14 @@ export {
   LOG_SEGMENTS,
   SHELL_TABS,
   isFullscreenStackRoute,
+  pageIndexFromOffset,
+  pageOffsetX,
+  segmentIndexOf,
+  segmentKeyAt,
   shellTabCount,
   type FullscreenStackRoute,
+  type HomeSegmentKey,
+  type LogSegmentKey,
   type ShellTabKey,
 } from "./shellNav.js";
 

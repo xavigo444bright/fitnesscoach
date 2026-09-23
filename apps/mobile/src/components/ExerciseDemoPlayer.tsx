@@ -1,66 +1,82 @@
 /**
- * 详情页标准动作预渲染 3D 示意（循环视频）。
- *
- * FR-064 为 P2：当前 Dev Client 可能未编入 ExponentAV。
- * **禁止**在未确认原生模块存在时 require('expo-av')——Hermes 会对缺失原生模块
- * 抛出无法被 try/catch 消掉的红屏。有片 + rebuild 后再打开下方 VIDEO_ENABLED。
+ * 详情页示范：复用训练示范窗同一套压缩原片（T18）。
+ * 不是 FR-064 预渲染 3D。无播放器 / 无片时占位，不冒充骨骼。
  */
-import { colors, fontSize, radius, space } from '@fitness-coach/ui';
-import { StyleSheet, Text, View } from 'react-native';
-
-/**
- * 需要同时满足：
- * 1) Dev Client 已 `expo run:ios` 编入 expo-av
- * 2) assets/demos 有片且 demoAssets registry 已 require
- * 才改为 true，并恢复 Video 播放分支。
- */
-const VIDEO_ENABLED = false;
+import {
+  isCoachableId,
+  type CameraHint,
+} from '@fitness-coach/core';
+import {
+  DEFAULT_CLIP_PLAYBACK_RATE,
+  colors,
+  fontSize,
+  radius,
+  space,
+} from '@fitness-coach/ui';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import PipClipPane from './PipClipPane';
 
 type Props = {
+  exerciseId: string;
   exerciseName: string;
-  /** catalog.demoAsset，如 squat.mp4 */
-  demoAsset?: string;
+  cameraHint: CameraHint;
 };
 
 export default function ExerciseDemoPlayer({
+  exerciseId,
   exerciseName,
-  demoAsset,
+  cameraHint,
 }: Props) {
-  // VIDEO_ENABLED 预留给 rebuild 后接回；现阶段恒为占位，避免加载 expo-av。
-  void VIDEO_ENABLED;
+  const [playing, setPlaying] = useState(true);
+
+  if (!isCoachableId(exerciseId)) {
+    return (
+      <View
+        style={styles.wrap}
+        accessibilityLabel={`${exerciseName}暂无示范片`}
+      >
+        <Text style={styles.placeholderTitle}>暂无示范片</Text>
+        <Text style={styles.placeholderHint}>{exerciseName} · 即将支持教练</Text>
+      </View>
+    );
+  }
 
   return (
-    <View
+    <Pressable
       style={styles.wrap}
-      accessibilityLabel={`${exerciseName}标准3D示意待导入`}
+      onPress={() => setPlaying((on) => !on)}
+      accessibilityRole="button"
+      accessibilityLabel={
+        playing ? `${exerciseName}示范片，点一下暂停` : `${exerciseName}示范片，点一下继续`
+      }
     >
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderTitle}>标准 3D 示意待导入</Text>
-        <Text style={styles.placeholderName}>{exerciseName}</Text>
-        <Text style={styles.placeholderHint}>
-          详情示意片为 P2，不阻塞训练。需播片时重装含 expo-av 的 Dev Client，并将
-          mp4 放入 assets/demos/
-          {demoAsset ? `\n文件名：${demoAsset}` : ''}
+      <PipClipPane
+        exerciseId={exerciseId}
+        cameraHint={cameraHint}
+        playing={playing}
+        rate={DEFAULT_CLIP_PLAYBACK_RATE}
+        unavailableHint="示范片暂时播不了。机位说明仍在下方。"
+      />
+      <View style={styles.caption} pointerEvents="none">
+        <Text style={styles.captionText}>
+          {playing ? '示范 · 点一下暂停' : '已暂停 · 点一下继续'}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radius.md,
     overflow: 'hidden',
     marginBottom: space.lg,
-    minHeight: 220,
-  },
-  placeholder: {
-    minHeight: 220,
-    alignItems: 'center',
+    minHeight: 240,
+    height: 240,
     justifyContent: 'center',
-    paddingHorizontal: space.lg,
-    paddingVertical: space.xl,
+    alignItems: 'center',
   },
   placeholderTitle: {
     color: colors.textPrimary,
@@ -68,16 +84,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: space.sm,
   },
-  placeholderName: {
-    color: '#E85D04',
-    fontSize: fontSize.title,
-    fontWeight: '800',
-    marginBottom: space.md,
-  },
   placeholderHint: {
     color: colors.textSecondary,
     fontSize: fontSize.caption,
     textAlign: 'center',
-    lineHeight: 18,
+  },
+  caption: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingVertical: 8,
+    paddingHorizontal: space.sm,
+    backgroundColor: colors.bg,
+  },
+  captionText: {
+    color: colors.textSecondary,
+    fontSize: fontSize.caption,
+    textAlign: 'center',
   },
 });

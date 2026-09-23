@@ -4,10 +4,16 @@
 import {
   applyFollowAlongSet,
   effectiveBodyweightKg,
+  formatWeightAmount,
   getCatalogEntry,
   isTimedCatalogId,
   openWorkout,
+  parseWeightToKg,
+  retargetWeightText,
   suggestedWeightKg,
+  weightUnitLabel,
+  workoutById,
+  type WeightUnit,
 } from '@fitness-coach/core';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -24,6 +30,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ShellButton from '../components/ShellButton';
+import WeightUnitToggle from '../components/WeightUnitToggle';
 import type { RootStackParamList } from '../navigation/types';
 import {
   commitWorkoutLog,
@@ -43,11 +50,12 @@ export default function FollowAlongLogScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'FollowAlongLog'>>();
-  const { catalogId, cameraReps, formSummary } = route.params;
+  const { catalogId, cameraReps, formSummary, workoutId } = route.params;
   const timed = isTimedCatalogId(catalogId);
   const name = getCatalogEntry(catalogId)?.name ?? catalogId;
   const [countText, setCountText] = useState(String(cameraReps));
   const [kgText, setKgText] = useState('');
+  const [entryUnit, setEntryUnit] = useState<WeightUnit>('kg');
   const [bodyweightKg, setBodyweightKg] = useState<number | undefined>(
     peekWorkoutLog().bodyweightKg,
   );
@@ -55,7 +63,9 @@ export default function FollowAlongLogScreen() {
   useEffect(() => {
     const fillKg = () => {
       const stored = peekWorkoutLog();
-      const session = openWorkout(stored);
+      const session = workoutId
+        ? workoutById(stored, workoutId)
+        : openWorkout(stored);
       setBodyweightKg(effectiveBodyweightKg(stored, session));
       const suggest = suggestedWeightKg(
         stored,
@@ -67,7 +77,7 @@ export default function FollowAlongLogScreen() {
     };
     fillKg();
     return subscribeWorkoutLog(fillKg);
-  }, [catalogId]);
+  }, [catalogId, workoutId]);
 
   return (
     <KeyboardAvoidingView
@@ -90,7 +100,13 @@ export default function FollowAlongLogScreen() {
         />
         {timed ? null : (
           <>
-            <Text style={styles.label}>公斤</Text>
+            <WeightUnitToggle
+              unit={entryUnit}
+              onChange={(next) => {
+                setKgText((cur) => retargetWeightText(cur, entryUnit, next));
+                setEntryUnit(next);
+              }}
+            />
             <TextInput
               value={kgText}
               onChangeText={setKgText}
@@ -98,42 +114,79 @@ export default function FollowAlongLogScreen() {
               placeholder="选填"
               placeholderTextColor={colors.tabInactive}
               style={styles.input}
-              accessibilityLabel="公斤"
+              accessibilityLabel={weightUnitLabel(entryUnit)}
             />
             {bodyweightKg == null ? null : (
               <ShellButton
                 variant="ghost"
                 label="用自重"
-                onPress={() => setKgText(String(bodyweightKg))}
+                onPress={() =>
+                  setKgText(formatWeightAmount(bodyweightKg, entryUnit))
+                }
               />
             )}
           </>
         )}
-        <ShellButton
-          label="写入本组"
-          onPress={() => {
-            const counted = parseOptionalNumber(countText) ?? cameraReps;
-            void commitWorkoutLog((log, ids) =>
-              applyFollowAlongSet(
-                log,
-                {
-                  catalogId,
-                  cameraReps,
-                  reps: counted,
-                  weightKg: timed ? undefined : parseOptionalNumber(kgText),
-                  formSummary,
-                },
-                new Date().toISOString(),
-                ids,
-              ),
-            ).then(() => {
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'MainTabs' }],
-              });
-            });
-          }}
-        />
+        <View style={styles.actions}>
+          <View style={styles.actionHalf}>
+            <ShellButton
+              variant="ghost"
+              label="跳过"
+              onPress={() => {
+                navigation.reset({
+                  index: 0,
+                  routes: [
+                    {
+                      name: 'MainTabs',
+                      params: workoutId
+                        ? { screen: 'Home', params: { workoutId } }
+                        : undefined,
+                    },
+                  ],
+                });
+              }}
+            />
+          </View>
+          <View style={styles.actionHalf}>
+            <ShellButton
+              label="写入本组"
+              onPress={() => {
+                const counted = parseOptionalNumber(countText) ?? cameraReps;
+                void commitWorkoutLog((log, ids) =>
+                  applyFollowAlongSet(
+                    log,
+                    {
+                      catalogId,
+                      cameraReps,
+                      reps: counted,
+                      weightKg: timed
+                        ? undefined
+                        : parseWeightToKg(kgText, entryUnit),
+                      weightUnit: timed ? undefined : entryUnit,
+                      formSummary,
+                    },
+                    new Date().toISOString(),
+                    ids,
+                    workoutId,
+                  ),
+                ).then((next) => {
+                  const targetId = workoutId ?? openWorkout(next)?.id;
+                  navigation.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'MainTabs',
+                        params: targetId
+                          ? { screen: 'Home', params: { workoutId: targetId } }
+                          : undefined,
+                      },
+                    ],
+                  });
+                });
+              }}
+            />
+          </View>
+        </View>
       </View>
       <StatusBar style="light" />
     </KeyboardAvoidingView>
@@ -182,5 +235,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.sm,
     fontSize: fontSize.body,
     marginBottom: space.sm,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: space.sm,
+    marginTop: space.sm,
+  },
+  actionHalf: {
+    flex: 1,
   },
 });

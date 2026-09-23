@@ -62,8 +62,10 @@ export default function ExerciseLibraryScreen({
         </>
       )}
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled
       >
         {BODY_PART_ORDER.map((part) => {
           const items = byPart[part];
@@ -74,6 +76,7 @@ export default function ExerciseLibraryScreen({
               {items.map((e) => (
                 <ExerciseCard
                   key={e.id}
+                  exerciseId={e.id}
                   name={e.name}
                   bodyPart={BODY_PART_LABEL[e.bodyPart]}
                   cameraHint={cardSubtitle(e)}
@@ -84,7 +87,8 @@ export default function ExerciseLibraryScreen({
           );
         })}
         <Text style={styles.privacy}>
-          姿态在本机分析，视频不上传（详见隐私说明）
+          姿态在本机分析，视频不上传（详见隐私说明）。动作图：Everkinetic /
+          Bryl Lim，CC BY-SA 4.0。
         </Text>
       </ScrollView>
       {onOpenDevPose ? (

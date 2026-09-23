@@ -69,6 +69,8 @@ type Props = {
   playing: boolean;
   rate: number;
   onReady?: () => void;
+  /** 详情页等没有「骨骼」切换时覆盖占位说明 */
+  unavailableHint?: string;
 };
 
 export default function PipClipPane({
@@ -77,6 +79,7 @@ export default function PipClipPane({
   playing,
   rate,
   onReady,
+  unavailableHint,
 }: Props) {
   const clip = resolveSampleClip(exerciseId, cameraHint);
   const [avFailed, setAvFailed] = useState(false);
@@ -113,11 +116,12 @@ export default function PipClipPane({
         {clip?.fileName ?? '未打进安装包'}
       </Text>
       <Text style={styles.placeholderHint}>
-        {clip
-          ? VideoComp
-            ? '原片解码失败。可先切「骨骼」对照。'
-            : '当前 App 未编入播放器。可先切「骨骼」对照。'
-          : '后续动作原片按需下载（NFR-010），不打进包。可切「骨骼」对照。'}
+        {unavailableHint ??
+          (clip
+            ? VideoComp
+              ? '原片解码失败。可先切「骨骼」对照。'
+              : '当前 App 未编入播放器。可先切「骨骼」对照。'
+            : '后续动作原片按需下载（NFR-010），不打进包。可切「骨骼」对照。')}
       </Text>
     </View>
   );

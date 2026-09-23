@@ -1,12 +1,11 @@
 /**
- * PG-008 记录·我的账号块。绑定/退出不改课表文件。
+ * PG-008 记录·我的账号块。退出和删除账号都不改课表文件。
  */
 import { accountDisplayName, type LocalAccount } from '@fitness-coach/core';
 import { colors, fontSize, space } from '@fitness-coach/ui';
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { bindProvider, signOutToGuest } from '../accountStorage';
-import BindLabelSheet from './BindLabelSheet';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { deleteLocalAccount, signOutToGuest } from '../accountStorage';
+import AuthMethodList from './AuthMethodList';
 import ShellButton from './ShellButton';
 
 type Props = {
@@ -14,64 +13,45 @@ type Props = {
 };
 
 export default function AccountBlock({ account }: Props) {
-  const [labelKind, setLabelKind] = useState<'phone' | 'email' | null>(null);
   const guest = account.kind === 'guest';
 
   return (
     <View style={styles.wrap}>
       <Text style={styles.title}>账号</Text>
-      <Text style={styles.status}>
-        {guest
-          ? '游客 · 记录只在这台手机'
-          : `已绑定 · ${accountDisplayName(account)}`}
-      </Text>
-      <Text style={styles.hint}>
-        绑定或退出都不会删掉本机课表。首发不上传。
-      </Text>
+      <Text style={styles.status}>{accountDisplayName(account)}</Text>
       {guest ? (
+        <AuthMethodList />
+      ) : (
         <View style={styles.actions}>
           <ShellButton
-            label="通过 Apple 登录"
+            label="退出登录"
+            variant="ghost"
             onPress={() => {
-              void bindProvider('apple');
+              void signOutToGuest();
             }}
           />
           <ShellButton
-            label="手机号"
-            variant="ghost"
-            onPress={() => setLabelKind('phone')}
-          />
-          <ShellButton
-            label="邮箱"
-            variant="ghost"
-            onPress={() => setLabelKind('email')}
-          />
-          <ShellButton
-            label="微信"
+            label="删除账号"
             variant="ghost"
             onPress={() => {
-              void bindProvider('wechat');
+              Alert.alert(
+                '删除账号',
+                '这台手机上的登录名和密码会被清掉。训练记录还留在手机里。若用过 Apple 登录，可在系统设置里撤销本 App。',
+                [
+                  { text: '取消', style: 'cancel' },
+                  {
+                    text: '删除',
+                    style: 'destructive',
+                    onPress: () => {
+                      void deleteLocalAccount();
+                    },
+                  },
+                ],
+              );
             }}
           />
         </View>
-      ) : (
-        <ShellButton
-          label="退出登录"
-          variant="ghost"
-          onPress={() => {
-            void signOutToGuest();
-          }}
-        />
       )}
-      <BindLabelSheet
-        kind={labelKind}
-        onClose={() => setLabelKind(null)}
-        onSubmit={(label) => {
-          const kind = labelKind;
-          setLabelKind(null);
-          if (kind) void bindProvider(kind, label);
-        }}
-      />
     </View>
   );
 }
@@ -79,6 +59,9 @@ export default function AccountBlock({ account }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     marginBottom: space.xl,
+  },
+  actions: {
+    gap: space.sm,
   },
   title: {
     color: colors.textPrimary,
@@ -90,15 +73,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: fontSize.body,
     fontWeight: '600',
-    marginBottom: space.xs,
-  },
-  hint: {
-    color: colors.textSecondary,
-    fontSize: fontSize.caption,
-    lineHeight: 20,
     marginBottom: space.md,
-  },
-  actions: {
-    gap: space.sm,
   },
 });

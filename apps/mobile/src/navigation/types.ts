@@ -10,14 +10,15 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Welcome: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
-  Detail: { catalogId: string };
-  Prepare: { exerciseId: ExerciseId };
-  Training: { exerciseId: ExerciseId };
+  Detail: { catalogId: string; workoutId?: string };
+  Prepare: { exerciseId: ExerciseId; workoutId?: string };
+  Training: { exerciseId: ExerciseId; workoutId?: string };
   Summary: { summary: SessionSummaryData; exerciseId: ExerciseId };
   FollowAlongLog: {
     catalogId: string;
     cameraReps: number;
     formSummary?: string;
+    workoutId?: string;
   };
   RestTimer: { durationSec: number };
   DevPose: undefined;

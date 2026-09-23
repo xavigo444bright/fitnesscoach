@@ -1,6 +1,7 @@
 /**
- * PG-001 首页壳：页内 训练 | 动作（FR-110）
+ * PG-001 首页壳：页内 动作 | 训练（FR-110）
  */
+import { isCoachableId } from '@fitness-coach/core';
 import {
   DEFAULT_HOME_SEGMENT,
   HOME_SEGMENTS,
@@ -23,6 +24,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SegmentedControl from '../components/SegmentedControl';
+import SegmentPager from '../components/SegmentPager';
 import TodayWorkoutList from '../components/TodayWorkoutList';
 import WorkoutSessionPane from '../components/WorkoutSessionPane';
 import { tabBarContentPadding } from '../navigation/chrome';
@@ -70,8 +72,29 @@ export default function HomeScreen() {
         onChange={setSegment}
       />
       <View style={{ flex: 1, marginTop: layout.pageSectionGap }}>
-        {segment === 'train' ? (
-          focusWorkoutId ? (
+        <SegmentPager
+          items={HOME_SEGMENTS}
+          value={segment}
+          onChange={setSegment}
+        >
+          <ExerciseLibraryScreen
+            embedded
+            contentBottomInset={bottomPad}
+            onSelectExercise={(id) => {
+              navigation.navigate('Detail', {
+                catalogId: id,
+                workoutId: focusWorkoutId,
+              });
+            }}
+            onOpenDevPose={
+              __DEV__
+                ? () => {
+                    navigation.navigate('DevPose');
+                  }
+                : undefined
+            }
+          />
+          {focusWorkoutId ? (
             <WorkoutSessionPane
               log={log}
               workoutId={focusWorkoutId}
@@ -87,6 +110,13 @@ export default function HomeScreen() {
               onOpenRest={(durationSec) => {
                 navigation.navigate('RestTimer', { durationSec });
               }}
+              onFollowAlong={(catalogId) => {
+                if (!isCoachableId(catalogId) || !focusWorkoutId) return;
+                navigation.navigate('Prepare', {
+                  exerciseId: catalogId,
+                  workoutId: focusWorkoutId,
+                });
+              }}
             />
           ) : (
             <TodayWorkoutList
@@ -99,23 +129,8 @@ export default function HomeScreen() {
                 });
               }}
             />
-          )
-        ) : (
-          <ExerciseLibraryScreen
-            embedded
-            contentBottomInset={bottomPad}
-            onSelectExercise={(id) => {
-              navigation.navigate('Detail', { catalogId: id });
-            }}
-            onOpenDevPose={
-              __DEV__
-                ? () => {
-                    navigation.navigate('DevPose');
-                  }
-                : undefined
-            }
-          />
-        )}
+          )}
+        </SegmentPager>
       </View>
       <StatusBar style="light" />
     </View>

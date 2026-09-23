@@ -4,6 +4,7 @@
 import type { ExerciseCardProps } from '@fitness-coach/ui';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import ExercisePoseIcon from './ExercisePoseIcon';
 
 type Props = ExerciseCardProps;
 
@@ -11,6 +12,7 @@ export default function ExerciseCard({
   name,
   bodyPart,
   cameraHint,
+  exerciseId,
   onPress,
 }: Props) {
   return (
@@ -21,7 +23,7 @@ export default function ExerciseCard({
       accessibilityLabel={`${name}，${bodyPart}，${cameraHint}`}
     >
       <View style={styles.thumb}>
-        <Text style={styles.thumbLabel}>{name.slice(0, 1)}</Text>
+        <ExercisePoseIcon catalogId={exerciseId} size={48} />
       </View>
       <View style={styles.meta}>
         <Text style={styles.name}>{name}</Text>
@@ -53,11 +55,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  thumbLabel: {
-    color: colors.primary,
-    fontSize: fontSize.title,
-    fontWeight: '700',
   },
   meta: {
     flex: 1,

@@ -15,6 +15,7 @@ export {
   type WorkoutStatus,
   type WorkoutTemplate,
   type WorkoutTemplateSlot,
+  type WeightUnit,
 } from "./types.js";
 export {
   calendarDayLabel,
@@ -22,6 +23,7 @@ export {
   calendarDayUtc,
   countModeForRef,
   dayVolumeKg,
+  isoAtLocalNoon,
   isTimedCatalogId,
   setVolumeKg,
   workoutVolumeKg,
@@ -33,6 +35,7 @@ export {
   copyLastSet,
   copySet,
   createWorkout,
+  createBackdatedWorkout,
   endWorkout,
   endedWorkouts,
   ensureOpenWorkout,
@@ -49,11 +52,23 @@ export {
 } from "./commands.js";
 export { lastLoadForExercise, type LastLoad } from "./lastLoad.js";
 export {
+  PR_PREVIEW_LIMIT,
+  personalRecords,
+  prStampMark,
+  prStampParts,
+  visiblePersonalRecords,
+  type ExercisePr,
+  type PrStampMark,
+  type PrStampParts,
+} from "./personalRecords.js";
+export {
   calendarMonthDays,
   shiftYearMonth,
   trainedCalendarDays,
   workoutCalendarDay,
   workoutsOnCalendarDay,
+  backdateKind,
+  type BackdateKind,
 } from "./calendar.js";
 export {
   effectiveBodyweightKg,
@@ -73,7 +88,28 @@ export {
   removeWorkoutTemplate,
   saveWorkoutAsTemplate,
 } from "./templates.js";
-export { DEFAULT_REST_SEC, restRemainingSec } from "./rest.js";
+export {
+  DEFAULT_REST_SEC,
+  MAX_REST_SEC,
+  REST_SAND_CAP_SEC,
+  clampRestSec,
+  restDurationForRemaining,
+  restRemainingFromSandFraction,
+  restRemainingSec,
+  restSandCapacitySec,
+} from "./rest.js";
+export {
+  LB_PER_KG,
+  formatVolumeKg,
+  formatWeightAmount,
+  kgToLb,
+  lbToKg,
+  parseWeightToKg,
+  recordedWeightUnit,
+  retargetWeightText,
+  toggleWeightUnit,
+  weightUnitLabel,
+} from "./units.js";
 export {
   loadWorkoutLogFromMemory,
   parseWorkoutLog,

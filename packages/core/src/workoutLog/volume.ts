@@ -50,6 +50,53 @@ export function calendarDayLocal(iso: string, timeZone?: string): string {
   return fmt.format(date);
 }
 
+/**
+ * 某本地日历日的中午。用来写补记 `startedAt`，避免 UTC 零点被时区滚到另一天。
+ */
+export function isoAtLocalNoon(day: string, timeZone?: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!match) throw new Error(`invalid calendar day: ${day}`);
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const date = Number(match[3]);
+  const utcGuess = Date.UTC(year, month - 1, date, 12, 0, 0);
+  const offset = timeZoneOffsetMs(utcGuess, timeZone);
+  let instant = utcGuess - offset;
+  const offset2 = timeZoneOffsetMs(instant, timeZone);
+  if (offset2 !== offset) instant = utcGuess - offset2;
+  const iso = new Date(instant).toISOString();
+  if (calendarDayLocal(iso, timeZone) !== day) {
+    throw new Error(`local noon missed ${day}`);
+  }
+  return iso;
+}
+
+function timeZoneOffsetMs(utcMs: number, timeZone?: string): number {
+  const date = new Date(utcMs);
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const parts = Object.fromEntries(
+    fmt.formatToParts(date).map((part) => [part.type, part.value]),
+  );
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return asUtc - date.getTime();
+}
+
 export function calendarDayLabel(iso: string, timeZone?: string): string {
   const day = calendarDayLocal(iso, timeZone);
   const parts = day.split("-");

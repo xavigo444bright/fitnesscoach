@@ -35,7 +35,7 @@
 | face-pull | 面拉 | 肩 | 无详情 demo 片；训练示范窗 3/4 `face-pull-side-01.mp4`（scout `face-pull-three_quarter-01`） |
 | pike-pushup | 派克俯卧撑 | 肩 | 无详情 demo 片；训练示范窗侧面 `pike-pushup-side-01.mp4`（0:02–0:11） |
 
-训练页不叠半透明 Ghost；标准动作为详情页预渲染视频。当前 coachable **App 真机齐**（VT-P6-001～003/005～023，2026-09-07）。暂不扩新动作。小程序 VT-P6-004 **已取消**。
+训练页不叠半透明 Ghost；标准动作为详情页预渲染视频。当前 coachable **App 真机齐**（VT-P6-001～003/005～023，2026-09-07）。下一波扩库见 [`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json)（Phase G 12 + Phase H 99）。小程序 VT-P6-004 **已取消**。
 
 ## 升级队列
 

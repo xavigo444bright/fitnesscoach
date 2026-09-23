@@ -2,15 +2,17 @@
  * NAV-LOG：记录列表（结束课写入）+ 我的身体数据（自重）。
  */
 import {
+  backdateKind,
   calendarDayLabel,
   calendarDayLocal,
+  createBackdatedWorkout,
+  removeWorkout,
   setBodyweightKg,
   trainedCalendarDays,
   workoutExerciseSummary,
   workoutTitleDisplay,
   workoutVolumeKg,
   workoutsOnCalendarDay,
-  removeWorkout,
 } from '@fitness-coach/core';
 import {
   DEFAULT_LOG_SEGMENT,
@@ -40,7 +42,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { peekAccount, subscribeAccount } from '../accountStorage';
 import AccountBlock from '../components/AccountBlock';
 import EmptyPane from '../components/EmptyPane';
+import PrBoard from '../components/PrBoard';
 import SegmentedControl from '../components/SegmentedControl';
+import SegmentPager from '../components/SegmentPager';
+import ShellButton from '../components/ShellButton';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutModuleCard from '../components/WorkoutModuleCard';
 import { tabBarContentPadding } from '../navigation/chrome';
@@ -57,13 +62,6 @@ type LogNavigation = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Log'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
-
-function parseOptionalNumber(raw: string): number | undefined {
-  const t = raw.trim();
-  if (t === '') return undefined;
-  const n = Number(t);
-  return Number.isFinite(n) ? n : undefined;
-}
 
 export default function LogScreen() {
   const insets = useSafeAreaInsets();
@@ -90,22 +88,45 @@ export default function LogScreen() {
         onChange={setSegment}
       />
       <View style={{ flex: 1, marginTop: layout.pageSectionGap }}>
-        {segment === 'history' ? (
+        <SegmentPager
+          items={LOG_SEGMENTS}
+          value={segment}
+          onChange={setSegment}
+        >
           <HistoryPane
             log={log}
             onOpenWorkout={(workoutId) => {
               navigation.navigate('Home', { workoutId, openedFrom: 'log' });
             }}
+            onBackdate={(day) => {
+              let createdId = '';
+              void commitWorkoutLog((next, ids) => {
+                const created = createBackdatedWorkout(
+                  next,
+                  day,
+                  new Date().toISOString(),
+                  ids,
+                );
+                createdId = created.workoutId;
+                return created.log;
+              }).then(() => {
+                if (!createdId) return;
+                navigation.navigate('Home', {
+                  workoutId: createdId,
+                  openedFrom: 'log',
+                });
+              });
+            }}
           />
-        ) : (
           <MeBodyPane
             account={account}
+            log={log}
             bodyweightKg={log.bodyweightKg}
             onSave={(kg) => {
               void commitWorkoutLog((next) => setBodyweightKg(next, kg));
             }}
           />
-        )}
+        </SegmentPager>
       </View>
       <StatusBar style="light" />
     </View>
@@ -120,9 +141,11 @@ function yearMonthFromDay(day: string): { year: number; month: number } {
 function HistoryPane({
   log,
   onOpenWorkout,
+  onBackdate,
 }: {
   log: ReturnType<typeof peekWorkoutLog>;
   onOpenWorkout: (workoutId: string) => void;
+  onBackdate: (day: string) => void;
 }) {
   const today = calendarDayLocal(new Date().toISOString());
   const initial = yearMonthFromDay(today);
@@ -134,9 +157,10 @@ function HistoryPane({
     [log],
   );
   const dayWorkouts = workoutsOnCalendarDay(log, selectedDay);
+  const kind = backdateKind(selectedDay, new Date().toISOString());
 
   return (
-    <ScrollView keyboardShouldPersistTaps="handled">
+    <ScrollView style={{ flex: 1 }} keyboardShouldPersistTaps="handled">
       <WorkoutCalendar
         year={year}
         month={month}
@@ -149,14 +173,28 @@ function HistoryPane({
         onSelectDay={setSelectedDay}
       />
       {dayWorkouts.length === 0 ? (
-        <EmptyPane
-          title={trainedDays.size === 0 ? '还没有记录' : '这天没有训练'}
-          body={
-            trainedDays.size === 0
-              ? '结束一节课后会出现在这里。'
-              : '点有标记的日期查看当天的课。'
-          }
-        />
+        <>
+          <EmptyPane
+            title={kind === 'today' ? '今天还没有训练' : trainedDays.size === 0 ? '还没有记录' : '这天没有训练'}
+            body={
+              kind === 'future'
+                ? '还不能记还没到的日期。'
+                : kind === 'today'
+                  ? '从这里开始今天的训练。'
+                  : trainedDays.size === 0
+                    ? '可以补记过去的一天。'
+                    : '这天还没有课，可以补记。'
+            }
+          />
+          {kind === 'future' ? null : (
+            <View style={styles.backdate}>
+              <ShellButton
+                label={kind === 'today' ? '开始今天训练' : '补记这天'}
+                onPress={() => onBackdate(selectedDay)}
+              />
+            </View>
+          )}
+        </>
       ) : (
         dayWorkouts.map((workout) => (
           <WorkoutModuleCard
@@ -177,10 +215,12 @@ function HistoryPane({
 
 function MeBodyPane({
   account,
+  log,
   bodyweightKg,
   onSave,
 }: {
   account: ReturnType<typeof peekAccount>;
+  log: ReturnType<typeof peekWorkoutLog>;
   bodyweightKg?: number;
   onSave: (kg: number | undefined) => void;
 }) {
@@ -193,18 +233,30 @@ function MeBodyPane({
 
   return (
     <ScrollView
+      style={{ flex: 1 }}
       keyboardShouldPersistTaps="handled"
       automaticallyAdjustKeyboardInsets
       contentContainerStyle={{ paddingBottom: space.xl }}
     >
       {account ? <AccountBlock account={account} /> : null}
+      <PrBoard log={log} />
       <Text style={styles.meTitle}>身体数据</Text>
       <Text style={styles.meHint}>自重会带到训练页小格。</Text>
       <Text style={styles.fieldLabel}>自重 kg</Text>
       <TextInput
         value={text}
         onChangeText={setText}
-        onEndEditing={() => onSave(parseOptionalNumber(text))}
+        onEndEditing={() => {
+          const shown = bodyweightKg != null ? String(bodyweightKg) : '';
+          if (text === shown) return;
+          const raw = text.trim();
+          if (raw === '') {
+            onSave(undefined);
+            return;
+          }
+          const n = Number(raw);
+          onSave(Number.isFinite(n) ? n : undefined);
+        }}
         placeholder="70"
         placeholderTextColor={colors.tabInactive}
         keyboardType="decimal-pad"
@@ -251,5 +303,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     paddingHorizontal: space.sm,
     fontSize: fontSize.body,
+  },
+  backdate: {
+    marginTop: space.lg,
   },
 });

@@ -1,9 +1,9 @@
 {
   "version": "0.6.59",
   "plan": "module-based",
-  "last_updated": "2026-09-12T23:44:00+08:00",
+  "last_updated": "2026-09-24T00:02:00+08:00",
   "status": "in_progress",
-  "blocker": "T15-R 绑定输入被键盘挡住已改。等人再验。口令 T15 通过。勿 arm sleeper。",
+  "blocker": "TestFlight 0.1.0/1 已上传。内测三条改动在工作区：站位不稳时示范窗不跳、跟练可跳过、休息可拖沙漏。尚未打进 TestFlight。勿 arm。",
   "focus": "app",
   "backlog": [
     {
@@ -37,7 +37,7 @@
     {
       "id": "APP-DISTRIBUTE",
       "title": "App 内测分发与上架（TestFlight / Store）",
-      "note": "2026-09-07：主线。用户将付费苹果开发者（替换免费 7 天描述文件，现至 2026-09-12）。eas.json 已有。待：付费账号签包、TestFlight（VT-P4-005b）、上架材料（OQ-004 品牌名/包名）。",
+      "note": "2026-09-24：production IPA 已提交 TestFlight（build a30ef3de，ASC 6814918688，0.1.0/1）。待测试员装上，才算 VT-P4-005b。",
       "before": "launch",
       "status": "in_progress"
     },
@@ -51,9 +51,9 @@
     {
       "id": "APP-GHOST",
       "title": "详情预渲染 3D 示意（FR-064）",
-      "note": "详情预渲染仍 P2。训练参考改为 Plan C 3D（非本 backlog）。",
+      "note": "用户 2026-09-18 明确不要详情页 3D 预渲染。训练示范窗不走这条。",
       "before": "launch",
-      "status": "deferred"
+      "status": "cancelled"
     },
     {
       "id": "APP-CATALOG",
@@ -65,9 +65,9 @@
     {
       "id": "ASSET-SCOUT",
       "title": "批量扩动作库：选片清单 + 版权门闩 + ingest",
-      "note": "2026-09-07：当前批次已接线且 App 真机齐。产品决定暂不扩新动作。管线保留，不排下一波。",
+      "note": "2026-09-21：用户要求 grokbot 扩库。Phase G=catalog 12 条优先；Phase H=99 条新 id。机位已写入 specs.json。先 --yt-search 出 proposed，未授权不 download。真源 docs/exercises/asset-scout/expansion-queue.json。",
       "after": "M13-GATE",
-      "status": "parked"
+      "status": "in_progress"
     },
     {
       "id": "APP-UPGRADE",
@@ -93,23 +93,107 @@
     {
       "id": "APP-LOG",
       "title": "训记式训练容量 / 课表（FR-091/092）",
-      "note": "T12 / T13 / T14 通过。已结束课可左滑删除。PR 另单。",
+      "note": "T12 / T13 / T14 / T19 通过。已结束课可左滑删除。PR 在我的·成就柜。",
       "before": "launch",
-      "status": "in_progress"
+      "status": "done"
     },
     {
       "id": "APP-UI",
       "title": "全 App 视觉改版（UI-013）",
-      "note": "MLS 视觉随 APP-SHELL 起。训练页铬放波次 7。叠加层不改。",
+      "note": "MLS 视觉随 APP-SHELL 起。T16 真机通过：结束白胶囊/计数深色胶囊；详情只留跟练。叠加层不改。",
       "before": "launch",
-      "status": "spec"
+      "status": "done"
     },
     {
       "id": "APP-ACCOUNT",
       "title": "账号体系（FR-100）",
-      "note": "T15 已编码：游客欢迎 + 四登录本机绑定，不上传。等人真机。",
+      "note": "T15 + T23 真机通过。游客欢迎 + Apple 系统框本机绑定，不上传。",
       "before": "launch",
-      "status": "in_progress"
+      "status": "done"
+    },
+    {
+      "id": "APP-SEG-SWIPE",
+      "title": "主 Tab 下子分段支持左右滑",
+      "note": "T17 真机通过。首页/记录页内左右滑。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-DETAIL-DEMO",
+      "title": "动作详情示范片",
+      "note": "T18 真机通过。详情复用训练压缩片。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-AUTH-REAL",
+      "title": "真登录（数据仍本机）",
+      "note": "T23 真机通过。Apple 系统框绑定本机；取消不写。FR-101 不做。Bundle com.Myfitco.mobile / team 93UHA7C4LM。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-LOG-UNITS",
+      "title": "公斤/磅切换（建议 FR-102）",
+      "note": "T24 真机通过。每次记重量点 KG/LB，成就按该组单位显示。我的没有全局单位。存储与容量仍 kg。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-LOG-BACKDATE",
+      "title": "日历补记过去日期课表（FR-099）",
+      "note": "T25 真机通过。空白过去日补记为 ended，不占首页进行中。未来日拒绝。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-PR",
+      "title": "按动作历史最大重量（FR-098）",
+      "note": "T19 真机通过。我的·成就柜默认 Top 4；砖上无戳；标题旁无计数。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-FOLLOW-ALONG",
+      "title": "课内跟练 + 跟练落账指定当前课",
+      "note": "T21 真机通过。课内跟练写入当前节。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-ADD-SEARCH",
+      "title": "加动作搜索 + 计次居中 + 站位一行",
+      "note": "T22 真机通过。搜索/计次居中/站位一行/已结束课也可跟练。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-WG-FLIPBOOK",
+      "title": "Workout Guide 三帧循环（非示范原片）",
+      "note": "用户 2026-09-18 明确不要。",
+      "before": "launch",
+      "status": "cancelled"
+    },
+    {
+      "id": "APP-EXERCISE-ICONS",
+      "title": "动作库/训练铬汉字图标改开源训练图标",
+      "note": "T20 真机通过。Workout Guide frame-2 PNG（CC BY-SA 4.0）。无 mp4/gif；每动作仅 frame-1/2/3。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-AUTH-DIRECTORY",
+      "title": "登录账号记到服务器（用户名密码 / Apple）",
+      "note": "T26 真机通过（2026-09-23）。用户名密码只在本机（只存哈希）。Apple 走苹果。我的里可删除账号。课表不上传。",
+      "before": "launch",
+      "status": "done"
+    },
+    {
+      "id": "APP-WECHAT-OPEN",
+      "title": "微信开放平台移动应用登录",
+      "note": "用户 2026-09-21 明确不要。登录只留用户名密码和 Apple。",
+      "before": "launch",
+      "status": "cancelled"
     }
   ],
   "loop": {
@@ -119,7 +203,7 @@
     "stopped_at": null,
     "stop_reason": null,
     "stop_after_next_tick": false,
-    "note": "T15-R 绑定 sheet 避开键盘。paused_human。口令 T15 通过。勿 arm sleeper。"
+    "note": "T26 已通过。用户下令首页动作在前，并做可安装包。勿 arm。"
   },
   "current_module": "M13",
   "modules": {
@@ -205,10 +289,8 @@
       ]
     }
   },
-  "next_task": "T15",
+  "next_task": "APP-DISTRIBUTE",
   "queue": [
-    "APP-ACCOUNT",
-    "APP-TRAIN-CHROME",
     "APP-DISTRIBUTE"
   ],
   "completed_tasks": [
@@ -292,7 +374,19 @@
     "T11-1",
     "T12",
     "T13",
-    "T14"
+    "T14",
+    "T15",
+    "T16",
+    "T17",
+    "T18",
+    "T19",
+    "T20",
+    "T21",
+    "T22",
+    "T23",
+    "T24",
+    "T25",
+    "T26"
   ],
   "completed_gates": [
     "M0-GATE",
@@ -308,6 +402,357 @@
     "M13-GATE"
   ],
   "iteration_log": [
+    {
+      "at": "2026-09-24T00:02:00+08:00",
+      "module": "M8",
+      "task": "APP-DISTRIBUTE",
+      "result": "partial",
+      "summary": "iOS 0.1.0（1）已上传 TestFlight。ASC App 6814918688。用户给出的是后台页，还不能当别人的安装链接。未 arm。",
+      "next": "在 TestFlight 添加测试员。他人安装后无需 Metro，再算 VT-P4-005b。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-23T00:50:00+08:00",
+      "module": "M8",
+      "task": "T26",
+      "result": "ok",
+      "summary": "用户确认 T26 通过。首页分段改为动作在前、训练在后，默认落在动作。开始做可发给别人的安装包。未 arm。",
+      "next": "EAS 出 iOS TestFlight 包。他人安装后无需 Metro。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-21T00:45:00+08:00",
+      "module": "M8",
+      "task": "T26",
+      "result": "partial",
+      "summary": "登录改为用户名密码（服务只存哈希）和 Apple。去掉验证码、短信、微信。忘记密码仅本机：面容或指纹通过后改密码；生物识别不可用则近 7 天训练题。新手机只能靠密码或 Apple。未 arm。",
+      "next": "用户真机：注册或登录后我的显示该用户名；退出后课还在。口令：T26 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-19T00:22:00+08:00",
+      "module": "M8",
+      "task": "T26",
+      "result": "partial",
+      "summary": "账号服务启动核对 /v1/me，用户写入本机文件。记录页当天空课按钮改为开始今天训练，过去日仍是补记。课表仍不上传。未 arm。",
+      "next": "用户真机：邮箱验证码登录后我的显示该账号；当天记录按钮是开始今天训练。口令：T26 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T23:58:00+08:00",
+      "module": "M8",
+      "task": "T26",
+      "result": "partial",
+      "summary": "用户取消三帧循环和详情 3D 预渲染，下令完善登录。账号服务记下邮箱/手机号/Apple/微信身份，课表仍不上传。微信无密钥返回 503，不再本机假装绑定。未 arm。",
+      "next": "用户真机：邮箱验证码登录、微信不假装成功、课表还在。口令：T26 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T23:48:00+08:00",
+      "module": "M8",
+      "task": "T24+T25",
+      "result": "ok",
+      "summary": "用户确认 T24、T25 通过。单位是每次记重量时的 KG/LB 附标，成就跟该组单位；容量与自重仍 kg。空白过去日可补记。未做三帧、未做分发。未 arm。",
+      "next": "等人点名下一刀。三帧循环未拍板；APP-DISTRIBUTE 仍最后。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T23:32:00+08:00",
+      "module": "M8",
+      "task": "T24+T25",
+      "result": "partial",
+      "summary": "用户下令 T24 与 T25 一起做、一起验。公斤/磅只换展示，磁盘仍 kg；空白今天/过去日可补记，过去日 ended，未来日拒绝。core 472 绿，mobile tsc 绿。未改叠加层。未 arm。",
+      "next": "用户一起真机。口令：T24 通过、T25 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T01:36:00+08:00",
+      "module": "M8",
+      "task": "T24",
+      "result": "ok",
+      "summary": "用户确认 T23 通过。PM 收口 APP-AUTH-REAL。派 T24 公斤/磅；T25 过去日补记起草排队。未改产品代码。未拍板三帧。未 arm。",
+      "next": "用户下令开发后做 T24。口令仍等真机：T24 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T01:30:00+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "G4B 已安装 com.Myfitco.mobile，签名 93UHA7C4LM 且含 com.apple.developer.applesignin。codesign 用 Apple Development: Ruiyi Fang。未伪绑定。未 arm。等人真机验系统框。",
+      "next": "用户打开新装的 Fitness Coach，点通过 Apple 登录：出系统框、取消仍游客、登录后课表还在。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T01:23:00+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "已有 Apple Development: Ruiyi Fang（93UHA7C4LM）。xcodebuild 仍 No Accounts：DVT Apple ID 列表为空，没有 com.Myfitco.mobile 描述文件。未重装。未伪绑定。未 arm。",
+      "next": "用户在 Xcode Accounts 重新登录付费 Apple ID，确认左边出现邮箱后再回「左边有邮箱」。然后重装 G4B。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T01:18:00+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "Team 改为 Ruiyi Fang / 93UHA7C4LM，Bundle com.Myfitco.mobile，applesignin 已写。xcodebuild 失败：Xcode 账号 keychain 失效（No Accounts / missing Xcode-Username）。未重装。未伪绑定。未 arm。",
+      "next": "用户在 Xcode Settings → Accounts 重新登录付费 Apple ID，看到 Ruiyi Fang 后回「已登录」。然后重装 G4B。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-18T01:12:00+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "iOS Bundle ID 改为 com.Myfitco.mobile（app.json / pbxproj / URL scheme），entitlement 写回 applesignin。本机 codesign 仍只有 go444bright 免费队 GDX7AL5G5F，未重装。未伪绑定。未 arm。",
+      "next": "用户在 Xcode Settings → Accounts 添加付费 Apple ID（Team 不要选 Personal Team），回「账号已加上」。然后重装 G4B。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:40:51+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "真机「Apple 登录没完成」：signed app 与 7 天免费 profile 都没有 com.apple.developer.applesignin。写入 entitlement 后 expo run:ios 失败（profile does not support Sign In with Apple）。已撤回 entitlement 以免堵后续真机包。错误文案改为指向付费 Developer。未伪绑定。未 arm。",
+      "next": "用户付费加入 Apple Developer，给 com.fitnesscoach.mobile 打开 Sign in with Apple，再说一声再重装。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:22:00+08:00",
+      "module": "M8",
+      "task": "T23",
+      "result": "partial",
+      "summary": "T23 返工：红屏是 Metro 未纳入 expo-apple-authentication。metro extraNodeModules + 8081 --clear，apps/mobile/index.ts bundle 200。未重装 Dev Client。未 arm。",
+      "next": "用户真机验 T23。系统框需重装含 Apple 登录的 Dev Client。口令：T23 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:17:00+08:00",
+      "module": "M8",
+      "task": "T22",
+      "result": "ok",
+      "summary": "用户确认 T22 通过。APP-ADD-SEARCH 收口。已结束课编辑也可跟练。未 arm。",
+      "next": "T23 真登录（数据仍本机）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:16:00+08:00",
+      "module": "M8",
+      "task": "T22",
+      "result": "partial",
+      "summary": "已结束课点进编辑也可跟练，写入该节。core 464 绿，mobile tsc 绿。未改绿骨。未 arm。",
+      "next": "用户再验坐姿推胸器行右侧跟练，以及 T22 其余项。口令：T22 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:11:00+08:00",
+      "module": "M8",
+      "task": "T22",
+      "result": "partial",
+      "summary": "T22 返工：组表跟练被挤/自定义名吃掉。添加唯一库内名走 catalog；自定义名唯一对应可跟练动作也出跟练钮。core 463 绿，mobile tsc 绿。未 arm。",
+      "next": "用户再验课表动作行右侧跟练，以及 T22 其余项。口令：T22 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T01:02:00+08:00",
+      "module": "M8",
+      "task": "T21",
+      "result": "ok",
+      "summary": "用户确认 T21 通过。课内跟练写入当前节。APP-FOLLOW-ALONG 收口。未 arm。",
+      "next": "T22 等人真机。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T00:45:00+08:00",
+      "module": "M8",
+      "task": "T21",
+      "result": "partial",
+      "summary": "课内跟练：applyFollowAlongSet 可指定 workoutId；组表可跟练动作有入口；写完回该课。core 458 + mobile tsc。未改绿骨。未 arm。",
+      "next": "用户真机验 T21。口令：T21 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-16T00:40:00+08:00",
+      "module": "M8",
+      "task": "T20",
+      "result": "ok",
+      "summary": "用户确认 T20 通过。APP-EXERCISE-ICONS 收口。Workout Guide 仓库无 mp4/gif/webp，仅每动作 3 帧。未拆三帧循环单。未 arm。",
+      "next": "默认下一课内跟练。若要库内三帧循环须另拍板，且不得替换示范窗原片。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-15T00:25:00+08:00",
+      "module": "M8",
+      "task": "T20",
+      "result": "partial",
+      "summary": "用户选 C。接入 Workout Guide frame-2 PNG（CC BY-SA）。卡片/组表/加动作/示范窗收起不再用汉字。core+ui+mobile 机测过。未改绿骨。未 arm。",
+      "next": "用户真机验 T20。口令：T20 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-15T00:10:00+08:00",
+      "module": "M8",
+      "task": "T19",
+      "result": "ok",
+      "summary": "用户确认 T19 通过。APP-PR 收口。下一 T20 动作图标：检索开源源，未编码。未 arm。",
+      "next": "用户选 A 线框或接受 C（CC BY-SA 插画）后开发 T20。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:34:00+08:00",
+      "module": "M8",
+      "task": "T19-R7",
+      "result": "partial",
+      "summary": "去掉成就旁计数。壳层字阶写入 MASTER 与 shell-typography 规则。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:30:00+08:00",
+      "module": "M8",
+      "task": "T19-R6",
+      "result": "partial",
+      "summary": "用户否所有戳：成就砖去掉圆章/邮戳/日期，文案居中。achievedAt 仍留 core。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:20:00+08:00",
+      "module": "M8",
+      "task": "T19-R5",
+      "result": "partial",
+      "summary": "用户否现稿圆章并要求先提案。后改为字居中 + 邮戳裁切 P1–P6。未改产品代码。未 arm。",
+      "next": "用户回 P1–P6 后再改 PrBoard。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:16:00+08:00",
+      "module": "M8",
+      "task": "T19-R4",
+      "result": "partial",
+      "summary": "T19 再打回：圆章去掉自造红印和 8pt 挤字，改回壳层灰白双圈 + 等宽 MM.DD/年。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:12:00+08:00",
+      "module": "M8",
+      "task": "T19-R3",
+      "result": "partial",
+      "summary": "T19 再打回：去掉线性时间戳，改成成就砖右下角双圈斜盖章（月日年）。Top 4 收放未改。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-14T00:10:00+08:00",
+      "module": "M8",
+      "task": "T19-R2",
+      "result": "partial",
+      "summary": "T19 再打回：成就柜默认 Top 4 可展开/收起；PR 带课 startedAt 达成戳。公式未改。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:59:00+08:00",
+      "module": "M8",
+      "task": "T19-R",
+      "result": "partial",
+      "summary": "T19 打回：PR 迁到我的·成就柜（2 列 BEST 砖 + 巨大 kg），记录页只留日历和课。公式未改。未 arm。",
+      "next": "用户再验 T19。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:54:00+08:00",
+      "module": "M8",
+      "task": "T19",
+      "result": "partial",
+      "summary": "APP-PR：personalRecords 取最大重量、同重量取更高次数；记录页展示。未改叠加层。未做课内跟练/真登录。未 arm。",
+      "next": "用户真机三步。口令：T19 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:53:00+08:00",
+      "module": "M4",
+      "task": "T18",
+      "result": "ok",
+      "summary": "用户确认 T18 通过。APP-DETAIL-DEMO 收口。按优先级接 T19 PR。未 arm。",
+      "next": "T19 FR-098 PR 列表。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-09-13T23:52:00+08:00",
+      "module": "M4",
+      "task": "T18",
+      "result": "partial",
+      "summary": "APP-DETAIL-DEMO：详情复用训练压缩片（PipClipPane/sampleClips），点按暂停。删空 demoAssets。未改绿骨/示范窗行为/计次。未做 3D。未 arm。",
+      "next": "用户真机四步。口令：T18 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:51:00+08:00",
+      "module": "M4",
+      "task": "T17",
+      "result": "ok",
+      "summary": "用户确认 T17 通过。APP-SEG-SWIPE 收口。按优先级接 T18 详情片。未 arm。",
+      "next": "T18 详情复用训练压缩片。",
+      "human_action_needed": false
+    },
+    {
+      "at": "2026-09-13T23:50:00+08:00",
+      "module": "M4",
+      "task": "T17",
+      "result": "partial",
+      "summary": "APP-SEG-SWIPE：首页/记录页内左右滑与分段同步；课编辑滑走不关。无新原生模块。ui 25 测绿，mobile tsc 绿。未改叠加层。未做详情片/PR/真登录。未 arm。",
+      "next": "用户真机四步。口令：T17 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:45:00+08:00",
+      "module": "M8",
+      "task": "PM-GAP-REVIEW",
+      "result": "partial",
+      "summary": "用户要求 APP-DISTRIBUTE 放到最后，先完善。PM 对照 PRD/现网评审：子分段仅点按；详情示范片占位（训练窗已有片）；账号是本机标签，真登录与云同步分层。另敞着 FR-098 PR、课内跟练、跟练落账选课。未改产品代码、未拆工单、未 arm。",
+      "next": "用户点下一刀后再拆一张工单。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:41:00+08:00",
+      "module": "M4",
+      "task": "T16",
+      "result": "ok",
+      "summary": "用户确认 T16 通过。APP-TRAIN-CHROME 收口：结束白胶囊/计数深色胶囊；详情只留跟练。未改绿骨/示范窗/计次。未 arm。下一 APP-DISTRIBUTE，等人下令再开发。",
+      "next": "等人说继续后做 APP-DISTRIBUTE（付费签包 / TestFlight）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:32:00+08:00",
+      "module": "M4",
+      "task": "T16",
+      "result": "partial",
+      "summary": "APP-TRAIN-CHROME：RepCounter 结束白胶囊、计数深色等宽数字，去掉底栏灰调试条。未改绿骨/示范窗/计次/纠错。ui 24，mobile tsc 绿，check:figure / check:reference OK。未 arm。",
+      "next": "用户真机两步。口令：T16 通过。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T23:29:00+08:00",
+      "module": "M8",
+      "task": "T15",
+      "result": "ok",
+      "summary": "用户确认 T15 通过。APP-ACCOUNT 收口：游客先练、本机四绑定、绑定/退出不丢课表。未做 FR-101 / 训练铬。未 arm。下一 APP-TRAIN-CHROME / T16，等人下令再开发。",
+      "next": "等人说继续后开发 T16（训练页铬，不改绿骨/示范窗/计次）。",
+      "human_action_needed": true
+    },
+    {
+      "at": "2026-09-13T00:05:00+08:00",
+      "module": "M8",
+      "task": "T15-R2",
+      "result": "partial",
+      "summary": "绑定邮箱/手机：去掉 KeyboardAvoidingView（取消钮被顶到屏幕顶、输入仍被挡）。改为 keyboardWillChangeFrame 高度整块上抬。未改叠加层。未 arm。",
+      "next": "用户再验绑定输入。口令：T15 通过。",
+      "human_action_needed": true
+    },
     {
       "at": "2026-09-12T23:44:00+08:00",
       "module": "M8",

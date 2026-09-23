@@ -12,6 +12,14 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
+config.resolver.unstable_enableSymlinks = true;
+config.resolver.extraNodeModules = {
+  ...(config.resolver.extraNodeModules ?? {}),
+  'expo-apple-authentication': path.resolve(
+    projectRoot,
+    'node_modules/expo-apple-authentication',
+  ),
+};
 
 // Expo 54 默认 assetExts 不含 glb；不配的话 require('*.glb') 会报文件不存在。
 const assetExts = config.resolver.assetExts.filter((ext) => ext !== 'glb');

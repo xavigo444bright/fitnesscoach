@@ -1,7 +1,7 @@
 /**
  * NativeStack 包 2 个 BottomTab；跟练 / 组表 sheet / 倒计时全屏栈盖住底栏（FR-110）。
  */
-import { addSlot, ensureOpenWorkout, isCoachableId } from '@fitness-coach/core';
+import { isCoachableId } from '@fitness-coach/core';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -18,7 +18,6 @@ import RestTimerScreen from '../screens/RestTimerScreen';
 import SessionSummaryScreen from '../screens/SessionSummaryScreen';
 import TrainingScreen from '../screens/TrainingScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
-import { commitWorkoutLog } from '../workoutLogStorage';
 import type { MainTabParamList, RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -44,28 +43,14 @@ function DetailRoute({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Detail'>) {
-  const { catalogId } = route.params;
+  const { catalogId, workoutId } = route.params;
   return (
     <ExerciseDetailScreen
       exerciseId={catalogId}
       onBack={() => navigation.goBack()}
-      onJoin={() => {
-        let workoutId = '';
-        void commitWorkoutLog((log, ids) => {
-          const open = ensureOpenWorkout(log, new Date().toISOString(), ids);
-          workoutId = open.workoutId;
-          return addSlot(open.log, open.workoutId, { kind: 'catalog', catalogId }, ids)
-            .log;
-        }).then(() => {
-          navigation.navigate('MainTabs', {
-            screen: 'Home',
-            params: { workoutId },
-          });
-        });
-      }}
       onStart={() => {
         if (!isCoachableId(catalogId)) return;
-        navigation.navigate('Prepare', { exerciseId: catalogId });
+        navigation.navigate('Prepare', { exerciseId: catalogId, workoutId });
       }}
     />
   );
@@ -75,11 +60,11 @@ function PrepareRoute({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Prepare'>) {
-  const { exerciseId } = route.params;
+  const { exerciseId, workoutId } = route.params;
   return (
     <PrepareScreen
       onBack={() => navigation.goBack()}
-      onReady={() => navigation.navigate('Training', { exerciseId })}
+      onReady={() => navigation.navigate('Training', { exerciseId, workoutId })}
     />
   );
 }
@@ -88,7 +73,7 @@ function TrainingRoute({
   navigation,
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Training'>) {
-  const { exerciseId } = route.params;
+  const { exerciseId, workoutId } = route.params;
   return (
     <TrainingScreen
       exerciseId={exerciseId}
@@ -97,6 +82,7 @@ function TrainingRoute({
           catalogId: exerciseId,
           cameraReps: summary.reps,
           formSummary: summary.topIssue?.message,
+          workoutId,
         });
       }}
     />

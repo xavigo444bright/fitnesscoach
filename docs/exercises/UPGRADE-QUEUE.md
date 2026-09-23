@@ -45,7 +45,32 @@
 
 ## 下一动作
 
-**暂不扩新动作（2026-09-07）**。当前 20 条 coachable App 真机齐。主线改为 App 上线。
+**2026-09-21 重开扩库**（给 grokbot scout）。机位已写入 `camera-planes/specs.json`。先检索 YouTube 出 `proposed`，用户授权后再 ingest。不要一次接线。
+
+真源：[`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json) · 协议：[`asset-scout/GROKBOT-SCOUT.md`](./asset-scout/GROKBOT-SCOUT.md)
+
+### Phase G（catalog 已有，优先）
+
+| 顺序 | id | 名称 | 评估桶 | 必收片 | 窗 |
+|------|-----|------|--------|--------|----|
+| 1 | lat-pulldown | 高位下拉 | 正面 | `front` | reps |
+| 2 | seated-row | 坐姿划船 | 侧面 | `side` | reps |
+| 3 | superman | 超人式 | 侧面 | `side` | reps |
+| 4 | band-row | 弹力带划船 | 侧面 | `side` | reps |
+| 5 | leg-press | 腿举 | 侧面 | `side` | reps |
+| 6 | calf-raise | 提踵 | 侧面 | `side` | reps |
+| 7 | goblet-squat | 高脚杯深蹲 | 侧面 | `side` | reps |
+| 8 | dead-bug | 死虫式 | 侧面 | `side` | reps |
+| 9 | bird-dog | 鸟狗式 | 侧面 | `side` | reps |
+| 10 | crunch | 卷腹 | 侧面 | `side` | reps |
+| 11 | side-plank | 侧平板 | 正面 | `front` | hold |
+| 12 | hanging-knee-raise | 悬垂提膝 | 侧面 | `side` | reps |
+
+### Phase H（99 条新 id，尚未进 catalog）
+
+胸 16 · 肩 7 · 背/臂 21 · 下肢 29 · 核心 26。弯举暂挂 `back`，臂屈伸暂挂 `chest`/`shoulders`（库里还没有「手臂」分区）。
+
+不拆：chin-up、走/反向弓步、站姿绳索飞鸟、单臂哑铃划船、军事推、相扑硬拉、箱式蹲、直立划船、颈后推、farmer/burpee/box-jump/举重三翻。
 
 **Phase F（肩）** 已接线并 **coachable**（VT-P6-019～023 通过 2026-09-07）。
 

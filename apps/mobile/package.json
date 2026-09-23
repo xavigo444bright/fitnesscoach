@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@babel/runtime": "7.29.7",
     "@expo/vector-icons": "^15.0.3",
     "@fitness-coach/core": "workspace:*",
     "@fitness-coach/pose-native": "workspace:*",
@@ -13,12 +14,15 @@
     "@react-navigation/native-stack": "^7.18.10",
     "@thinksys/react-native-mediapipe": "^0.0.21",
     "expo": "~54.0.35",
+    "expo-apple-authentication": "~8.0.8",
     "expo-asset": "~12.0.13",
     "expo-av": "~16.0.8",
     "expo-camera": "~17.0.10",
+    "expo-constants": "~18.0.13",
     "expo-dev-client": "~6.0.21",
     "expo-file-system": "~19.0.24",
     "expo-gl": "~16.0.10",
+    "expo-local-authentication": "~17.0.9",
     "expo-modules-core": "~3.0.30",
     "expo-speech": "~14.0.8",
     "expo-status-bar": "~3.0.9",
@@ -35,6 +39,7 @@
     "typescript": "~5.9.3"
   },
   "scripts": {
+    "eas-build-post-install": "pnpm --filter @fitness-coach/core build && pnpm --filter @fitness-coach/ui build && pnpm --filter @fitness-coach/render build && pnpm --filter @fitness-coach/pose-native build",
     "start": "expo start --dev-client",
     "start:go": "expo start",
     "android": "expo run:android",

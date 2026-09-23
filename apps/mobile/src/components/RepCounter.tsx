@@ -1,10 +1,11 @@
 /**
- * CMP-005 RepCounter（M3-T7 · UX-003）
+ * CMP-005 RepCounter。T16：结束白胶囊、计数深色胶囊。不改计次逻辑。
  */
 import type { RepCounterProps } from '@fitness-coach/ui';
-import { colors, fontSize, layout, motion } from '@fitness-coach/ui';
+import { colors, fontSize, layout, motion, radius, space } from '@fitness-coach/ui';
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = RepCounterProps;
 
@@ -14,6 +15,7 @@ export default function RepCounter({
   endLabel = '结束',
   caption = 'Rep',
 }: Props) {
+  const insets = useSafeAreaInsets();
   const scale = useRef(new Animated.Value(1)).current;
   const prevCount = useRef(count);
 
@@ -30,12 +32,29 @@ export default function RepCounter({
   }, [count, scale]);
 
   return (
-    <View style={styles.bar}>
-      <View style={styles.repBlock}>
+    <View
+      style={[
+        styles.bar,
+        { paddingBottom: Math.max(insets.bottom, space.sm) },
+      ]}
+    >
+      <View style={styles.repChip}>
         <Text style={styles.caption}>{caption}</Text>
-        <Animated.Text style={[styles.count, { transform: [{ scale }] }]}>
-          {count}
-        </Animated.Text>
+        <View style={styles.countSlot}>
+          <Animated.Text
+            style={[
+              styles.count,
+              {
+                transform: [
+                  { scale },
+                  { translateY: Platform.OS === 'ios' ? 2 : 0 },
+                ],
+              },
+            ]}
+          >
+            {count}
+          </Animated.Text>
+        </View>
       </View>
       {onEnd ? (
         <Pressable
@@ -53,38 +72,60 @@ export default function RepCounter({
 
 const styles = StyleSheet.create({
   bar: {
-    height: layout.bottomBarHeight,
+    minHeight: layout.bottomBarHeight,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    backgroundColor: colors.overlayScrim,
+    paddingHorizontal: space.md,
+    paddingTop: space.sm,
+    backgroundColor: 'transparent',
   },
-  repBlock: {
+  repChip: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.sm,
+    height: layout.touchMin,
+    paddingHorizontal: space.md,
+    paddingVertical: 0,
+    borderRadius: radius.pill,
+    backgroundColor: colors.tabBar,
   },
   caption: {
     color: colors.textSecondary,
     fontSize: fontSize.caption,
-    fontWeight: '400',
+    lineHeight: fontSize.caption,
+    fontWeight: '600',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
+  countSlot: {
+    height: fontSize.rep,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible',
   },
   count: {
-    color: colors.overlayText,
+    color: colors.textPrimary,
     fontSize: fontSize.rep,
+    lineHeight: fontSize.rep,
     fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    includeFontPadding: false,
+    textAlignVertical: 'center',
   },
   endBtn: {
     minHeight: layout.touchMin,
-    minWidth: layout.touchMin,
-    paddingHorizontal: 16,
+    minWidth: 88,
+    paddingHorizontal: space.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.cta,
     justifyContent: 'center',
     alignItems: 'center',
   },
   endLabel: {
-    color: colors.overlayText,
+    color: colors.onCta,
     fontSize: fontSize.body,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

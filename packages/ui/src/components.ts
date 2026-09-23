@@ -23,6 +23,8 @@ export interface ExerciseCardProps {
   name: string;
   bodyPart: string;
   cameraHint: string;
+  /** catalog id；无则按器械/默认姿势图 */
+  exerciseId?: string;
   onPress?: () => void;
 }
 

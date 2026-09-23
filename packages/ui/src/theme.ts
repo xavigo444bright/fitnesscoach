@@ -15,7 +15,7 @@ export const colors = {
   surfaceRaised: "#1A1A1A",
   overlayScrim: "rgba(0, 0, 0, 0.55)",
   overlayText: "#FFFFFF",
-  /** 历史训练页按钮蓝；壳层主 CTA 用 cta / onCta（T16 再迁训练铬） */
+  /** 历史训练页按钮蓝；壳层与训练铬主 CTA 用 cta / onCta */
   primary: "#3B82F6",
   cta: "#FFFFFF",
   onCta: "#000000",

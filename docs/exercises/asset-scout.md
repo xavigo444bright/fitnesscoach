@@ -139,6 +139,8 @@
 
 视频产示范素材与轨迹；规则另写，用轨迹校对，不替代。
 
+下一波扩库（111 条）见 [`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json) 与 [`GROKBOT-SCOUT.md`](./asset-scout/GROKBOT-SCOUT.md)。
+
 ## 本批 10 个动作
 
 深蹲、俯卧撑（已入库授权）+ 臀桥、弓步蹲、平板支撑、哑铃划船、站姿推举、杠铃卧推、罗马尼亚硬拉、引体向上。

@@ -37,6 +37,8 @@ export * from "./exercises/pike-pushup.js";
 export * from "./exercises/batch-keyframes.js";
 export * from "./exercises/ghostKeyframes.js";
 export * from "./exercises/catalog.js";
+export * from "./exercises/exerciseIcons.js";
+export * from "./exercises/exerciseSearch.js";
 export {
   BODY_PART_ACTIVE_MUSCLES,
   activeMusclesFromBodyPart,

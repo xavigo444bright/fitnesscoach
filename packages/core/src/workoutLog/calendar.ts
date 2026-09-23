@@ -69,3 +69,17 @@ export function shiftYearMonth(
   const date = new Date(year, month - 1 + delta, 1);
   return { year: date.getFullYear(), month: date.getMonth() + 1 };
 }
+
+export type BackdateKind = "past" | "today" | "future";
+
+/** 相对 `nowIso` 的本地日：过去 / 今天 / 未来。未来不允许补记。 */
+export function backdateKind(
+  day: string,
+  nowIso: string,
+  timeZone?: string,
+): BackdateKind {
+  const today = calendarDayLocal(nowIso, timeZone);
+  if (day > today) return "future";
+  if (day < today) return "past";
+  return "today";
+}

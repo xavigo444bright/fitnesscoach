@@ -1,0 +1,2481 @@
+{
+  "schemaVersion": "1.0",
+  "updatedAt": "2026-09-21",
+  "notes": "Grokbot scout 真源。Phase G=已在 catalog 的 12 条（优先）。Phase H=新 id，尚未进 catalog.ts。机位已写入 camera-planes/specs.json。未授权不 download。chin-up / 走弓步 / 站姿绳索飞鸟等见 skip，不拆 id。",
+  "skip": [
+    {
+      "id": "chin-up",
+      "reason": "与 pullup 同一驱动，别名已挂在 pullup"
+    },
+    {
+      "id": "walking-lunge",
+      "reason": "与 lunge 同行程，错误集未打架前不拆"
+    },
+    {
+      "id": "reverse-lunge",
+      "reason": "同上，仍用 lunge"
+    },
+    {
+      "id": "cable-fly",
+      "reason": "站姿龙门夹胸已是 cable-crossover"
+    },
+    {
+      "id": "one-arm-db-row",
+      "reason": "已是 db-row"
+    },
+    {
+      "id": "military-press",
+      "reason": "已是 ohp"
+    },
+    {
+      "id": "sumo-deadlift",
+      "reason": "本波锁 conventional deadlift，站距差不拆"
+    },
+    {
+      "id": "box-squat",
+      "reason": "与 squat 同行程"
+    },
+    {
+      "id": "upright-row",
+      "reason": "肩撞击风险高，且与 face-pull 开合接近"
+    },
+    {
+      "id": "behind-neck-press",
+      "reason": "不安全变式，不收录"
+    },
+    {
+      "id": "farmer-carry",
+      "reason": "位移动作，2D 计次弱"
+    },
+    {
+      "id": "burpee",
+      "reason": "复合爆发，本波不做"
+    },
+    {
+      "id": "box-jump",
+      "reason": "plyo，本波不做"
+    },
+    {
+      "id": "snatch",
+      "reason": "举重三翻，本波不做"
+    },
+    {
+      "id": "clean-and-jerk",
+      "reason": "举重三翻，本波不做"
+    },
+    {
+      "id": "muscle-up",
+      "reason": "高技能，本波不做"
+    },
+    {
+      "id": "smith-machine-variants",
+      "reason": "史密斯变式并入对应自由重量 id"
+    }
+  ],
+  "phases": {
+    "G": {
+      "title": "已在 catalog、尚未 coachable",
+      "priority": 1,
+      "exercises": [
+        {
+          "id": "lat-pulldown",
+          "name": "高位下拉",
+          "nameEn": "Lat pulldown",
+          "inCatalog": true,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "坐姿高位下拉，杆拉至上胸；宽距窄距不拆",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front", "three_quarter"],
+          "cuePlanes": [{ "ruleId": "pull-depth", "planes": ["front", "side", "three_quarter"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["side", "three_quarter"],
+          "placementNote": "面对器械，手机放在用户前方或 3/4。",
+          "rationale": "计数看肘/过杆；健身房默认杠前摆机。侧面只补摆浪，不挡本版接线。",
+          "ytQueries": [
+            "how to do lat pulldown proper form facing camera",
+            "lat pulldown form tutorial front view"
+          ]
+        },
+        {
+          "id": "seated-row",
+          "name": "坐姿划船",
+          "nameEn": "Seated cable row",
+          "inCatalog": true,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "坐姿绳索/器械划船，拉至腹侧，不是站姿",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "row-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "坐在器械侧面，看清躯干直立与肘向髋后拉。",
+          "rationale": "划船行程在矢状面。正面只补左右对称，可有可无。",
+          "ytQueries": [
+            "how to do seated cable row proper form side view",
+            "seated row form tutorial side"
+          ]
+        },
+        {
+          "id": "superman",
+          "name": "超人式",
+          "nameEn": "Superman",
+          "inCatalog": true,
+          "bodyPart": "back",
+          "equipment": "bodyweight",
+          "lockVariant": "俯卧同时抬胸与腿，不是反向挺身凳",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "lift-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "趴在垫上，手机放身体一侧看胸腿离地。",
+          "rationale": "抬伸在矢状面。正面看不清幅度。",
+          "ytQueries": [
+            "how to do superman exercise proper form side view",
+            "superman back extension floor side"
+          ]
+        },
+        {
+          "id": "band-row",
+          "name": "弹力带划船",
+          "nameEn": "Band row",
+          "inCatalog": true,
+          "bodyPart": "back",
+          "equipment": "band",
+          "lockVariant": "站姿、锚点在前方的弹力带划船",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "row-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧入画，看肘后拉与躯干不晃。",
+          "rationale": "与哑铃划船同一几何：侧管肘行程。正面可补对称。",
+          "ytQueries": [
+            "how to do resistance band row standing side view",
+            "band row proper form side"
+          ]
+        },
+        {
+          "id": "leg-press",
+          "name": "腿举",
+          "nameEn": "Leg press",
+          "inCatalog": true,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "坐姿/斜蹬腿举，不是哈克",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side", "three_quarter"],
+          "cuePlanes": [{ "ruleId": "knee-depth", "planes": ["side", "three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "站在器械侧面，看清膝角与腰是否离开靠垫。",
+          "rationale": "膝伸在矢状面。正对脚掌不可读。",
+          "ytQueries": [
+            "how to do leg press proper form side view",
+            "leg press machine form tutorial side"
+          ]
+        },
+        {
+          "id": "calf-raise",
+          "name": "提踵",
+          "nameEn": "Standing calf raise",
+          "inCatalog": true,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "站姿提踵（双腿）；坐姿提踵另有 seated-calf-raise",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "ankle-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧，看清踝从底到顶的行程。",
+          "rationale": "踝伸在矢状面。正面只补左右是否同时抬。",
+          "ytQueries": [
+            "how to do standing calf raise proper form side view",
+            "calf raise form tutorial side"
+          ]
+        },
+        {
+          "id": "goblet-squat",
+          "name": "高脚杯深蹲",
+          "nameEn": "Goblet squat",
+          "inCatalog": true,
+          "bodyPart": "legs",
+          "equipment": "dumbbell",
+          "lockVariant": "哑铃/壶铃贴胸的高脚杯深蹲，不是肩前杠",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "squat-depth", "planes": ["side"] },
+            { "ruleId": "torso-lean", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看蹲深与躯干；正面只补膝内扣。",
+          "rationale": "与深蹲同一几何：侧管深度。正面膝内扣可有可无。不要写成 dual 却只收正面。",
+          "ytQueries": [
+            "how to do goblet squat proper form side view",
+            "goblet squat form tutorial side"
+          ]
+        },
+        {
+          "id": "dead-bug",
+          "name": "死虫式",
+          "nameEn": "Dead bug",
+          "inCatalog": true,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧对侧手脚伸展，腰贴地",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "lumbar-contact", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "垫侧方，看清腰是否离地、手脚是否伸直。",
+          "rationale": "腰曲和肢体伸展在矢状面最可读。",
+          "ytQueries": [
+            "how to do dead bug exercise proper form side view",
+            "dead bug core form side"
+          ]
+        },
+        {
+          "id": "bird-dog",
+          "name": "鸟狗式",
+          "nameEn": "Bird dog",
+          "inCatalog": true,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "四点支撑对侧手脚伸直，不是超人式",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side", "three_quarter"],
+          "cuePlanes": [{ "ruleId": "hip-level", "planes": ["side", "three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "垫侧方看四肢一线；3/4 可补髋旋。",
+          "rationale": "伸展在矢状面。正对脸看不清髋是否转。",
+          "ytQueries": [
+            "how to do bird dog exercise proper form side view",
+            "bird dog form tutorial side"
+          ]
+        },
+        {
+          "id": "crunch",
+          "name": "卷腹",
+          "nameEn": "Crunch",
+          "inCatalog": true,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧肩胛离地即可，不是全幅度仰卧起坐",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "crunch-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方，看清肩胛离地、下背仍贴地。",
+          "rationale": "躯干屈曲在矢状面。正面不可读幅度。",
+          "ytQueries": [
+            "how to do crunch proper form side view",
+            "abdominal crunch form tutorial side"
+          ]
+        },
+        {
+          "id": "side-plank",
+          "name": "侧平板",
+          "nameEn": "Side plank",
+          "inCatalog": true,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "前臂或直臂侧撑，身体一条线；不是侧躺抬髋",
+          "windowKind": "hold",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-line", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "人侧躺撑起，脸朝镜头，看肩髋踝是否叠成一线。",
+          "rationale": "侧平板的一线在冠状面（脸朝镜头）。侧面只看到厚度。hold 3–8s。",
+          "ytQueries": [
+            "how to do side plank proper form facing camera",
+            "side plank form tutorial front"
+          ]
+        },
+        {
+          "id": "hanging-knee-raise",
+          "name": "悬垂提膝",
+          "nameEn": "Hanging knee raise",
+          "inCatalog": true,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "悬垂屈髋屈膝，不是直腿举腿",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "杠侧方看膝向胸；正面只补摆浪左右。",
+          "rationale": "提膝在矢状面。正面看不清髋角。",
+          "ytQueries": [
+            "how to do hanging knee raise proper form side view",
+            "hanging knee raise form tutorial side"
+          ]
+        }
+      ]
+    },
+    "H": {
+      "title": "新动作（尚未进 catalog）",
+      "priority": 2,
+      "exercises": [
+        {
+          "id": "incline-bench-press",
+          "name": "上斜杠铃卧推",
+          "nameEn": "Incline barbell bench press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "barbell",
+          "lockVariant": "上斜凳杠铃卧推，不是哑铃",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "凳侧方看杠落到上胸再推起。",
+          "rationale": "与平板卧推同一几何：侧管肘/杠行程。",
+          "ytQueries": [
+            "how to do incline bench press proper form side view",
+            "incline barbell bench press form side"
+          ]
+        },
+        {
+          "id": "decline-bench-press",
+          "name": "下斜杠铃卧推",
+          "nameEn": "Decline barbell bench press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "barbell",
+          "lockVariant": "下斜凳杠铃卧推",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看杠落到下胸。",
+          "rationale": "侧管行程。正对脸被凳挡住。",
+          "ytQueries": [
+            "how to do decline bench press proper form side view",
+            "decline bench press form side"
+          ]
+        },
+        {
+          "id": "db-bench-press",
+          "name": "哑铃卧推",
+          "nameEn": "Dumbbell bench press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "dumbbell",
+          "lockVariant": "平板哑铃卧推，不是飞鸟",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["side", "three_quarter"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["side", "three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["side"],
+          "placementNote": "凳侧 3/4 同时看双铃行程。",
+          "rationale": "双铃左右是否对称在 3/4 最清楚。清侧可计，场馆常被挡。",
+          "ytQueries": [
+            "how to do dumbbell bench press proper form 3/4 view",
+            "dumbbell bench press form angle view"
+          ]
+        },
+        {
+          "id": "close-grip-bench",
+          "name": "窄距卧推",
+          "nameEn": "Close-grip bench press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "barbell",
+          "lockVariant": "杠铃窄距卧推，手距约肩宽",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看肘贴近躯干的行程。",
+          "rationale": "与卧推同一平面，只是握距更窄。",
+          "ytQueries": [
+            "how to do close grip bench press proper form side view",
+            "close grip bench press form side"
+          ]
+        },
+        {
+          "id": "pec-deck",
+          "name": "蝴蝶机夹胸",
+          "nameEn": "Pec deck",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "machine",
+          "lockVariant": "坐姿蝴蝶机/器械飞鸟，肘垫或握手把",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "fly-depth", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对镜头或从器械前看双臂在胸前开合。",
+          "rationale": "开合在冠状面。侧面看不清左右是否对称。",
+          "ytQueries": [
+            "how to do pec deck fly proper form facing camera",
+            "machine pec fly form front view"
+          ]
+        },
+        {
+          "id": "decline-pushup",
+          "name": "下斜俯卧撑",
+          "nameEn": "Decline push-up",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "bodyweight",
+          "lockVariant": "脚垫高的俯卧撑，不是上斜",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["side", "front"],
+          "cuePlanes": [
+            { "ruleId": "body-line", "planes": ["side"] },
+            { "ruleId": "pushup-depth", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side", "front"],
+          "placementNote": "与俯卧撑相同：侧管一线，正管手距。",
+          "rationale": "只是脚垫高，评估桶与俯卧撑一致。",
+          "ytQueries": [
+            "how to do decline push up proper form side view",
+            "decline push-up form front view"
+          ]
+        },
+        {
+          "id": "floor-press",
+          "name": "地板卧推",
+          "nameEn": "Floor press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "dumbbell",
+          "lockVariant": "仰卧地板哑铃/杠铃推，上臂触地即停",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看上臂触地再推起。",
+          "rationale": "行程被地板截断，必须侧面才能读触地。",
+          "ytQueries": [
+            "how to do dumbbell floor press proper form side view",
+            "floor press form tutorial side"
+          ]
+        },
+        {
+          "id": "landmine-press",
+          "name": "地雷管推举",
+          "nameEn": "Landmine press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "other",
+          "lockVariant": "单臂或双手地雷管斜上推，站姿或跪姿均可，优先站姿",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "side"],
+          "cuePlanes": [{ "ruleId": "press-lockout", "planes": ["three_quarter", "side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["side"],
+          "placementNote": "斜前方看杠沿斜线上推。",
+          "rationale": "斜线行程 3/4 最完整。正对脸被杠挡住。",
+          "ytQueries": [
+            "how to do landmine press proper form",
+            "standing landmine press form 3/4"
+          ]
+        },
+        {
+          "id": "squeeze-press",
+          "name": "哑铃夹胸推",
+          "nameEn": "Dumbbell squeeze press",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "dumbbell",
+          "lockVariant": "两铃始终贴在一起的平板推",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter"],
+          "cuePlanes": [{ "ruleId": "press-depth", "planes": ["three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "placementNote": "凳侧 3/4 看双铃贴紧上推。",
+          "rationale": "夹紧是本动作特征，3/4 才能同时看两铃。",
+          "ytQueries": [
+            "how to do dumbbell squeeze press proper form",
+            "hex press dumbbell form"
+          ]
+        },
+        {
+          "id": "kneeling-pushup",
+          "name": "跪姿俯卧撑",
+          "nameEn": "Kneeling push-up",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "bodyweight",
+          "lockVariant": "膝着地的俯卧撑，肩髋膝一线",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "body-line", "planes": ["side"] },
+            { "ruleId": "pushup-depth", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "侧面看肩髋膝一线与肘深。",
+          "rationale": "与俯卧撑同一侧向几何，只是力臂缩短。",
+          "ytQueries": [
+            "how to do kneeling push up proper form side view",
+            "knee push-up form side"
+          ]
+        },
+        {
+          "id": "diamond-pushup",
+          "name": "钻石俯卧撑",
+          "nameEn": "Diamond push-up",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "bodyweight",
+          "lockVariant": "双手食指拇指相对成菱形",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "pushup-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "侧面看深度；正面可选手型。",
+          "rationale": "深度仍在矢状面。正面手型可有可无。",
+          "ytQueries": [
+            "how to do diamond push up proper form side view",
+            "diamond push-up form side"
+          ]
+        },
+        {
+          "id": "seated-db-press",
+          "name": "坐姿哑铃推举",
+          "nameEn": "Seated dumbbell shoulder press",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "dumbbell",
+          "lockVariant": "坐姿靠背或直立坐，双铃从头侧推起；不是站姿 OHP",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "凳侧方看铃从耳侧推到锁肘。",
+          "rationale": "与 OHP 同一矢状行程。3/4 补左右对称。",
+          "ytQueries": [
+            "how to do seated dumbbell shoulder press proper form side view",
+            "seated db press form side"
+          ]
+        },
+        {
+          "id": "arnold-press",
+          "name": "阿诺德推举",
+          "nameEn": "Arnold press",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "dumbbell",
+          "lockVariant": "坐姿，掌心由朝脸旋到朝前再推起",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "front"],
+          "cuePlanes": [{ "ruleId": "press-rotation", "planes": ["three_quarter", "front"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "斜前方看旋转+上推。",
+          "rationale": "旋转是本动作特征，清侧看不清旋腕。",
+          "ytQueries": [
+            "how to do arnold press proper form",
+            "arnold press form 3/4 view"
+          ]
+        },
+        {
+          "id": "shrug",
+          "name": "耸肩",
+          "nameEn": "Barbell shrug",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "barbell",
+          "lockVariant": "站姿杠铃耸肩，直上直下，不转肩",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "shrug-height", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对镜头看双肩上提是否对称。",
+          "rationale": "耸肩幅度在冠状面。侧面看不清左右。",
+          "ytQueries": [
+            "how to do barbell shrug proper form facing camera",
+            "barbell shrug form front view"
+          ]
+        },
+        {
+          "id": "reverse-pec-deck",
+          "name": "反向蝴蝶机",
+          "nameEn": "Reverse pec deck",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "machine",
+          "lockVariant": "坐姿面对垫、双臂向两侧打开（后束）",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "fly-depth", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "从器械后/侧前看双臂打开。",
+          "rationale": "后束开合在冠状面。",
+          "ytQueries": [
+            "how to do reverse pec deck proper form",
+            "reverse fly machine form front"
+          ]
+        },
+        {
+          "id": "machine-shoulder-press",
+          "name": "器械推肩",
+          "nameEn": "Machine shoulder press",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "machine",
+          "lockVariant": "坐姿固定轨迹推肩",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "press-lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "器械侧方看手柄从头侧推起。",
+          "rationale": "推举行程在矢状面。",
+          "ytQueries": [
+            "how to do machine shoulder press proper form side view",
+            "shoulder press machine form side"
+          ]
+        },
+        {
+          "id": "push-press",
+          "name": "借力推举",
+          "nameEn": "Push press",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "barbell",
+          "lockVariant": "杠铃借腿蹬地的站姿推举，不是严格军事推",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "dip-drive", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看屈膝再蹬起推杠。",
+          "rationale": "借力屈伸只在侧面可读。",
+          "ytQueries": [
+            "how to do push press proper form side view",
+            "barbell push press form side"
+          ]
+        },
+        {
+          "id": "barbell-row",
+          "name": "杠铃划船",
+          "nameEn": "Barbell bent-over row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "barbell",
+          "lockVariant": "俯身杠铃划船（持续俯身），不是彭德莱硬拉停",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "row-depth", "planes": ["side"] },
+            { "ruleId": "torso-angle", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看躯干角与杠拉至腹。",
+          "rationale": "铰链+划船都在矢状面。",
+          "ytQueries": [
+            "how to do barbell bent over row proper form side view",
+            "barbell row form tutorial side"
+          ]
+        },
+        {
+          "id": "t-bar-row",
+          "name": "T 杠划船",
+          "nameEn": "T-bar row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "other",
+          "lockVariant": "胸不贴垫的 T 杠/地雷管划船",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side", "three_quarter"],
+          "cuePlanes": [{ "ruleId": "row-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "器械侧方看拉至胸。",
+          "rationale": "俯身拉在矢状面。",
+          "ytQueries": [
+            "how to do t bar row proper form side view",
+            "t-bar row form side"
+          ]
+        },
+        {
+          "id": "chest-supported-row",
+          "name": "胸撑划船",
+          "nameEn": "Chest-supported row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "胸贴上斜凳的哑铃/器械划船",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "row-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看肘后拉。",
+          "rationale": "躯干被凳固定，侧管肘行程即可。",
+          "ytQueries": [
+            "how to do chest supported row proper form side view",
+            "chest supported dumbbell row side"
+          ]
+        },
+        {
+          "id": "inverted-row",
+          "name": "反向划船",
+          "nameEn": "Inverted row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧悬垂拉胸向杠，身体一线",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "body-line", "planes": ["side"] },
+            { "ruleId": "row-depth", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "杠侧方看胸靠近杠、髋不塌。",
+          "rationale": "一线+拉深都在矢状面。",
+          "ytQueries": [
+            "how to do inverted row proper form side view",
+            "australian pull up form side"
+          ]
+        },
+        {
+          "id": "straight-arm-pulldown",
+          "name": "直臂下拉",
+          "nameEn": "Straight-arm pulldown",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "站姿肘微屈固定，把杆从高位划到大腿",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "arc-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看直臂划弧。",
+          "rationale": "肩伸划弧在矢状面。",
+          "ytQueries": [
+            "how to do straight arm pulldown proper form side view",
+            "straight arm pulldown form side"
+          ]
+        },
+        {
+          "id": "db-pullover",
+          "name": "哑铃上拉",
+          "nameEn": "Dumbbell pullover",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "仰卧平板，双手持一铃从头后拉回胸上",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "pullover-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看铃从头后到胸上。",
+          "rationale": "肩屈伸在矢状面。",
+          "ytQueries": [
+            "how to do dumbbell pullover proper form side view",
+            "db pullover form side"
+          ]
+        },
+        {
+          "id": "good-morning",
+          "name": "早安式",
+          "nameEn": "Good morning",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "barbell",
+          "lockVariant": "杠在背上的髋铰链，膝微屈",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hinge", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看背平与髋铰链。",
+          "rationale": "与 RDL 同一铰链几何。",
+          "ytQueries": [
+            "how to do good morning exercise proper form side view",
+            "barbell good morning form side"
+          ]
+        },
+        {
+          "id": "back-extension",
+          "name": "反向挺身",
+          "nameEn": "Back extension",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "罗马椅/45° 反向挺身，不是地板超人式",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "extension-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看躯干从屈到与腿一线。",
+          "rationale": "伸髋伸背在矢状面。",
+          "ytQueries": [
+            "how to do back extension roman chair proper form side view",
+            "45 degree hyperextension form side"
+          ]
+        },
+        {
+          "id": "renegade-row",
+          "name": "金刚推举划船",
+          "nameEn": "Renegade row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "俯卧撑姿势单臂划船，髋不转",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "front"],
+          "cuePlanes": [{ "ruleId": "hip-square", "planes": ["three_quarter", "front"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "斜前方看划船与髋是否翻。",
+          "rationale": "抗旋转必须看见两侧髋，清侧不够。",
+          "ytQueries": [
+            "how to do renegade row proper form",
+            "renegade row form 3/4"
+          ]
+        },
+        {
+          "id": "band-pull-apart",
+          "name": "弹力带直臂开合",
+          "nameEn": "Band pull-apart",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "band",
+          "lockVariant": "站姿双臂前伸把带子向两侧拉开",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "open-width", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对镜头看双臂打开。",
+          "rationale": "开合在冠状面。",
+          "ytQueries": [
+            "how to do band pull apart proper form facing camera",
+            "band pull apart form front"
+          ]
+        },
+        {
+          "id": "machine-high-row",
+          "name": "高位划船器",
+          "nameEn": "Machine high row",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "坐姿高位/俯拉器，肘向外后拉",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "side"],
+          "cuePlanes": [{ "ruleId": "row-depth", "planes": ["three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["side"],
+          "placementNote": "斜侧看手柄拉向胸。",
+          "rationale": "高位轨迹 3/4 同时看躯干与肘。",
+          "ytQueries": [
+            "how to do machine high row proper form",
+            "iso lateral high row form"
+          ]
+        },
+        {
+          "id": "prone-y-raise",
+          "name": "俯卧 Y 举",
+          "nameEn": "Prone Y raise",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "bodyweight",
+          "lockVariant": "俯卧或上斜凳，双臂呈 Y 抬起",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter"],
+          "cuePlanes": [{ "ruleId": "raise-height", "planes": ["three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "placementNote": "斜上方看双臂 Y 形抬起。",
+          "rationale": "Y 形开合清侧会叠臂。",
+          "ytQueries": [
+            "how to do prone Y raise proper form",
+            "prone y raise form tutorial"
+          ]
+        },
+        {
+          "id": "barbell-curl",
+          "name": "杠铃弯举",
+          "nameEn": "Barbell curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "barbell",
+          "lockVariant": "站姿杠铃弯举，肘贴体侧",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看肘角。上臂分区未单列，暂挂背。",
+          "rationale": "屈肘在矢状面。",
+          "ytQueries": [
+            "how to do barbell curl proper form side view",
+            "barbell biceps curl form side"
+          ]
+        },
+        {
+          "id": "db-curl",
+          "name": "哑铃弯举",
+          "nameEn": "Dumbbell curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "站姿交替或同步哑铃弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看工作臂全程。",
+          "rationale": "屈肘在矢状面。",
+          "ytQueries": [
+            "how to do dumbbell curl proper form side view",
+            "standing dumbbell curl form side"
+          ]
+        },
+        {
+          "id": "hammer-curl",
+          "name": "锤式弯举",
+          "nameEn": "Hammer curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "中立握哑铃弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看锤式行程。",
+          "rationale": "与弯举同一平面，只是握法。",
+          "ytQueries": [
+            "how to do hammer curl proper form side view",
+            "hammer curl form side"
+          ]
+        },
+        {
+          "id": "preacher-curl",
+          "name": "托臂弯举",
+          "nameEn": "Preacher curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "上臂贴托垫的弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "托垫侧方看肘全行程。",
+          "rationale": "垫面已锁肩，侧管肘角即可。",
+          "ytQueries": [
+            "how to do preacher curl proper form side view",
+            "preacher curl form side"
+          ]
+        },
+        {
+          "id": "incline-db-curl",
+          "name": "上斜哑铃弯举",
+          "nameEn": "Incline dumbbell curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "坐上斜凳、臂后于躯干的弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看臂在身后的行程。",
+          "rationale": "拉长弯举必须侧面才看得出肩位。",
+          "ytQueries": [
+            "how to do incline dumbbell curl proper form side view",
+            "incline curl form side"
+          ]
+        },
+        {
+          "id": "concentration-curl",
+          "name": "集中弯举",
+          "nameEn": "Concentration curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "dumbbell",
+          "lockVariant": "坐姿肘顶大腿内侧",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "工作臂一侧入画。",
+          "rationale": "单臂屈肘在矢状面。",
+          "ytQueries": [
+            "how to do concentration curl proper form side view",
+            "concentration curl form side"
+          ]
+        },
+        {
+          "id": "cable-curl",
+          "name": "绳索弯举",
+          "nameEn": "Cable curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "machine",
+          "lockVariant": "低位滑轮站姿弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看屈肘。",
+          "rationale": "与杠铃弯举同一平面。",
+          "ytQueries": [
+            "how to do cable curl proper form side view",
+            "cable biceps curl form side"
+          ]
+        },
+        {
+          "id": "reverse-curl",
+          "name": "反握弯举",
+          "nameEn": "Reverse curl",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "barbell",
+          "lockVariant": "正握（掌心向下）杠铃弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "curl-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看屈肘。",
+          "rationale": "与弯举同一平面。",
+          "ytQueries": [
+            "how to do reverse curl proper form side view",
+            "reverse barbell curl form side"
+          ]
+        },
+        {
+          "id": "skull-crusher",
+          "name": "仰卧臂屈伸",
+          "nameEn": "Skull crusher",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "barbell",
+          "lockVariant": "仰卧杠铃/铃片落到额前再伸肘",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "elbow-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看肘折到额前。上臂分区未单列，暂挂胸。",
+          "rationale": "伸肘在矢状面。",
+          "ytQueries": [
+            "how to do skull crusher proper form side view",
+            "lying tricep extension form side"
+          ]
+        },
+        {
+          "id": "tricep-pushdown",
+          "name": "绳索下压",
+          "nameEn": "Tricep pushdown",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "machine",
+          "lockVariant": "站姿高位滑轮伸肘，直杆或绳",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "elbow-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看肘固定、前臂下压。",
+          "rationale": "伸肘在矢状面。",
+          "ytQueries": [
+            "how to do tricep pushdown proper form side view",
+            "cable pushdown form side"
+          ]
+        },
+        {
+          "id": "overhead-tricep-extension",
+          "name": "过头臂屈伸",
+          "nameEn": "Overhead tricep extension",
+          "inCatalog": false,
+          "bodyPart": "shoulders",
+          "equipment": "dumbbell",
+          "lockVariant": "坐姿或站姿铃在脑后伸肘",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "elbow-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看铃在脑后的行程。",
+          "rationale": "过头伸肘在矢状面。",
+          "ytQueries": [
+            "how to do overhead tricep extension proper form side view",
+            "dumbbell overhead extension form side"
+          ]
+        },
+        {
+          "id": "tricep-kickback",
+          "name": "臂屈伸后踢",
+          "nameEn": "Tricep kickback",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "dumbbell",
+          "lockVariant": "俯身单臂伸肘，上臂贴躯干",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "elbow-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "工作臂一侧看伸直。",
+          "rationale": "伸肘在矢状面。",
+          "ytQueries": [
+            "how to do tricep kickback proper form side view",
+            "dumbbell kickback form side"
+          ]
+        },
+        {
+          "id": "bench-dip",
+          "name": "凳上臂屈伸",
+          "nameEn": "Bench dip",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "bodyweight",
+          "lockVariant": "手撑凳沿、脚在前的臂屈伸，不是双杠",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "dip-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看肘折与肩。",
+          "rationale": "与双杠类似但必须侧面读深度。",
+          "ytQueries": [
+            "how to do bench dip proper form side view",
+            "bench dips form side"
+          ]
+        },
+        {
+          "id": "machine-tricep-extension",
+          "name": "器械臂屈伸",
+          "nameEn": "Machine tricep extension",
+          "inCatalog": false,
+          "bodyPart": "chest",
+          "equipment": "machine",
+          "lockVariant": "坐姿器械伸肘",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "elbow-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看伸肘。",
+          "rationale": "固定轨迹仍在矢状面读肘。",
+          "ytQueries": [
+            "how to do machine tricep extension proper form side view",
+            "tricep extension machine form side"
+          ]
+        },
+        {
+          "id": "deadlift",
+          "name": "传统硬拉",
+          "nameEn": "Conventional deadlift",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "barbell",
+          "lockVariant": "传统站距地面硬拉，不是罗马尼亚、不是相扑",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "bar-path", "planes": ["side"] },
+            { "ruleId": "lockout", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看杠贴腿、背平、锁髋。",
+          "rationale": "与 RDL 不同：从地面启动。侧管铰链。正面只补杠是否偏。",
+          "ytQueries": [
+            "how to do conventional deadlift proper form side view",
+            "barbell deadlift form tutorial side"
+          ]
+        },
+        {
+          "id": "trap-bar-deadlift",
+          "name": "六角杠硬拉",
+          "nameEn": "Trap-bar deadlift",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "other",
+          "lockVariant": "站在六角杠内的硬拉",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看起杠与锁髋。",
+          "rationale": "仍是髋膝伸，侧面可读。",
+          "ytQueries": [
+            "how to do trap bar deadlift proper form side view",
+            "hex bar deadlift form side"
+          ]
+        },
+        {
+          "id": "hip-thrust",
+          "name": "臀冲",
+          "nameEn": "Hip thrust",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "barbell",
+          "lockVariant": "上背靠凳的杠铃臀冲，不是地板臀桥",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hip-lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看肩髋膝一线。",
+          "rationale": "与臀桥同一髋伸，必须侧面。",
+          "ytQueries": [
+            "how to do barbell hip thrust proper form side view",
+            "hip thrust form tutorial side"
+          ]
+        },
+        {
+          "id": "bulgarian-split-squat",
+          "name": "保加利亚分腿蹲",
+          "nameEn": "Bulgarian split squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "后脚垫高的分腿蹲，不是弓步走",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "front-knee", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "工作腿一侧看前膝与躯干。",
+          "rationale": "分腿蹲深在矢状面。正面只补膝内扣。",
+          "ytQueries": [
+            "how to do bulgarian split squat proper form side view",
+            "bulgarian split squat form side"
+          ]
+        },
+        {
+          "id": "split-squat",
+          "name": "分腿蹲",
+          "nameEn": "Split squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "双脚原地前后、后脚不垫高",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "front-knee", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看前膝下蹲。",
+          "rationale": "与弓步近，但双脚不交替；侧管深度。",
+          "ytQueries": [
+            "how to do split squat proper form side view",
+            "stationary split squat form side"
+          ]
+        },
+        {
+          "id": "step-up",
+          "name": "上台阶",
+          "nameEn": "Step-up",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "单腿踏上箱再控制下来",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "drive-leg", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "箱侧方看驱动腿蹬直。",
+          "rationale": "踏上台阶的髋膝伸在矢状面。",
+          "ytQueries": [
+            "how to do step up exercise proper form side view",
+            "box step up form side"
+          ]
+        },
+        {
+          "id": "leg-extension",
+          "name": "腿屈伸",
+          "nameEn": "Leg extension",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "坐姿器械伸膝",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看小腿抬起。",
+          "rationale": "伸膝在矢状面。",
+          "ytQueries": [
+            "how to do leg extension proper form side view",
+            "leg extension machine form side"
+          ]
+        },
+        {
+          "id": "lying-leg-curl",
+          "name": "俯卧腿弯举",
+          "nameEn": "Lying leg curl",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "俯卧器械屈膝",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看足跟拉向臀。",
+          "rationale": "屈膝在矢状面。",
+          "ytQueries": [
+            "how to do lying leg curl proper form side view",
+            "lying hamstring curl form side"
+          ]
+        },
+        {
+          "id": "seated-leg-curl",
+          "name": "坐姿腿弯举",
+          "nameEn": "Seated leg curl",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "坐姿器械屈膝",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看屈膝。",
+          "rationale": "屈膝在矢状面。",
+          "ytQueries": [
+            "how to do seated leg curl proper form side view",
+            "seated hamstring curl form side"
+          ]
+        },
+        {
+          "id": "hack-squat",
+          "name": "哈克深蹲",
+          "nameEn": "Hack squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "肩顶垫的哈克机，不是杠后硬拉式哈克",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "squat-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "器械侧方看蹲深。",
+          "rationale": "固定轨迹蹲在矢状面。",
+          "ytQueries": [
+            "how to do hack squat proper form side view",
+            "hack squat machine form side"
+          ]
+        },
+        {
+          "id": "front-squat",
+          "name": "前蹲",
+          "nameEn": "Front squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "barbell",
+          "lockVariant": "杠在肩前的深蹲（高肘或交叉握）",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [
+            { "ruleId": "squat-depth", "planes": ["side"] },
+            { "ruleId": "torso-upright", "planes": ["side"] }
+          ],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看躯干更直立的蹲深。",
+          "rationale": "与深蹲同一几何，侧管躯干是否塌。",
+          "ytQueries": [
+            "how to do front squat proper form side view",
+            "barbell front squat form side"
+          ]
+        },
+        {
+          "id": "seated-calf-raise",
+          "name": "坐姿提踵",
+          "nameEn": "Seated calf raise",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "膝上负重的坐姿提踵",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "ankle-rom", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看踝行程。",
+          "rationale": "踝伸在矢状面。",
+          "ytQueries": [
+            "how to do seated calf raise proper form side view",
+            "seated calf raise form side"
+          ]
+        },
+        {
+          "id": "hip-abduction",
+          "name": "髋外展",
+          "nameEn": "Hip abduction machine",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "坐姿外展机",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "abduction-width", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对或从器械前看双膝打开。",
+          "rationale": "外展在冠状面。",
+          "ytQueries": [
+            "how to do hip abduction machine proper form",
+            "abductor machine form front"
+          ]
+        },
+        {
+          "id": "hip-adduction",
+          "name": "髋内收",
+          "nameEn": "Hip adduction machine",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "坐姿内收机",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "adduction-close", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "器械前看双膝夹拢。",
+          "rationale": "内收在冠状面。",
+          "ytQueries": [
+            "how to do hip adduction machine proper form",
+            "adductor machine form front"
+          ]
+        },
+        {
+          "id": "nordic-curl",
+          "name": "北欧腿弯举",
+          "nameEn": "Nordic hamstring curl",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "踝固定、膝着地的离心北欧弯举",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "torso-line", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看躯干慢慢放倒。",
+          "rationale": "长杠杆必须侧面。",
+          "ytQueries": [
+            "how to do nordic hamstring curl proper form side view",
+            "nordic curl form side"
+          ]
+        },
+        {
+          "id": "kettlebell-swing",
+          "name": "壶铃摆荡",
+          "nameEn": "Kettlebell swing",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "other",
+          "lockVariant": "俄式摆荡（肩高），髋铰链，不是深蹲式",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hinge-snap", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看铰链与铃摆到肩高。",
+          "rationale": "摆荡平面在矢状面。",
+          "ytQueries": [
+            "how to do kettlebell swing proper form side view",
+            "russian kettlebell swing form side"
+          ]
+        },
+        {
+          "id": "glute-kickback",
+          "name": "臀后踢",
+          "nameEn": "Glute kickback",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "四点或绳索向后踢腿，不是侧踢",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hip-extension", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "工作腿一侧看髋伸。",
+          "rationale": "后踢在矢状面。",
+          "ytQueries": [
+            "how to do glute kickback proper form side view",
+            "cable glute kickback form side"
+          ]
+        },
+        {
+          "id": "cable-pull-through",
+          "name": "绳索穿体",
+          "nameEn": "Cable pull-through",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "machine",
+          "lockVariant": "背对低滑轮、绳从两腿间穿出的铰链",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hinge", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看髋铰链。",
+          "rationale": "与 RDL 同一铰链。",
+          "ytQueries": [
+            "how to do cable pull through proper form side view",
+            "cable pull through form side"
+          ]
+        },
+        {
+          "id": "single-leg-rdl",
+          "name": "单腿罗马尼亚硬拉",
+          "nameEn": "Single-leg RDL",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "dumbbell",
+          "lockVariant": "单腿铰链，后腿向后抬",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hinge", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "支撑腿一侧看背与后腿一线。",
+          "rationale": "铰链在矢状面。正面只补是否歪。",
+          "ytQueries": [
+            "how to do single leg rdl proper form side view",
+            "single leg romanian deadlift form side"
+          ]
+        },
+        {
+          "id": "pistol-squat",
+          "name": "手枪深蹲",
+          "nameEn": "Pistol squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "单腿深蹲，另一腿前伸",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "squat-depth", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "工作腿一侧看蹲深。",
+          "rationale": "单腿蹲深在矢状面。",
+          "ytQueries": [
+            "how to do pistol squat proper form side view",
+            "pistol squat form side"
+          ]
+        },
+        {
+          "id": "cossack-squat",
+          "name": "哥萨克深蹲",
+          "nameEn": "Cossack squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "宽站距向一侧蹲，另腿伸直",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-depth", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "面对镜头看向侧坐下。",
+          "rationale": "侧向蹲在冠状面。",
+          "ytQueries": [
+            "how to do cossack squat proper form facing camera",
+            "cossack squat form front"
+          ]
+        },
+        {
+          "id": "lateral-lunge",
+          "name": "侧弓步",
+          "nameEn": "Lateral lunge",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "向侧迈步再回到中，不是哥萨克原地",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-depth", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对镜头看侧迈与蹲。",
+          "rationale": "侧向位移在冠状面。",
+          "ytQueries": [
+            "how to do lateral lunge proper form facing camera",
+            "side lunge form front view"
+          ]
+        },
+        {
+          "id": "curtsy-lunge",
+          "name": "屈膝行礼蹲",
+          "nameEn": "Curtsy lunge",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "后腿向斜后交叉蹲下",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "front"],
+          "cuePlanes": [{ "ruleId": "cross-depth", "planes": ["three_quarter"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "斜前方看交叉腿路径。",
+          "rationale": "交叉步清侧会挡后腿。",
+          "ytQueries": [
+            "how to do curtsy lunge proper form",
+            "curtsy lunge form 3/4"
+          ]
+        },
+        {
+          "id": "thruster",
+          "name": "推举深蹲",
+          "nameEn": "Thruster",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "barbell",
+          "lockVariant": "前蹲接推举的连续动作",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "squat-to-press", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看蹲深接过头。",
+          "rationale": "蹲+推都在矢状面一条片里。",
+          "ytQueries": [
+            "how to do barbell thruster proper form side view",
+            "thruster exercise form side"
+          ]
+        },
+        {
+          "id": "wall-sit",
+          "name": "靠墙静蹲",
+          "nameEn": "Wall sit",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "背靠墙膝约直角的静力",
+          "windowKind": "hold",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-angle", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看膝角与背贴墙。hold 3–8s。",
+          "rationale": "静力角度只在侧面可读。",
+          "ytQueries": [
+            "how to do wall sit proper form side view",
+            "wall sit form tutorial side"
+          ]
+        },
+        {
+          "id": "single-leg-glute-bridge",
+          "name": "单腿臀桥",
+          "nameEn": "Single-leg glute bridge",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧单腿顶髋，另一腿伸直",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hip-lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看肩髋膝一线。",
+          "rationale": "与臀桥同一髋伸，必须侧面。",
+          "ytQueries": [
+            "how to do single leg glute bridge proper form side view",
+            "single leg hip bridge form side"
+          ]
+        },
+        {
+          "id": "frog-pump",
+          "name": "蛙式臀桥",
+          "nameEn": "Frog pump",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧脚掌相对、膝外展的短程顶髋",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hip-lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "垫侧方看顶髋。正面可补膝外展。",
+          "rationale": "髋伸仍在矢状面。",
+          "ytQueries": [
+            "how to do frog pump proper form side view",
+            "frog pump glute form side"
+          ]
+        },
+        {
+          "id": "sissy-squat",
+          "name": "西施深蹲",
+          "nameEn": "Sissy squat",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "bodyweight",
+          "lockVariant": "膝前移、躯干后仰的股四头主导蹲",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-travel", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看膝前移与躯干后仰。",
+          "rationale": "这条线只在侧面可读。",
+          "ytQueries": [
+            "how to do sissy squat proper form side view",
+            "sissy squat form side"
+          ]
+        },
+        {
+          "id": "rack-pull",
+          "name": "架上拉",
+          "nameEn": "Rack pull",
+          "inCatalog": false,
+          "bodyPart": "legs",
+          "equipment": "barbell",
+          "lockVariant": "杠从膝上或膝下架上启动，不是地面硬拉",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "lockout", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看锁髋。",
+          "rationale": "短程硬拉仍在矢状面。",
+          "ytQueries": [
+            "how to do rack pull proper form side view",
+            "rack pull form side"
+          ]
+        },
+        {
+          "id": "russian-twist",
+          "name": "俄罗斯转体",
+          "nameEn": "Russian twist",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "坐姿后仰左右转体，脚可点地",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "rotation", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "面对镜头看左右转肩。",
+          "rationale": "转体在水平/冠状可见面。侧面看不清左右。",
+          "ytQueries": [
+            "how to do russian twist proper form facing camera",
+            "russian twist form front view"
+          ]
+        },
+        {
+          "id": "hanging-leg-raise",
+          "name": "悬垂直腿举",
+          "nameEn": "Hanging leg raise",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "悬垂直腿上举，不是提膝",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "leg-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "杠侧方看直腿上举。",
+          "rationale": "与提膝分开：直腿髋屈幅度只在侧面可读。",
+          "ytQueries": [
+            "how to do hanging leg raise proper form side view",
+            "hanging straight leg raise form side"
+          ]
+        },
+        {
+          "id": "ab-wheel",
+          "name": "健腹轮",
+          "nameEn": "Ab wheel rollout",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "other",
+          "lockVariant": "跪姿健腹轮推出再收回",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "rollout-line", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看推出长度与腰不塌。",
+          "rationale": "长杠杆一线在矢状面。",
+          "ytQueries": [
+            "how to do ab wheel rollout proper form side view",
+            "ab wheel form side"
+          ]
+        },
+        {
+          "id": "cable-crunch",
+          "name": "绳索卷腹",
+          "nameEn": "Cable crunch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "machine",
+          "lockVariant": "跪姿高位绳索屈躯干",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "crunch-flex", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看脊柱屈曲。",
+          "rationale": "屈躯在矢状面。",
+          "ytQueries": [
+            "how to do cable crunch proper form side view",
+            "kneeling cable crunch form side"
+          ]
+        },
+        {
+          "id": "sit-up",
+          "name": "仰卧起坐",
+          "nameEn": "Sit-up",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧全幅度坐起，不是卷腹",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "sit-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看躯干坐起。",
+          "rationale": "全幅度屈曲在矢状面。",
+          "ytQueries": [
+            "how to do sit up proper form side view",
+            "sit-up form tutorial side"
+          ]
+        },
+        {
+          "id": "v-up",
+          "name": "V 字起",
+          "nameEn": "V-up",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧手脚同时抬起在中线相接",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "v-close", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看手脚在空中相接。",
+          "rationale": "开合在矢状面。",
+          "ytQueries": [
+            "how to do v up proper form side view",
+            "v-up exercise form side"
+          ]
+        },
+        {
+          "id": "hollow-hold",
+          "name": "空心支撑",
+          "nameEn": "Hollow body hold",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧腰贴地、手脚离地的静力",
+          "windowKind": "hold",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hollow-shape", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看腰贴地与空心形。hold 3–8s。",
+          "rationale": "空心形状只在侧面可读。",
+          "ytQueries": [
+            "how to do hollow body hold proper form side view",
+            "hollow hold form side"
+          ]
+        },
+        {
+          "id": "mountain-climber",
+          "name": "登山者",
+          "nameEn": "Mountain climber",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "俯卧撑姿势交替收膝",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-drive", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "身体一侧看收膝与髋高。",
+          "rationale": "收膝在矢状面。正面可补左右交替。",
+          "ytQueries": [
+            "how to do mountain climber proper form side view",
+            "mountain climbers form side"
+          ]
+        },
+        {
+          "id": "bicycle-crunch",
+          "name": "自行车卷腹",
+          "nameEn": "Bicycle crunch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧对侧肘膝相接",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "front"],
+          "cuePlanes": [{ "ruleId": "elbow-knee", "planes": ["three_quarter", "front"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "斜上方看肘膝相接。",
+          "rationale": "对侧相接清侧会挡一侧。",
+          "ytQueries": [
+            "how to do bicycle crunch proper form",
+            "bicycle crunch form 3/4"
+          ]
+        },
+        {
+          "id": "woodchop",
+          "name": "伐木式",
+          "nameEn": "Cable woodchop",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "machine",
+          "lockVariant": "站姿绳索高打低或低打高",
+          "windowKind": "reps",
+          "evaluation": "dual_or_three_quarter",
+          "countPlanes": ["three_quarter", "front"],
+          "cuePlanes": [{ "ruleId": "chop-arc", "planes": ["three_quarter"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["three_quarter"],
+          "optionalClipCameras": ["front"],
+          "placementNote": "斜前方看斜向划弧。",
+          "rationale": "斜向旋转 3/4 最完整。",
+          "ytQueries": [
+            "how to do cable woodchop proper form",
+            "woodchop exercise form 3/4"
+          ]
+        },
+        {
+          "id": "pallof-press",
+          "name": "帕洛夫推",
+          "nameEn": "Pallof press",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "machine",
+          "lockVariant": "侧对滑轮、双手前推抗旋转的静力或慢推",
+          "windowKind": "hold",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "anti-rotation", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "面对镜头看手臂前伸、躯干不转。hold 3–8s。",
+          "rationale": "抗旋转必须看见躯干是否被拉转，正面。",
+          "ytQueries": [
+            "how to do pallof press proper form facing camera",
+            "pallof press form front"
+          ]
+        },
+        {
+          "id": "reverse-crunch",
+          "name": "反向卷腹",
+          "nameEn": "Reverse crunch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧屈膝把髋卷离地",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "hip-curl", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看髋离地。",
+          "rationale": "卷髋在矢状面。",
+          "ytQueries": [
+            "how to do reverse crunch proper form side view",
+            "reverse crunch form side"
+          ]
+        },
+        {
+          "id": "flutter-kick",
+          "name": "交替踢腿",
+          "nameEn": "Flutter kick",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧或支撑、双腿交替小幅踢",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "low-leg", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看腰贴地与踢幅。",
+          "rationale": "踢腿幅度在矢状面。",
+          "ytQueries": [
+            "how to do flutter kicks proper form side view",
+            "flutter kick form side"
+          ]
+        },
+        {
+          "id": "toe-touch",
+          "name": "仰卧摸脚",
+          "nameEn": "Toe touch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧腿朝天、手摸脚尖",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "reach-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看肩离地摸脚。",
+          "rationale": "屈躯在矢状面。",
+          "ytQueries": [
+            "how to do toe touch crunch proper form side view",
+            "lying toe touch form side"
+          ]
+        },
+        {
+          "id": "side-crunch",
+          "name": "侧卷腹",
+          "nameEn": "Side crunch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "侧躺屈体，不是侧平板",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-flex", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "人侧躺、脸朝镜头看侧屈。",
+          "rationale": "侧屈在冠状面（与侧平板同一朝向）。",
+          "ytQueries": [
+            "how to do side crunch proper form facing camera",
+            "oblique crunch form front"
+          ]
+        },
+        {
+          "id": "machine-crunch",
+          "name": "卷腹器",
+          "nameEn": "Machine crunch",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "machine",
+          "lockVariant": "坐姿卷腹机",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "crunch-flex", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看屈躯。",
+          "rationale": "屈躯在矢状面。",
+          "ytQueries": [
+            "how to do machine crunch proper form side view",
+            "ab crunch machine form side"
+          ]
+        },
+        {
+          "id": "captain-chair-knee-raise",
+          "name": "罗马椅提膝",
+          "nameEn": "Captain's chair knee raise",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "machine",
+          "lockVariant": "臂撑罗马椅提膝，不是悬垂",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "knee-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "器械侧方看提膝。",
+          "rationale": "与悬垂提膝同一矢状行程，支撑不同。",
+          "ytQueries": [
+            "how to do captains chair knee raise proper form side view",
+            "captain chair knee raise form side"
+          ]
+        },
+        {
+          "id": "plank-shoulder-tap",
+          "name": "平板摸肩",
+          "nameEn": "Plank shoulder tap",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "直臂平板交替摸对侧肩",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "hip-square", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "头前方看摸肩时髋不转。",
+          "rationale": "抗旋转看髋，正面。不要只收侧面。",
+          "ytQueries": [
+            "how to do plank shoulder tap proper form facing camera",
+            "shoulder tap plank form front"
+          ]
+        },
+        {
+          "id": "plank-hip-dip",
+          "name": "平板侧摆髋",
+          "nameEn": "Plank hip dip",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "前臂平板左右放髋",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "hip-dip", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "头前方或略高看髋左右点地。",
+          "rationale": "左右摆髋在冠状面。",
+          "ytQueries": [
+            "how to do plank hip dips proper form facing camera",
+            "plank hip dip form front"
+          ]
+        },
+        {
+          "id": "dead-hang",
+          "name": "悬垂放松",
+          "nameEn": "Dead hang",
+          "inCatalog": false,
+          "bodyPart": "back",
+          "equipment": "bodyweight",
+          "lockVariant": "杠上直臂悬垂静力",
+          "windowKind": "hold",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "hang-still", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["side"],
+          "placementNote": "杠前方看肩是否耸、身体是否摆。hold 3–8s。",
+          "rationale": "静悬对称正面最清楚。",
+          "ytQueries": [
+            "how to do dead hang proper form facing camera",
+            "dead hang from bar form front"
+          ]
+        },
+        {
+          "id": "l-sit",
+          "name": "L 坐",
+          "nameEn": "L-sit",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "双杠或地板直臂撑、腿前伸成 L",
+          "windowKind": "hold",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "l-shape", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "身体一侧看腿是否水平。hold 3–8s。",
+          "rationale": "L 形只在侧面可读。",
+          "ytQueries": [
+            "how to do l sit proper form side view",
+            "l-sit hold form side"
+          ]
+        },
+        {
+          "id": "windshield-wiper",
+          "name": "雨刷式",
+          "nameEn": "Windshield wiper",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧或悬垂，双腿并拢左右摆",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "wipe-arc", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "脚侧或杠前看双腿左右摆。",
+          "rationale": "左右摆在冠状面。",
+          "ytQueries": [
+            "how to do windshield wipers exercise proper form",
+            "lying windshield wiper form front"
+          ]
+        },
+        {
+          "id": "landmine-rotation",
+          "name": "地雷管转体",
+          "nameEn": "Landmine rotation",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "other",
+          "lockVariant": "站姿双手持地雷管左右转",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "rotation", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "optionalClipCameras": ["three_quarter"],
+          "placementNote": "面对或斜前看杠左右摆。",
+          "rationale": "水平旋转正面最清楚。",
+          "ytQueries": [
+            "how to do landmine rotation proper form facing camera",
+            "landmine twist form front"
+          ]
+        },
+        {
+          "id": "heel-tap",
+          "name": "摸脚跟",
+          "nameEn": "Heel tap",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧屈膝左右手摸脚跟",
+          "windowKind": "reps",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-reach", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "头前方略高看左右摸跟。",
+          "rationale": "左右侧屈在冠状面。",
+          "ytQueries": [
+            "how to do heel taps abs proper form facing camera",
+            "lying heel tap form front"
+          ]
+        },
+        {
+          "id": "decline-sit-up",
+          "name": "下斜仰卧起坐",
+          "nameEn": "Decline sit-up",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "下斜凳仰卧起坐",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "sit-height", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "凳侧方看坐起。",
+          "rationale": "与仰卧起坐同一平面。",
+          "ytQueries": [
+            "how to do decline sit up proper form side view",
+            "decline sit-up form side"
+          ]
+        },
+        {
+          "id": "copenhagen-plank",
+          "name": "哥本哈根侧撑",
+          "nameEn": "Copenhagen plank",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "上腿架凳的侧撑静力",
+          "windowKind": "hold",
+          "evaluation": "front",
+          "countPlanes": ["front"],
+          "cuePlanes": [{ "ruleId": "side-line", "planes": ["front"] }],
+          "defaultHint": "front",
+          "requiredClipCameras": ["front"],
+          "placementNote": "脸朝镜头看肩髋一线。hold 3–8s。",
+          "rationale": "与侧平板同一朝向。",
+          "ytQueries": [
+            "how to do copenhagen plank proper form facing camera",
+            "copenhagen side plank form"
+          ]
+        },
+        {
+          "id": "scissor-kick",
+          "name": "剪刀腿",
+          "nameEn": "Scissor kick",
+          "inCatalog": false,
+          "bodyPart": "core",
+          "equipment": "bodyweight",
+          "lockVariant": "仰卧双腿上下交叉剪",
+          "windowKind": "reps",
+          "evaluation": "side",
+          "countPlanes": ["side"],
+          "cuePlanes": [{ "ruleId": "scissor-amp", "planes": ["side"] }],
+          "defaultHint": "side",
+          "requiredClipCameras": ["side"],
+          "placementNote": "垫侧方看交叉幅度与腰。",
+          "rationale": "上下剪在矢状面。",
+          "ytQueries": [
+            "how to do scissor kicks proper form side view",
+            "scissor kick abs form side"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -687,10 +687,10 @@ export default function DevPoseScreen({
       setFaultReviewing(lastFaultRef.current.reviewing);
       setRepCount(repUi.count);
       setHoldActive(repUi.holdActive);
-      setSkeleton(scene);
-      // 正/侧面：按肩髋跨度自动识别；行程中锁定，stand 可切换（无手动开关）
+      setSkeleton(showPlacement ? null : scene);
+      // 站位未稳时不改机位、不切骨骼，示范窗停在推荐样片（FR-068）
       let camHint: TrajectoryCameraHint = trajCameraRef.current;
-      if (hasDemoTrajectory(exercise.id, 'front')) {
+      if (!showPlacement && hasDemoTrajectory(exercise.id, 'front')) {
         const camInf = inferCameraHintDetailed(forRules);
         const latched = cameraHintLatch.current.update(camInf.hint, {
           confidence: camInf.confidence,
@@ -700,7 +700,7 @@ export default function DevPoseScreen({
           camHint = latched;
         }
       }
-      if (camHint !== trajCameraRef.current) {
+      if (!showPlacement && camHint !== trajCameraRef.current) {
         trajCameraRef.current = camHint;
       }
       const canonPose =
@@ -711,9 +711,9 @@ export default function DevPoseScreen({
               exerciseId: exercise.id,
             })
           : null;
-      setCanonicalPose(canonPose);
-      setLockPipToClip(!drawSpec.followUserInPip);
-      setRefCameraHint(camHint);
+      setCanonicalPose(showPlacement ? null : canonPose);
+      setLockPipToClip(showPlacement || !drawSpec.followUserInPip);
+      if (!showPlacement) setRefCameraHint(camHint);
       setPlacementVisible(showPlacement);
       setPlacementHint(
         composedHint ??

@@ -63,8 +63,21 @@ export const EQUIPMENT_LABEL: Record<Equipment, string> = {
   other: "其他",
 };
 
-/** 升级队列（Phase E 胸部已接线，待真机 VT-P6-015～018）。 */
-export const COACHABLE_UPGRADE_QUEUE: string[] = [];
+/** 下一波升级：已在 catalog 的 12 条（Phase G）。Phase H 新 id 见 expansion-queue.json。 */
+export const COACHABLE_UPGRADE_QUEUE: string[] = [
+  "lat-pulldown",
+  "seated-row",
+  "superman",
+  "band-row",
+  "leg-press",
+  "calf-raise",
+  "goblet-squat",
+  "dead-bug",
+  "bird-dog",
+  "crunch",
+  "side-plank",
+  "hanging-knee-raise",
+];
 
 export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
   // —— 胸 ——

@@ -12,14 +12,23 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fitnesscoach.mobile",
+      "bundleIdentifier": "com.Myfitco.mobile",
+      "appleTeamId": "93UHA7C4LM",
       "buildNumber": "1",
+      "usesAppleSignIn": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "需要摄像头以实时分析您的健身动作"
+        "NSCameraUsageDescription": "需要摄像头以实时分析您的健身动作",
+        "NSFaceIDUsageDescription": "用于在这台手机上找回登录密码",
+        "NSLocalNetworkUsageDescription": "仅用于开发调试时连接同一局域网",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        },
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
-      "package": "com.fitnesscoach.mobile",
+      "package": "com.Myfitco.mobile",
       "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -27,16 +36,32 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ],
+      "usesCleartextTraffic": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      "expo-apple-authentication",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "用于在这台手机上找回登录密码"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
-        "_comment": "首次在 apps/mobile 执行 npx eas init 或 eas build 时由 CLI 写入 projectId；勿手填假 ID"
+        "_comment": "首次在 apps/mobile 执行 npx eas init 或 eas build 时由 CLI 写入 projectId；勿手填假 ID",
+        "projectId": "c912bd53-3fe2-4acb-aaa7-b3d23bf3eaae"
       }
-    }
+    },
+    "owner": "xavigo4bright"
   }
 }

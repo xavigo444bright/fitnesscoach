@@ -30,20 +30,23 @@ describe("camera-planes (FR-089)", () => {
     const planes = loadCameraPlaneRegistry();
     expect(planes.schemaVersion).toBe("1.0");
     expect(planes.grandfatheredExerciseIds).toContain("pullup");
-    expect(Object.keys(planes.exercises).sort()).toEqual(
-      [
-        "cable-crossover",
-        "chest-press-machine",
-        "db-fly",
-        "dip",
-        "face-pull",
-        "front-raise",
-        "incline-pushup",
-        "lateral-raise",
-        "pike-pushup",
-        "rear-delt-fly",
-      ].sort(),
-    );
+    const keys = Object.keys(planes.exercises);
+    for (const id of [
+      "cable-crossover",
+      "chest-press-machine",
+      "db-fly",
+      "dip",
+      "face-pull",
+      "front-raise",
+      "incline-pushup",
+      "lateral-raise",
+      "pike-pushup",
+      "rear-delt-fly",
+      "lat-pulldown",
+    ]) {
+      expect(keys).toContain(id);
+    }
+    expect(keys.length).toBeGreaterThanOrEqual(20);
     expect(() => loadScoutRegistry()).not.toThrow();
     expect(planes.exercises["db-fly"].evaluation).toBe("dual_or_three_quarter");
     expect(planes.exercises["db-fly"].requiredClipCameras).toEqual([

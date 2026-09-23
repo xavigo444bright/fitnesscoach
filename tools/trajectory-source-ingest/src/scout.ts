@@ -55,7 +55,16 @@ export const SCOUT_REPS_SEC_PREFERRED_MAX = 10;
 export const SCOUT_HOLD_SEC_MIN = 3;
 export const SCOUT_HOLD_SEC_MAX = 8;
 
-const HOLD_EXERCISES = new Set(["plank", "side-plank"]);
+const HOLD_EXERCISES = new Set([
+  "plank",
+  "side-plank",
+  "wall-sit",
+  "hollow-hold",
+  "pallof-press",
+  "dead-hang",
+  "l-sit",
+  "copenhagen-plank",
+]);
 
 export type ScoutCameraStability = "locked" | "handheld" | "moving";
 

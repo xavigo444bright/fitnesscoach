@@ -95,6 +95,10 @@
 
 `lateral-raise` / `front-raise` / `rear-delt-fly` / `face-pull` / `pike-pushup` 规格已写入 `specs.json`。必收机位已核窗 `authorized` 并接线。optional 机位不进清单。VT-P6-019～023 通过。
 
+## Phase G / H（扩库，2026-09-21）
+
+catalog 剩余 12 条 + 99 条新 id 的评估桶已写入 `specs.json`，与 [`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json) 同步。Grokbot 先按队列 `--yt-search`，再往 `clips.json` 加 `proposed`。未授权不 ingest。
+
 ## 祖父条款
 
 `squat` / `pushup` / `glute-bridge` / `lunge` / `plank` / `db-row` / `ohp` / `bench-press` / `rdl` / `pullup` 已按当时侧片接线。不补本规格、不改规则与 App。日后若给其中某条加第二机位，再补规格并走 RULE-BOUNDARY，不在本次范围。

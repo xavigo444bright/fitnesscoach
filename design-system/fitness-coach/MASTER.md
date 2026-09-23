@@ -49,10 +49,21 @@ Text contrast ≥ 4.5:1. Do not use `#94A3B8` on `#0F172A` as the new body color
 
 ## Typography
 
-- **Display / titles:** Barlow Condensed 600–700 (sports condensed; not MLS wordmark itself)
-- **Body / numbers:** Barlow 400–600; tabular nums for sets/reps/kg
-- **Scale (375pt width):** Screen title 28–32; card title 18–20; body 15–16; meta 12; huge stat 40–48
-- **RN:** `@expo-google-fonts/barlow-condensed` + `@expo-google-fonts/barlow`. Fallback: San Francisco until fonts ship.
+对照 Apple HIG Text Styles：同一页只用量级表，禁止标题旁跳变。
+
+| 角色 | Token | ≈ HIG | 例子 |
+|------|--------|--------|------|
+| 一级 / 模块标题 | `display` 28 白 700 | Large Title / Title 1 | 账号、成就、身体数据 |
+| 二级 | `title` 20 | Title 2 / 3 | 卡片、sheet |
+| 正文 | `body` 16 | Body | 绑定状态 |
+| 说明 | `caption` 14 次要色 | Subhead / Footnote | 模块 lead |
+| 元信息 | `meta` 12 弱提示 | Caption 2 | BEST |
+| 主数字 | `hugeStat` 40 | 仅砖内 kg | 禁止当标题装饰 |
+
+- **Display / titles:** Barlow Condensed 600–700（未装字体前 System）
+- **Body / numbers:** Barlow 400–600；数字用 tabular
+- **禁止：** 标题同行放另一级字号的计数（如「成就 9」）；同页同级模块混用 28 与 20
+- **RN：** `@expo-google-fonts/barlow-condensed` + `@expo-google-fonts/barlow`
 
 ## Layout & components
 

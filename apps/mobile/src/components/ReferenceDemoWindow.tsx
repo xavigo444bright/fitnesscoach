@@ -19,6 +19,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { sampleClipFileName } from '../sampleClips';
 import DraggablePip from './DraggablePip';
+import ExercisePoseIcon from './ExercisePoseIcon';
 import PipClipPane from './PipClipPane';
 import ReferencePersonPip from './ReferencePersonPip';
 
@@ -57,7 +58,7 @@ export default function ReferenceDemoWindow({
   const showClip = displayMode === 'clip';
   const showBones = displayMode === 'bones';
   useEffect(() => {
-    setMode(fileName ? 'clip' : 'bones');
+    if (fileName) setMode('clip');
   }, [fileName]);
 
   return (
@@ -74,7 +75,7 @@ export default function ReferenceDemoWindow({
           accessibilityLabel="拉开示范窗"
           hitSlop={4}
         >
-          <Text style={styles.tabText}>示</Text>
+          <ExercisePoseIcon catalogId={exerciseId} size={28} />
         </Pressable>
       ) : (
         <View style={styles.frame}>
@@ -214,11 +215,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(34, 197, 94, 0.55)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  tabText: {
-    color: colors.correct,
-    fontSize: 16,
-    fontWeight: '800',
   },
   frame: {
     width: PIP_W,

@@ -12,8 +12,19 @@ import {
   copyLastSet,
   copySet,
   countModeForRef,
+  backdateKind,
+  createBackdatedWorkout,
   createWorkout,
   dayVolumeKg,
+  formatVolumeKg,
+  formatWeightAmount,
+  kgToLb,
+  lbToKg,
+  openWorkout,
+  parseWeightToKg,
+  recordedWeightUnit,
+  retargetWeightText,
+  toggleWeightUnit,
   effectiveBodyweightKg,
   emptyWorkoutLog,
   endWorkout,
@@ -23,6 +34,10 @@ import {
   homeSessionWorkout,
   lastLoadForExercise,
   listWorkoutTemplates,
+  personalRecords,
+  prStampMark,
+  prStampParts,
+  visiblePersonalRecords,
   loadWorkoutLogFromMemory,
   parseWorkoutLog,
   patchSet,
@@ -30,7 +45,10 @@ import {
   removeSet,
   removeSlot,
   removeWorkout,
+  restDurationForRemaining,
+  restRemainingFromSandFraction,
   restRemainingSec,
+  restSandCapacitySec,
   saveWorkoutAsTemplate,
   saveWorkoutLogToMemory,
   setBodyweightKg,
@@ -269,6 +287,96 @@ describe("FR-093 跟练落组函数", () => {
     expect(workoutVolumeKg(log.workouts[0]!)).toBe(400);
   });
 
+  it("指定 workoutId 时写入该课，不写入另一节进行中的课", () => {
+    const clock = ids();
+    const first = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-16T01:00:00.000Z",
+      clock,
+    );
+    const second = createWorkout(
+      first.log,
+      "2026-09-16T02:00:00.000Z",
+      clock,
+    );
+    const log = applyFollowAlongSet(
+      second.log,
+      { catalogId: "squat", cameraReps: 6, reps: 5, weightKg: 20 },
+      "2026-09-16T03:00:00.000Z",
+      clock,
+      first.workoutId,
+    );
+    const older = log.workouts.find((w) => w.id === first.workoutId)!;
+    const newer = log.workouts.find((w) => w.id === second.workoutId)!;
+    expect(older.slots[0]!.sets[0]!.reps).toBe(5);
+    expect(newer.slots).toEqual([]);
+  });
+
+  it("不传 workoutId 时写入最后一节进行中的课", () => {
+    const clock = ids();
+    const first = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-16T01:00:00.000Z",
+      clock,
+    );
+    const second = createWorkout(
+      first.log,
+      "2026-09-16T02:00:00.000Z",
+      clock,
+    );
+    const log = applyFollowAlongSet(
+      second.log,
+      { catalogId: "squat", cameraReps: 4, weightKg: 10 },
+      "2026-09-16T03:00:00.000Z",
+      clock,
+    );
+    const older = log.workouts.find((w) => w.id === first.workoutId)!;
+    const newer = log.workouts.find((w) => w.id === second.workoutId)!;
+    expect(older.slots).toEqual([]);
+    expect(newer.slots[0]!.sets[0]!.cameraReps).toBe(4);
+  });
+
+  it("指定不存在的课则抛错", () => {
+    expect(() =>
+      applyFollowAlongSet(
+        emptyWorkoutLog(),
+        { catalogId: "squat", cameraReps: 1 },
+        "2026-09-16T03:00:00.000Z",
+        ids(),
+        "missing",
+      ),
+    ).toThrow(/workout not found/);
+  });
+
+  it("指定已结束的课仍写入该节", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-16T01:00:00.000Z",
+      clock,
+    );
+    const ended = endWorkout(
+      created.log,
+      created.workoutId,
+      "2026-09-16T02:00:00.000Z",
+    );
+    const log = applyFollowAlongSet(
+      ended,
+      { catalogId: "chest-press-machine", cameraReps: 8, reps: 8, weightKg: 70 },
+      "2026-09-16T03:00:00.000Z",
+      clock,
+      created.workoutId,
+    );
+    const workout = log.workouts.find((w) => w.id === created.workoutId)!;
+    expect(workout.status).toBe("ended");
+    expect(workout.slots[0]!.exercise).toEqual({
+      kind: "catalog",
+      catalogId: "chest-press-machine",
+    });
+    expect(workout.slots[0]!.sets[0]!.reps).toBe(8);
+    expect(workout.slots[0]!.sets[0]!.weightKg).toBe(70);
+  });
+
   it("patchSet 可改已落组的次数", () => {
     const clock = ids();
     let log = applyFollowAlongSet(
@@ -343,6 +451,17 @@ describe("ensureOpenWorkout + FR-096 剩余秒", () => {
     expect(restRemainingSec(90, 1_000, 1_000 + 30_000)).toBe(60);
     expect(restRemainingSec(90, 1_000, 1_000 + 90_000)).toBe(0);
     expect(restRemainingSec(90, 1_000, 1_000 + 120_000)).toBe(0);
+  });
+
+  it("拖沙漏改剩余秒，墙钟起点不变", () => {
+    expect(restSandCapacitySec(90)).toBe(300);
+    expect(restRemainingFromSandFraction(0, 90)).toBe(300);
+    expect(restRemainingFromSandFraction(1, 90)).toBe(0);
+    expect(restRemainingFromSandFraction(0.5, 90)).toBe(150);
+    const started = 10_000;
+    const now = started + 30_000;
+    expect(restDurationForRemaining(started, now, 120)).toBe(150);
+    expect(restRemainingSec(150, started, now)).toBe(120);
   });
 });
 
@@ -701,5 +820,439 @@ describe("T14 FR-097 计划模板", () => {
     log = removeWorkout(log, created.workoutId);
     expect(log.workouts).toHaveLength(0);
     expect(listWorkoutTemplates(log)).toHaveLength(1);
+  });
+});
+
+describe("FR-098 personalRecords", () => {
+  it("takes the heaviest set and ignores unweighted or timed sets", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-13T10:00:00.000Z",
+      clock,
+    );
+    let log = created.log;
+    const squat = addSlot(
+      log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      squat.log,
+      created.workoutId,
+      squat.slotId,
+      { reps: 8, weightKg: 40 },
+      clock,
+    ).log;
+    log = addSet(
+      log,
+      created.workoutId,
+      squat.slotId,
+      { reps: 5, weightKg: 50 },
+      clock,
+    ).log;
+    log = addSet(
+      log,
+      created.workoutId,
+      squat.slotId,
+      { reps: 10 },
+      clock,
+    ).log;
+    const plank = addSlot(
+      log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "plank" },
+      clock,
+    );
+    log = addSet(
+      plank.log,
+      created.workoutId,
+      plank.slotId,
+      { kind: "timed", durationSec: 40, weightKg: 20, reps: 40 },
+      clock,
+    ).log;
+    const custom = addSlot(
+      log,
+      created.workoutId,
+      { kind: "custom", name: "飞鸟" },
+      clock,
+    );
+    log = addSet(
+      custom.log,
+      created.workoutId,
+      custom.slotId,
+      { reps: 12, weightKg: 12 },
+      clock,
+    ).log;
+    expect(personalRecords(log)).toEqual([
+      {
+        exercise: { kind: "catalog", catalogId: "squat" },
+        weightKg: 50,
+        weightUnit: "kg",
+        reps: 5,
+        achievedAt: "2026-09-13T10:00:00.000Z",
+      },
+      {
+        exercise: { kind: "custom", name: "飞鸟" },
+        weightKg: 12,
+        weightUnit: "kg",
+        reps: 12,
+        achievedAt: "2026-09-13T10:00:00.000Z",
+      },
+    ]);
+  });
+
+  it("same max weight keeps the higher-rep set", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-13T11:00:00.000Z",
+      clock,
+    );
+    const slot = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "rdl" },
+      clock,
+    );
+    let log = addSet(
+      slot.log,
+      created.workoutId,
+      slot.slotId,
+      { reps: 3, weightKg: 80 },
+      clock,
+    ).log;
+    log = addSet(
+      log,
+      created.workoutId,
+      slot.slotId,
+      { reps: 5, weightKg: 80 },
+      clock,
+    ).log;
+    expect(personalRecords(log)).toEqual([
+      {
+        exercise: { kind: "catalog", catalogId: "rdl" },
+        weightKg: 80,
+        weightUnit: "kg",
+        reps: 5,
+        achievedAt: "2026-09-13T11:00:00.000Z",
+      },
+    ]);
+  });
+
+  it("stamps the workout that first wrote the current PR", () => {
+    const clock = ids();
+    const first = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-01T02:00:00.000Z",
+      clock,
+    );
+    const firstSlot = addSlot(
+      first.log,
+      first.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    let log = addSet(
+      firstSlot.log,
+      first.workoutId,
+      firstSlot.slotId,
+      { reps: 5, weightKg: 50 },
+      clock,
+    ).log;
+    const repeat = createWorkout(log, "2026-09-10T02:00:00.000Z", clock);
+    const repeatSlot = addSlot(
+      repeat.log,
+      repeat.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      repeatSlot.log,
+      repeat.workoutId,
+      repeatSlot.slotId,
+      { reps: 5, weightKg: 50 },
+      clock,
+    ).log;
+    const beaten = createWorkout(log, "2026-09-12T02:00:00.000Z", clock);
+    const beatenSlot = addSlot(
+      beaten.log,
+      beaten.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      beatenSlot.log,
+      beaten.workoutId,
+      beatenSlot.slotId,
+      { reps: 3, weightKg: 60 },
+      clock,
+    ).log;
+    expect(personalRecords(log)).toEqual([
+      {
+        exercise: { kind: "catalog", catalogId: "squat" },
+        weightKg: 60,
+        weightUnit: "kg",
+        reps: 3,
+        achievedAt: "2026-09-12T02:00:00.000Z",
+      },
+    ]);
+  });
+
+  it("keeps the earlier stamp when the same number is repeated", () => {
+    const clock = ids();
+    const later = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-10T02:00:00.000Z",
+      clock,
+    );
+    const laterSlot = addSlot(
+      later.log,
+      later.workoutId,
+      { kind: "catalog", catalogId: "ohp" },
+      clock,
+    );
+    let log = addSet(
+      laterSlot.log,
+      later.workoutId,
+      laterSlot.slotId,
+      { reps: 5, weightKg: 40 },
+      clock,
+    ).log;
+    const earlier = createWorkout(log, "2026-09-01T02:00:00.000Z", clock);
+    const earlierSlot = addSlot(
+      earlier.log,
+      earlier.workoutId,
+      { kind: "catalog", catalogId: "ohp" },
+      clock,
+    );
+    log = addSet(
+      earlierSlot.log,
+      earlier.workoutId,
+      earlierSlot.slotId,
+      { reps: 5, weightKg: 40 },
+      clock,
+    ).log;
+    expect(personalRecords(log)[0]?.achievedAt).toBe("2026-09-01T02:00:00.000Z");
+  });
+
+  it("preview keeps the heaviest four until expanded", () => {
+    const clock = ids();
+    let log = emptyWorkoutLog();
+    const loads: Array<[string, number]> = [
+      ["squat", 100],
+      ["rdl", 90],
+      ["ohp", 80],
+      ["bench-press", 70],
+      ["db-row", 60],
+    ];
+    for (const [catalogId, weightKg] of loads) {
+      const created = createWorkout(
+        log,
+        "2026-09-13T10:00:00.000Z",
+        clock,
+      );
+      const slot = addSlot(
+        created.log,
+        created.workoutId,
+        { kind: "catalog", catalogId },
+        clock,
+      );
+      log = addSet(
+        slot.log,
+        created.workoutId,
+        slot.slotId,
+        { reps: 5, weightKg },
+        clock,
+      ).log;
+    }
+    const rows = personalRecords(log);
+    expect(rows.map((row) => row.weightKg)).toEqual([100, 90, 80, 70, 60]);
+    expect(visiblePersonalRecords(rows, false).map((row) => row.weightKg)).toEqual([
+      100, 90, 80, 70,
+    ]);
+    expect(visiblePersonalRecords(rows, true)).toHaveLength(5);
+  });
+
+  it("breaks the stamp into local year month day", () => {
+    expect(prStampParts("2026-09-13T10:00:00.000Z", "Asia/Shanghai")).toEqual({
+      year: 2026,
+      month: 9,
+      day: 13,
+    });
+    expect(prStampMark("2026-09-13T10:00:00.000Z", "Asia/Shanghai")).toEqual({
+      monthDay: "09.13",
+      year: "2026",
+    });
+  });
+});
+
+describe("T24 公斤/磅", () => {
+  it("100 kg 显示约 220.5 lb，解析写回误差可接受", () => {
+    expect(kgToLb(100)).toBeCloseTo(220.46226218, 5);
+    expect(lbToKg(220.46226218)).toBeCloseTo(100, 5);
+    expect(formatWeightAmount(100, "lb")).toBe("220.5");
+    const written = parseWeightToKg("220.5", "lb");
+    expect(written).toBeDefined();
+    expect(Math.abs(written! - 100)).toBeLessThan(0.05);
+    expect(formatWeightAmount(100, "kg")).toBe("100");
+    expect(toggleWeightUnit("kg")).toBe("lb");
+    expect(retargetWeightText("", "kg", "lb")).toBe("");
+    expect(retargetWeightText("100", "kg", "lb")).toBe("220.5");
+  });
+
+  it("每一组记住输入单位，磁盘仍是公斤，旧数据缺省 kg", () => {
+    const clock = ids();
+    const created = createWorkout(
+      setBodyweightKg(emptyWorkoutLog(), 70),
+      "2026-09-18T02:00:00.000Z",
+      clock,
+    );
+    const slotted = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    const kgStored = parseWeightToKg("220.5", "lb")!;
+    const withSet = addSet(
+      slotted.log,
+      created.workoutId,
+      slotted.slotId,
+      { reps: 5, weightKg: kgStored, weightUnit: "lb" },
+      clock,
+    ).log;
+    const round = parseWorkoutLog(stringifyWorkoutLog(withSet));
+    const set = round.workouts[0]!.slots[0]!.sets[0]!;
+    expect(set.weightUnit).toBe("lb");
+    expect(set.weightKg).toBeCloseTo(100, 1);
+    expect(round.bodyweightKg).toBe(70);
+    expect("weightUnit" in round).toBe(false);
+    expect(recordedWeightUnit(undefined)).toBe("kg");
+  });
+
+  it("容量内部仍是次数×公斤，不因这组用 lb 而改合计", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-18T02:00:00.000Z",
+      clock,
+    );
+    const slotted = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    const log = addSet(
+      slotted.log,
+      created.workoutId,
+      slotted.slotId,
+      { reps: 10, weightKg: 100, weightUnit: "lb" },
+      clock,
+    ).log;
+    const workout = log.workouts[0]!;
+    expect(workoutVolumeKg(workout)).toBe(1000);
+    expect(formatVolumeKg(workoutVolumeKg(workout))).toBe("1000 kg");
+  });
+
+  it("PR 仍按存储公斤比大小，展示用该组记下的单位", () => {
+    const clock = ids();
+    let log = emptyWorkoutLog();
+    const lighter = createWorkout(log, "2026-09-18T02:00:00.000Z", clock);
+    log = lighter.log;
+    const lightSlot = addSlot(
+      log,
+      lighter.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      lightSlot.log,
+      lighter.workoutId,
+      lightSlot.slotId,
+      { reps: 3, weightKg: 90, weightUnit: "kg" },
+      clock,
+    ).log;
+    const heavier = createWorkout(log, "2026-09-18T03:00:00.000Z", clock);
+    log = heavier.log;
+    const heavySlot = addSlot(
+      log,
+      heavier.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      heavySlot.log,
+      heavier.workoutId,
+      heavySlot.slotId,
+      { reps: 3, weightKg: 100, weightUnit: "lb" },
+      clock,
+    ).log;
+    const rows = personalRecords(log);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.weightKg).toBe(100);
+    expect(rows[0]!.weightUnit).toBe("lb");
+    expect(formatWeightAmount(rows[0]!.weightKg, rows[0]!.weightUnit)).toBe("220.5");
+  });
+});
+
+describe("T25 过去日补记", () => {
+  const tz = "Asia/Shanghai";
+  const now = "2026-09-10T16:30:00.000Z";
+
+  it("上海昨天补记落在昨天且已结束，不是首页进行中", () => {
+    expect(calendarDayLocal(now, tz)).toBe("2026-09-11");
+    expect(backdateKind("2026-09-10", now, tz)).toBe("past");
+    const clock = ids();
+    const todayOpen = createWorkout(emptyWorkoutLog(), now, clock);
+    const created = createBackdatedWorkout(
+      todayOpen.log,
+      "2026-09-10",
+      now,
+      clock,
+      tz,
+    );
+    const workout = created.log.workouts.find((w) => w.id === created.workoutId)!;
+    expect(workout.status).toBe("ended");
+    expect(calendarDayLocal(workout.startedAt, tz)).toBe("2026-09-10");
+    expect(calendarDayUtc(workout.startedAt)).not.toBe("2026-09-09");
+    expect(trainedCalendarDays(created.log, tz)).toContain("2026-09-10");
+    expect(workoutsOnCalendarDay(created.log, "2026-09-10", tz)).toHaveLength(1);
+    expect(openWorkout(created.log)?.id).toBe(todayOpen.workoutId);
+    const home = homeDayWorkouts(created.log, now, tz);
+    expect(home.map((w) => w.id)).toEqual([todayOpen.workoutId]);
+    expect(home.some((w) => w.id === created.workoutId)).toBe(false);
+  });
+
+  it("今天可以另开一节，不把昨天的进行中课当成今天", () => {
+    const clock = ids();
+    const yesterdayOpen = createWorkout(
+      emptyWorkoutLog(),
+      "2026-09-09T04:00:00.000Z",
+      clock,
+    );
+    const created = createBackdatedWorkout(
+      yesterdayOpen.log,
+      "2026-09-11",
+      now,
+      clock,
+      tz,
+    );
+    const workout = created.log.workouts.find((w) => w.id === created.workoutId)!;
+    expect(created.workoutId).not.toBe(yesterdayOpen.workoutId);
+    expect(workout.status).toBe("open");
+    expect(calendarDayLocal(workout.startedAt, tz)).toBe("2026-09-11");
+    expect(calendarDayLocal(yesterdayOpen.log.workouts[0]!.startedAt, tz)).toBe(
+      "2026-09-09",
+    );
+  });
+
+  it("未来日拒绝新建", () => {
+    expect(backdateKind("2026-09-12", now, tz)).toBe("future");
+    expect(() =>
+      createBackdatedWorkout(emptyWorkoutLog(), "2026-09-12", now, ids(), tz),
+    ).toThrow(/future/);
   });
 });

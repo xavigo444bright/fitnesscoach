@@ -2,7 +2,6 @@
  * PG-009 本节课组表（FR-091 UI）。容量走 core.workoutVolumeKg。
  */
 import {
-  EXERCISE_CATALOG,
   EQUIPMENT_LABEL,
   DEFAULT_REST_SEC,
   addSet,
@@ -11,19 +10,28 @@ import {
   effectiveBodyweightKg,
   endWorkout,
   exerciseDisplayName,
+  followAlongCatalogId,
+  formatWeightAmount,
   lastLoadForExercise,
+  parseWeightToKg,
   patchSet,
   patchWorkout,
   removeSet,
   removeSlot,
   saveWorkoutAsTemplate,
+  searchCatalogExercises,
   suggestedWeightKg,
+  uniqueCatalogMatchForQuery,
   workoutById,
   workoutExerciseSummary,
   workoutTitleDisplay,
   workoutVolumeKg,
+  recordedWeightUnit,
+  retargetWeightText,
+  weightUnitLabel,
   type LogSet,
   type LogSlot,
+  type WeightUnit,
   type WorkoutLog,
 } from '@fitness-coach/core';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
@@ -39,7 +47,9 @@ import {
   View,
 } from 'react-native';
 import EmptyPane from './EmptyPane';
+import ExercisePoseIcon from './ExercisePoseIcon';
 import ShellButton from './ShellButton';
+import WeightUnitToggle from './WeightUnitToggle';
 import TemplateSheet from './TemplateSheet';
 import { commitWorkoutLog } from '../workoutLogStorage';
 
@@ -51,6 +61,7 @@ type Props = {
   workoutId: string;
   contentBottomInset: number;
   onOpenRest: (durationSec: number) => void;
+  onFollowAlong: (catalogId: string) => void;
   onClose: () => void;
 };
 
@@ -66,6 +77,7 @@ export default function WorkoutSessionPane({
   workoutId,
   contentBottomInset,
   onOpenRest,
+  onFollowAlong,
   onClose,
 }: Props) {
   const workout = workoutById(log, workoutId);
@@ -78,6 +90,7 @@ export default function WorkoutSessionPane({
   );
   const [repsText, setRepsText] = useState('');
   const [kgText, setKgText] = useState('');
+  const [entryUnit, setEntryUnit] = useState<WeightUnit>('kg');
   const [secText, setSecText] = useState('');
   const [titleText, setTitleText] = useState(workout?.title ?? '');
   const effectiveBw = effectiveBodyweightKg(log, workout);
@@ -129,6 +142,7 @@ export default function WorkoutSessionPane({
       return;
     }
     setRepsText(last ? String(last.reps) : '');
+    setEntryUnit('kg');
     setKgText(suggestKg != null ? String(suggestKg) : '');
     setSecText('');
   }, [selectedSlot?.id, log]);
@@ -180,7 +194,8 @@ export default function WorkoutSessionPane({
         selectedSlot.id,
         {
           reps,
-          weightKg: parseOptionalNumber(kgText),
+          weightKg: parseWeightToKg(kgText, entryUnit),
+          weightUnit: entryUnit,
         },
         ids,
       ).log;
@@ -250,6 +265,9 @@ export default function WorkoutSessionPane({
               value={bwText}
               onChangeText={setBwText}
               onEndEditing={() => {
+                const stored = effectiveBodyweightKg(log, workout);
+                const shown = stored != null ? String(stored) : '';
+                if (bwText === shown) return;
                 void commitWorkoutLog((next) =>
                   patchWorkout(next, workout.id, {
                     bodyweightKg: parseOptionalNumber(bwText) ?? null,
@@ -278,15 +296,40 @@ export default function WorkoutSessionPane({
               selectedSlotId === slot.id && styles.slotOn,
             ]}
           >
-            <Pressable
-              onPress={() => setSelectedSlotId(slot.id)}
-              accessibilityRole="button"
-              accessibilityLabel={exerciseDisplayName(slot.exercise)}
-            >
-              <Text style={styles.slotTitle}>
-                {exerciseDisplayName(slot.exercise)}
-              </Text>
-            </Pressable>
+            <View style={styles.slotHead}>
+              <Pressable
+                onPress={() => setSelectedSlotId(slot.id)}
+                style={styles.slotHeadMain}
+                accessibilityRole="button"
+                accessibilityLabel={exerciseDisplayName(slot.exercise)}
+              >
+                <ExercisePoseIcon
+                  catalogId={
+                    slot.exercise.kind === 'catalog'
+                      ? slot.exercise.catalogId
+                      : undefined
+                  }
+                  size={36}
+                />
+                <Text style={styles.slotTitle} numberOfLines={1}>
+                  {exerciseDisplayName(slot.exercise)}
+                </Text>
+              </Pressable>
+              {followAlongCatalogId(slot.exercise) ? (
+                <Pressable
+                  onPress={() => {
+                    const catalogId = followAlongCatalogId(slot.exercise);
+                    if (!catalogId) return;
+                    onFollowAlong(catalogId);
+                  }}
+                  style={styles.followBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={`跟练${exerciseDisplayName(slot.exercise)}`}
+                >
+                  <Text style={styles.followText}>跟练</Text>
+                </Pressable>
+              ) : null}
+            </View>
             {slot.sets.length === 0 ? (
               <Text style={styles.meta}>还没有组</Text>
             ) : (
@@ -297,7 +340,7 @@ export default function WorkoutSessionPane({
                     {slot.countMode === 'timed' ? '秒' : '次'}
                   </Text>
                   {slot.countMode === 'timed' ? null : (
-                    <Text style={[styles.setHeadCell, styles.colVal]}>kg</Text>
+                    <Text style={[styles.setHeadCell, styles.colVal]}>重量</Text>
                   )}
                   <Text style={[styles.setHeadCell, styles.colDel]} />
                 </View>
@@ -360,19 +403,37 @@ export default function WorkoutSessionPane({
                   onChange={setRepsText}
                   placeholder={String(PLACEHOLDER_REPS)}
                 />
-                <Field
-                  label="公斤"
-                  value={kgText}
-                  onChange={setKgText}
-                  placeholder="选填"
-                />
+                <View style={styles.field}>
+                  <WeightUnitToggle
+                    unit={entryUnit}
+                    onChange={(next) => {
+                      setKgText((cur) =>
+                        retargetWeightText(cur, entryUnit, next),
+                      );
+                      setEntryUnit(next);
+                    }}
+                  />
+                  <TextInput
+                    value={kgText}
+                    onChangeText={setKgText}
+                    placeholder="选填"
+                    placeholderTextColor={colors.tabInactive}
+                    keyboardType="decimal-pad"
+                    style={styles.input}
+                    accessibilityLabel="重量"
+                  />
+                </View>
               </View>
             )}
             {timed || parseOptionalNumber(bwText) == null ? null : (
               <ShellButton
                 variant="ghost"
                 label="用自重"
-                onPress={() => setKgText(String(parseOptionalNumber(bwText)))}
+                onPress={() => {
+                  const kg = parseOptionalNumber(bwText);
+                  if (kg == null) return;
+                  setKgText(formatWeightAmount(kg, entryUnit));
+                }}
               />
             )}
           </View>
@@ -456,14 +517,18 @@ export default function WorkoutSessionPane({
           })();
         }}
         onPickCustom={() => {
-          if (customName.trim() === '') return;
+          const name = customName.trim();
+          if (name === '') return;
+          const catalog = uniqueCatalogMatchForQuery(name);
           void (async () => {
             let slotId = '';
             await commitWorkoutLog((next, ids) => {
               const added = addSlot(
                 next,
                 workout.id,
-                { kind: 'custom', name: customName },
+                catalog
+                  ? { kind: 'catalog', catalogId: catalog.id }
+                  : { kind: 'custom', name },
                 ids,
               );
               slotId = added.slotId;
@@ -512,10 +577,16 @@ function SetRow({
   index: number;
   set: LogSet;
   timed: boolean;
-  onPatch: (patch: { reps?: number; weightKg?: number; durationSec?: number }) => void;
+  onPatch: (patch: {
+    reps?: number;
+    weightKg?: number;
+    weightUnit?: WeightUnit;
+    durationSec?: number;
+  }) => void;
   onDelete: () => void;
   onCopy: () => void;
 }) {
+  const unit = recordedWeightUnit(set.weightUnit);
   return (
     <View style={styles.setRow}>
       <Text style={[styles.setIndex, styles.colNum]}>{index + 1}</Text>
@@ -538,10 +609,11 @@ function SetRow({
               onPatch({ reps: n });
             }}
           />
-          <EditableNum
-            value={set.weightKg}
-            accessibilityLabel={`第${index + 1}组公斤`}
-            onCommit={(n) => onPatch({ weightKg: n })}
+          <WeightNum
+            storedKg={set.weightKg}
+            unit={unit}
+            accessibilityLabel={`第${index + 1}组${weightUnitLabel(unit)}`}
+            onCommit={(patch) => onPatch(patch)}
           />
         </>
       )}
@@ -565,6 +637,59 @@ function SetRow({
       >
         <Text style={styles.delText}>删</Text>
       </Pressable>
+    </View>
+  );
+}
+
+function WeightNum({
+  storedKg,
+  unit,
+  onCommit,
+  accessibilityLabel,
+}: {
+  storedKg: number | undefined;
+  unit: WeightUnit;
+  onCommit: (patch: { weightKg?: number; weightUnit: WeightUnit }) => void;
+  accessibilityLabel: string;
+}) {
+  const shown = storedKg == null ? '' : formatWeightAmount(storedKg, unit);
+  const [text, setText] = useState(shown);
+  const [textUnit, setTextUnit] = useState(unit);
+  useEffect(() => {
+    setText(shown);
+    setTextUnit(unit);
+  }, [shown, unit]);
+  return (
+    <View style={styles.weightCell}>
+      <TextInput
+        value={text}
+        onChangeText={setText}
+        onEndEditing={() => {
+          const baseline =
+            storedKg == null ? '' : formatWeightAmount(storedKg, textUnit);
+          if (text === baseline && textUnit === unit) return;
+          onCommit({
+            weightKg: parseWeightToKg(text, textUnit),
+            weightUnit: textUnit,
+          });
+        }}
+        keyboardType="decimal-pad"
+        style={styles.setInput}
+        accessibilityLabel={accessibilityLabel}
+      />
+      <WeightUnitToggle
+        inline
+        unit={textUnit}
+        onChange={(next) => {
+          const nextText = retargetWeightText(text, textUnit, next);
+          setText(nextText);
+          setTextUnit(next);
+          onCommit({
+            weightKg: parseWeightToKg(nextText, next),
+            weightUnit: next,
+          });
+        }}
+      />
     </View>
   );
 }
@@ -639,6 +764,10 @@ function AddExerciseModal({
   onPickCatalog: (id: string) => void;
   onPickCustom: () => void;
 }) {
+  const hits = useMemo(
+    () => searchCatalogExercises(customName),
+    [customName],
+  );
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modal}>
@@ -647,26 +776,39 @@ function AddExerciseModal({
           <TextInput
             value={customName}
             onChangeText={onChangeCustom}
-            placeholder="自定义名称"
+            placeholder="搜索或自定义名称"
             placeholderTextColor={colors.tabInactive}
             style={[styles.input, { flex: 1 }]}
-            accessibilityLabel="自定义动作名"
+            accessibilityLabel="搜索或自定义动作名"
+            autoCorrect={false}
+            autoCapitalize="none"
           />
-          <ShellButton label="添加" onPress={onPickCustom} />
+          <ShellButton
+            label="添加"
+            onPress={onPickCustom}
+            disabled={customName.trim() === ''}
+          />
         </View>
         <ScrollView>
-          {EXERCISE_CATALOG.map((e) => (
-            <Pressable
-              key={e.id}
-              onPress={() => onPickCatalog(e.id)}
-              style={styles.pickRow}
-              accessibilityRole="button"
-              accessibilityLabel={e.name}
-            >
-              <Text style={styles.pickName}>{e.name}</Text>
-              <Text style={styles.meta}>{EQUIPMENT_LABEL[e.equipment]}</Text>
-            </Pressable>
-          ))}
+          {hits.length === 0 ? (
+            <Text style={styles.hint}>没有匹配的动作，可点添加记自定义名</Text>
+          ) : (
+            hits.map((e) => (
+              <Pressable
+                key={e.id}
+                onPress={() => onPickCatalog(e.id)}
+                style={styles.pickRow}
+                accessibilityRole="button"
+                accessibilityLabel={e.name}
+              >
+                <ExercisePoseIcon catalogId={e.id} size={36} />
+                <View style={styles.pickMeta}>
+                  <Text style={styles.pickName}>{e.name}</Text>
+                  <Text style={styles.meta}>{EQUIPMENT_LABEL[e.equipment]}</Text>
+                </View>
+              </Pressable>
+            ))
+          )}
         </ScrollView>
         <ShellButton variant="ghost" label="取消" onPress={onClose} />
       </View>
@@ -773,11 +915,39 @@ const styles = StyleSheet.create({
   slotOn: {
     borderColor: colors.cta,
   },
+  slotHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginBottom: space.sm,
+  },
+  slotHeadMain: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    minHeight: layout.touchMin,
+  },
   slotTitle: {
+    flex: 1,
+    minWidth: 0,
     color: colors.textPrimary,
     fontSize: fontSize.title,
     fontWeight: '700',
-    marginBottom: space.sm,
+  },
+  followBtn: {
+    flexShrink: 0,
+    minHeight: layout.touchMin,
+    minWidth: layout.touchMin,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: space.sm,
+  },
+  followText: {
+    color: colors.textPrimary,
+    fontSize: fontSize.body,
+    fontWeight: '700',
   },
   setHead: {
     flexDirection: 'row',
@@ -819,6 +989,12 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     paddingHorizontal: space.sm,
     fontSize: fontSize.body,
+  },
+  weightCell: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
   },
   delBtn: {
     width: 44,
@@ -899,9 +1075,16 @@ const styles = StyleSheet.create({
   },
   pickRow: {
     minHeight: layout.touchMin,
-    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.border,
+    paddingVertical: space.sm,
+  },
+  pickMeta: {
+    flex: 1,
+    gap: 2,
   },
   pickName: {
     color: colors.textPrimary,

@@ -1,6 +1,6 @@
 /**
  * 课表记训数据层（FR-091 / FR-094 / FR-095 / FR-073）
- * 无 UI。重量单位公斤。无 RPE。
+ * 无 UI。磁盘重量一律公斤；每一组另记输入时的 kg/lb。无 RPE。
  */
 
 export const WORKOUT_LOG_VERSION = 1 as const;
@@ -18,8 +18,10 @@ export interface LogSet {
   kind: LogSetKind;
   /** 次数；timed 组可空 */
   reps?: number;
-  /** 公斤；未填则该组不进容量 */
+  /** 公斤；未填则该组不进容量。容量和比大小都用这个。 */
   weightKg?: number;
+  /** 这一组输入时用的单位。缺省 kg。成就按这个显示，不跟全局偏好。 */
+  weightUnit?: WeightUnit;
   /** 计时动作有效秒 */
   durationSec?: number;
   /** 组间休息秒数字段（FR-096 UI 下一波） */
@@ -38,6 +40,9 @@ export interface LogSlot {
 }
 
 export type WorkoutStatus = "open" | "ended";
+
+/** 展示单位。缺省 kg。磁盘上的重量字段仍是公斤。 */
+export type WeightUnit = "kg" | "lb";
 
 export interface Workout {
   id: string;

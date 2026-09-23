@@ -194,6 +194,9 @@ describe("ASSET-SCOUT registry", () => {
 
   it("rejects lecture-length proposed look-windows", () => {
     expect(inferWindowKind("plank")).toBe("hold");
+    expect(inferWindowKind("side-plank")).toBe("hold");
+    expect(inferWindowKind("hollow-hold")).toBe("hold");
+    expect(inferWindowKind("lat-pulldown")).toBe("reps");
     expect(() =>
       assertScoutLookWindow(
         proposedClip({

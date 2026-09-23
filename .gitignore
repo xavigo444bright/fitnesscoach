@@ -29,6 +29,9 @@ apps/miniprogram/packageTrain/miniprogram_npm/
 !.vscode/extensions.json
 .local/
 
+# 账号服务本机用户库（不进 git）
+apps/server/data/
+
 # 示范片源（体积大，本地提轨迹用；目录保留 README）
 # 注意：gitignore 不支持 {a,b} 花括号展开，须逐后缀写
 media/trajectory-source/**/*.mp4

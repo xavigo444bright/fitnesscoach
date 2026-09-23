@@ -1,6 +1,6 @@
 /**
  * PG-002 动作详情（FR-002）；catalog 项禁用开始训练
- * 标准动作示意：预渲染 3D 视频（非训练页 Ghost）
+ * 标准动作示意：复用训练压缩原片（T18；非 FR-064 3D）
  */
 import {
   BODY_PART_LABEL,
@@ -18,7 +18,6 @@ import ShellButton from '../components/ShellButton';
 type Props = {
   exerciseId: string;
   onBack: () => void;
-  onJoin: () => void;
   onStart: () => void;
 };
 
@@ -40,7 +39,6 @@ const CAMERA_COPY = {
 export default function ExerciseDetailScreen({
   exerciseId,
   onBack,
-  onJoin,
   onStart,
 }: Props) {
   const insets = useSafeAreaInsets();
@@ -73,8 +71,9 @@ export default function ExerciseDetailScreen({
       >
         {showDemo ? (
           <ExerciseDemoPlayer
+            exerciseId={entry.id}
             exerciseName={entry.name}
-            demoAsset={entry.demoAsset}
+            cameraHint={entry.cameraHint}
           />
         ) : (
           <View style={styles.diagram} accessibilityLabel="机位示意图">
@@ -113,10 +112,7 @@ export default function ExerciseDetailScreen({
       </ScrollView>
 
       <View style={[styles.ctaCol, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-        <ShellButton label="加入本节" onPress={onJoin} />
-        <View style={{ height: space.sm }} />
         <ShellButton
-          variant="ghost"
           label={coachable ? '跟练' : '即将支持教练'}
           onPress={onStart}
           disabled={!coachable}

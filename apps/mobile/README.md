@@ -47,8 +47,8 @@ npx expo run:android --device
 ### 0. 前置条件
 
 - [Expo](https://expo.dev) 账号
-- **iOS**：付费 [Apple Developer](https://developer.apple.com) + [App Store Connect](https://appstoreconnect.apple.com) 中已有 App（Bundle ID = `com.fitnesscoach.mobile`）
-- **Android**：可用 Google 账号登录 EAS 即可打 preview APK（上架 Play 另需商店账号）
+- **iOS**：付费 [Apple Developer](https://developer.apple.com) + [App Store Connect](https://appstoreconnect.apple.com) 中已有 App（Bundle ID = `com.Myfitco.mobile`，Team `93UHA7C4LM`）
+- **Android**：包名与 iOS 相同，`com.Myfitco.mobile`。可用 Google 账号登录 EAS 打 preview APK（上架 Play 另需商店账号）
 
 ### 1. 关联 EAS 项目（首次）
 

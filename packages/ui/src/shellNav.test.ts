@@ -7,6 +7,10 @@ import {
   LOG_SEGMENTS,
   SHELL_TABS,
   isFullscreenStackRoute,
+  pageIndexFromOffset,
+  pageOffsetX,
+  segmentIndexOf,
+  segmentKeyAt,
   shellTabCount,
 } from "./shellNav.js";
 
@@ -21,9 +25,9 @@ describe("shellNav (FR-110)", () => {
   });
 
   it("keeps home/log segments in-page (not extra tabs)", () => {
-    expect(HOME_SEGMENTS.map((s) => s.label)).toEqual(["训练", "动作"]);
+    expect(HOME_SEGMENTS.map((s) => s.label)).toEqual(["动作", "训练"]);
     expect(LOG_SEGMENTS.map((s) => s.label)).toEqual(["记录", "我的"]);
-    expect(DEFAULT_HOME_SEGMENT).toBe("train");
+    expect(DEFAULT_HOME_SEGMENT).toBe("library");
     expect(DEFAULT_LOG_SEGMENT).toBe("history");
   });
 
@@ -36,5 +40,18 @@ describe("shellNav (FR-110)", () => {
     expect(isFullscreenStackRoute("RestTimer")).toBe(true);
     expect(isFullscreenStackRoute("Home")).toBe(false);
     expect(FULLSCREEN_STACK_ROUTES).not.toContain("MainTabs");
+  });
+
+  it("maps segment keys to page index and swipe offset", () => {
+    expect(segmentIndexOf(HOME_SEGMENTS, "library")).toBe(0);
+    expect(segmentIndexOf(HOME_SEGMENTS, "train")).toBe(1);
+    expect(segmentKeyAt(HOME_SEGMENTS, 0)).toBe("library");
+    expect(segmentKeyAt(HOME_SEGMENTS, 1)).toBe("train");
+    expect(segmentKeyAt(LOG_SEGMENTS, 99)).toBe("me");
+    expect(pageOffsetX(1, 390)).toBe(390);
+    expect(pageOffsetX(0, 0)).toBe(0);
+    expect(pageIndexFromOffset(200, 390, 2)).toBe(1);
+    expect(pageIndexFromOffset(-10, 390, 2)).toBe(0);
+    expect(pageIndexFromOffset(800, 390, 2)).toBe(1);
   });
 });

@@ -15,4 +15,5 @@
 
 ## 展示位置
 
+- 公开页：`docs/privacy-policy.html`（需放到可匿名打开的 https 地址，再填进 App Store Connect）
 - App：动作库页底部说明

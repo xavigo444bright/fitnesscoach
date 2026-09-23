@@ -1,4 +1,5 @@
-import { calendarDayLocal, countModeForRef } from "./volume.js";
+import { calendarDayLocal, countModeForRef, isoAtLocalNoon } from "./volume.js";
+import { backdateKind } from "./calendar.js";
 import type {
   LogExerciseRef,
   LogSet,
@@ -36,6 +37,28 @@ export function createWorkout(
   return {
     log: { ...log, workouts: [...log.workouts, workout] },
     workoutId: workout.id,
+  };
+}
+
+/**
+ * 给今天或过去某本地日新建一节。过去日直接结束，不占首页进行中。
+ * 不复用已有 open 课。未来日抛错。
+ */
+export function createBackdatedWorkout(
+  log: WorkoutLog,
+  day: string,
+  nowIso: string,
+  ids: WorkoutLogIds,
+  timeZone?: string,
+): { log: WorkoutLog; workoutId: string } {
+  const kind = backdateKind(day, nowIso, timeZone);
+  if (kind === "future") throw new Error(`cannot log a future day: ${day}`);
+  const startedAt = isoAtLocalNoon(day, timeZone);
+  const created = createWorkout(log, startedAt, ids);
+  if (kind === "today") return created;
+  return {
+    log: endWorkout(created.log, created.workoutId, startedAt),
+    workoutId: created.workoutId,
   };
 }
 
@@ -97,6 +120,10 @@ export function addSet(
     kind,
     reps: patch.reps,
     weightKg: patch.weightKg,
+    weightUnit:
+      patch.weightUnit === "lb" || patch.weightUnit === "kg"
+        ? patch.weightUnit
+        : undefined,
     durationSec: patch.durationSec,
     restSec: patch.restSec,
     note: patch.note,
@@ -203,6 +230,7 @@ export function copySet(
       kind: source.kind,
       reps: source.reps,
       weightKg: source.weightKg,
+      weightUnit: source.weightUnit,
       durationSec: source.durationSec,
       restSec: source.restSec,
     },
@@ -321,6 +349,7 @@ export type FollowAlongInput = {
   /** 用户改过的次数/秒；缺省用 cameraReps */
   reps?: number;
   weightKg?: number;
+  weightUnit?: "kg" | "lb";
   formSummary?: string;
 };
 
@@ -330,31 +359,38 @@ export function applyFollowAlongSet(
   input: FollowAlongInput,
   startedAt: string,
   ids: WorkoutLogIds,
+  workoutId?: string,
 ): WorkoutLog {
   let next = log;
-  let workout = openWorkout(next);
-  let workoutId = workout?.id;
-  if (!workoutId) {
-    const created = createWorkout(next, startedAt, ids);
-    next = created.log;
-    workoutId = created.workoutId;
+  let targetId = workoutId;
+  if (targetId) {
+    requireWorkout(next, targetId);
+  } else {
+    const open = openWorkout(next);
+    if (open) {
+      targetId = open.id;
+    } else {
+      const created = createWorkout(next, startedAt, ids);
+      next = created.log;
+      targetId = created.workoutId;
+    }
   }
   const slotAdd = addSlot(
     next,
-    workoutId,
+    targetId,
     { kind: "catalog", catalogId: input.catalogId },
     ids,
   );
   next = slotAdd.log;
   const counted = input.reps ?? input.cameraReps;
   const slot = next.workouts
-    .find((w) => w.id === workoutId)
+    .find((w) => w.id === targetId)
     ?.slots.find((s) => s.id === slotAdd.slotId);
   if (!slot) throw new Error("follow-along slot missing");
   if (slot.countMode === "timed") {
     const added = addSet(
       next,
-      workoutId,
+      targetId,
       slotAdd.slotId,
       {
         kind: "timed",
@@ -368,13 +404,14 @@ export function applyFollowAlongSet(
   }
   const added = addSet(
     next,
-    workoutId,
+    targetId,
     slotAdd.slotId,
     {
       kind: "reps",
       reps: counted,
       cameraReps: input.cameraReps,
       weightKg: input.weightKg,
+      weightUnit: input.weightUnit,
       formSummary: input.formSummary,
     },
     ids,

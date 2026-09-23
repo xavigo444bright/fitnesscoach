@@ -43,6 +43,8 @@ export default function WorkoutModuleCard({
   return (
     <Swipeable
       overshootRight={false}
+      activeOffsetX={[-12, 12]}
+      failOffsetY={[-24, 24]}
       renderRightActions={() => (
         <Pressable
           onPress={onDelete}
