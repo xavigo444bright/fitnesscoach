@@ -5,6 +5,7 @@ import type { ExerciseCardProps } from '@fitness-coach/ui';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import ExercisePoseIcon from './ExercisePoseIcon';
+import { useTr } from '../i18n';
 
 type Props = ExerciseCardProps;
 
@@ -15,21 +16,22 @@ export default function ExerciseCard({
   exerciseId,
   onPress,
 }: Props) {
+  const tr = useTr();
+  const shownName = tr(name);
+  const shownMeta = tr(`${bodyPart} · ${cameraHint}`);
   return (
     <Pressable
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${name}，${bodyPart}，${cameraHint}`}
+      accessibilityLabel={`${shownName}，${shownMeta}`}
     >
       <View style={styles.thumb}>
         <ExercisePoseIcon catalogId={exerciseId} size={48} />
       </View>
       <View style={styles.meta}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.caption}>
-          {bodyPart} · {cameraHint}
-        </Text>
+        <Text style={styles.name}>{shownName}</Text>
+        <Text style={styles.caption}>{shownMeta}</Text>
       </View>
     </Pressable>
   );

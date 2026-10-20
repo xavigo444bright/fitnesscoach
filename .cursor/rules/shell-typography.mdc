@@ -1,0 +1,25 @@
+---
+description: 壳层标题只能走固定字阶，禁止标题旁跳变杂字（Apple HIG）
+alwaysApply: true
+---
+
+# 壳层字阶（OLED / Apple HIG）
+
+对照 Human Interface Guidelines：同一页只用预定义 Text Style，禁止标题旁自造字号或弱色数字。
+
+| 角色 | Token | 约等于 HIG | 例子 |
+|------|--------|------------|------|
+| 一级 / 模块标题 | `fontSize.display` 28 白 700 | Large Title / Title 1 | 账号、成就、身体数据 |
+| 二级 | `fontSize.title` 20 | Title 2 / 3 | 卡片、sheet 标题 |
+| 正文 | `fontSize.body` 16 | Body | 绑定状态 |
+| 说明 | `fontSize.caption` 14 `textSecondary` | Subhead / Footnote | 模块 lead、自重提示 |
+| 元信息 | `fontSize.meta` 12 `tabInactive` | Caption 2 | BEST 等栏目标 |
+| 主数字 | `fontSize.hugeStat` 40 | 仅砖内 kg | 不是标题装饰 |
+
+禁止：
+
+- 模块标题同行再放不同字号/颜色的计数（如「成就 9」）
+- 同页同级模块一个 28、一个 20
+- Token 外的 8pt / 自造色标题
+
+计数若需要：放进展开文案或无障碍标签，不进标题行。

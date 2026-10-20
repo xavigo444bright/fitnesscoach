@@ -37,5 +37,7 @@ export function suggestedWeightKg(
   _workout?: Workout,
 ): number | undefined {
   const last = lastLoadForExercise(log, ref);
-  return last?.weightKg;
+  if (!last) return undefined;
+  if (last.weightLeftKg != null || last.weightRightKg != null) return undefined;
+  return last.weightKg;
 }

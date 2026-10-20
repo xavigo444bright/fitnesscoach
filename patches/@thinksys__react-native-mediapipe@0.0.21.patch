@@ -1,7 +1,8 @@
 diff --git a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt b/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
+index 1dc36b8..a597dae 100644
 --- a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
 +++ b/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt
-@@ -103,6 +103,7 @@
+@@ -103,6 +103,7 @@ class PoseLandmarkerHelper(
            .setMinPoseDetectionConfidence(minPoseDetectionConfidence)
            .setMinTrackingConfidence(minPoseTrackingConfidence)
            .setMinPosePresenceConfidence(minPosePresenceConfidence)
@@ -9,7 +10,7 @@ diff --git a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt b/and
            .setRunningMode(runningMode)
  
        // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
-@@ -219,7 +220,7 @@
+@@ -219,7 +220,7 @@ class PoseLandmarkerHelper(
      const val DEFAULT_POSE_DETECTION_CONFIDENCE = 0.5F
      const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
      const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
@@ -19,9 +20,10 @@ diff --git a/android/src/main/java/com/tsmediapipe/PoseLandmarkerHelper.kt b/and
      const val GPU_ERROR = 1
      const val MODEL_POSE_LANDMARKER_FULL = 0
 diff --git a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt b/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
+index 8b61fa3..31dc852 100644
 --- a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
 +++ b/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt
-@@ -261,37 +261,42 @@
+@@ -261,37 +261,42 @@ class CameraFragment : Fragment(), PoseLandmarkerHelper.LandmarkerListener {
        if (_fragmentCameraBinding != null) {
  
          val data = resultBundle.results.first()
@@ -53,10 +55,10 @@ diff --git a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt b/
 +              )
              )
 -            landmarksArray.add(landmarkData)
-           }
++          }
 +          if (one.isNotEmpty()) {
 +            posesArray.add(one)
-+          }
+           }
          }
  
          worldLandmarks?.let {
@@ -82,7 +84,7 @@ diff --git a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt b/
              }
            }
          }
-@@ -299,12 +304,11 @@
+@@ -299,12 +304,11 @@ class CameraFragment : Fragment(), PoseLandmarkerHelper.LandmarkerListener {
          val additionalData = mapOf(
            "height" to resultBundle.inputImageHeight,
            "width" to resultBundle.inputImageWidth,
@@ -98,9 +100,10 @@ diff --git a/android/src/main/java/com/tsmediapipe/fragment/CameraFragment.kt b/
            "additionalData" to additionalData,
            "worldLandmarks" to worldLandmarksArray
 diff --git a/ios/Configurations/DefaultConstants.swift b/ios/Configurations/DefaultConstants.swift
+index 20abc0e..bb79835 100644
 --- a/ios/Configurations/DefaultConstants.swift
 +++ b/ios/Configurations/DefaultConstants.swift
-@@ -12,7 +12,7 @@
+@@ -12,7 +12,7 @@ struct DefaultConstants {
      
      static let lineColor = UIColor(red: 255.0, green: 255.0, blue: 255.0, alpha: 1)
      
@@ -109,10 +112,143 @@ diff --git a/ios/Configurations/DefaultConstants.swift b/ios/Configurations/Defa
      static var minPoseDetectionConfidence: Float = 0.5
      static var minPosePresenceConfidence: Float = 0.5
      static var minTrackingConfidence: Float = 0.5
+diff --git a/ios/Services/CameraFeedService.swift b/ios/Services/CameraFeedService.swift
+index 7c21b4a..2c02662 100644
+--- a/ios/Services/CameraFeedService.swift
++++ b/ios/Services/CameraFeedService.swift
+@@ -262,9 +262,7 @@ class CameraFeedService: NSObject {
+             
+             self.addVideoDeviceInput()
+             
+-            // Update video orientation
+-            self.videoPreviewLayer.connection?.videoOrientation = .portrait
+-            self.videoDataOutput.connection(with: .video)?.videoOrientation = .portrait
++            self.applyInterfaceOrientation(isPortrait: self.isPortrait)
+             self.videoDataOutput.connection(with: .video)?.isVideoMirrored = self.cameraPosition == .front
+             
+             // Mirror the preview layer if using front camera
+@@ -293,6 +291,40 @@ class CameraFeedService: NSObject {
+     func updateVideoPreviewLayer(toFrame frame: CGRect) {
+         videoPreviewLayer.frame = frame
+     }
++
++    /// 预览和送去推理的画面用同一个方向，会话保持开着。
++    func applyInterfaceOrientation(isPortrait portrait: Bool) {
++        let orientation = CameraFeedService.captureOrientation(isPortrait: portrait)
++        let position = cameraPosition
++        sessionQueue.async { [weak self] in
++            guard let self = self else { return }
++            if let connection = self.videoPreviewLayer.connection, connection.isVideoOrientationSupported {
++                connection.videoOrientation = orientation
++            }
++            if let connection = self.videoDataOutput.connection(with: .video), connection.isVideoOrientationSupported {
++                connection.videoOrientation = orientation
++                if position == .front {
++                    connection.isVideoMirrored = true
++                }
++            }
++        }
++    }
++
++    private static func captureOrientation(isPortrait portrait: Bool) -> AVCaptureVideoOrientation {
++        let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
++        switch scene?.interfaceOrientation {
++        case .landscapeLeft:
++            return .landscapeLeft
++        case .landscapeRight:
++            return .landscapeRight
++        case .portraitUpsideDown:
++            return .portraitUpsideDown
++        case .portrait:
++            return .portrait
++        default:
++            return portrait ? .portrait : .landscapeRight
++        }
++    }
+     
+     /**
+      This method starts the AVCaptureSession
 diff --git a/ios/ViewContoller/CameraView.swift b/ios/ViewContoller/CameraView.swift
+index c9629cc..3161b02 100644
 --- a/ios/ViewContoller/CameraView.swift
 +++ b/ios/ViewContoller/CameraView.swift
-@@ -439,70 +439,47 @@
+@@ -55,7 +55,6 @@ class CameraView: UIView {
+ 
+     @objc var height: NSNumber = 0 {
+         didSet {
+-            self.frame.size.height = CGFloat(truncating: height)
+             self.heightInfo = CGFloat(truncating: height)
+         }
+     }
+@@ -64,7 +63,6 @@ class CameraView: UIView {
+     // Property for width
+     @objc var width: NSNumber = 0 {
+         didSet {
+-            self.frame.size.width = CGFloat(truncating: width)
+             self.widthInfo = CGFloat(truncating: width)
+         }
+     }
+@@ -174,10 +172,10 @@ class CameraView: UIView {
+         overlayView.translatesAutoresizingMaskIntoConstraints = false
+ 
+         NSLayoutConstraint.activate([
+-            previewView.widthAnchor.constraint(equalToConstant: CGFloat(truncating: self.width)),
+-            previewView.heightAnchor.constraint(equalToConstant: CGFloat(truncating: self.height)),
+-            previewView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+-            previewView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
++            previewView.topAnchor.constraint(equalTo: self.topAnchor),
++            previewView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
++            previewView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
++            previewView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+ 
+             cameraUnavailableLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+             cameraUnavailableLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+@@ -236,7 +234,7 @@ class CameraView: UIView {
+         cameraFeedService.poseStarted(started: self.poseStart)
+ 
+         cameraFeedService.setFrameLimit(limit: frameLimit)
+-        cameraFeedService.setOrientation(isPortrait: self.isPortrait)
++        syncOrientation()
+         cameraFeedService.startLiveCameraSession {[weak self] cameraConfiguration in
+             DispatchQueue.main.async {
+                 switch cameraConfiguration {
+@@ -255,12 +253,32 @@ class CameraView: UIView {
+         UIApplication.shared.isIdleTimerDisabled = true
+     }
+ 
++    override func layoutSubviews() {
++        super.layoutSubviews()
++        guard previewView != nil else { return }
++        cameraFeedService.updateVideoPreviewLayer(toFrame: previewView.bounds)
++        syncOrientation()
++    }
++
++    /// 宽高变化只改预览方向和大小，不拆相机会话。
++    private func syncOrientation() {
++        guard widthInfo > 0, heightInfo > 0 else { return }
++        isPortrait = heightInfo >= widthInfo
++        cameraFeedService.setOrientation(isPortrait: isPortrait)
++        cameraFeedService.applyInterfaceOrientation(isPortrait: isPortrait)
++    }
++
+     @objc
+     override func didSetProps(_ changedProps: [String]!) {
+-
+-        if changedProps.contains("height") && changedProps.contains("width")  {
+-            setupUI()
++        let sizeChanged = changedProps.contains("height") || changedProps.contains("width")
++        guard sizeChanged else { return }
++        if previewView == nil {
++            if widthInfo > 0 && heightInfo > 0 {
++                setupUI()
++            }
++            return
+         }
++        syncOrientation()
+     }
+ 
+     @objc func switchCamera() {
+@@ -439,70 +457,47 @@ extension CameraView: PoseLandmarkerServiceLiveStreamDelegate {
               //   self!.frameCount =  self!.frameCount+1;
               //   if(self!.frameCount > Int(limit)){
                      self!.frameCount = 0
@@ -216,3 +352,31 @@ diff --git a/ios/ViewContoller/CameraView.swift b/ios/ViewContoller/CameraView.s
                      }
                //  }
                  
+diff --git a/src/index.tsx b/src/index.tsx
+index c76f8fc..4917704 100644
+--- a/src/index.tsx
++++ b/src/index.tsx
+@@ -6,6 +6,7 @@ import {
+   type ViewStyle,
+   findNodeHandle,
+   View,
++  StyleSheet,
+   PixelRatio,
+   NativeModules,
+   NativeEventEmitter,
+@@ -23,6 +24,7 @@ const LINKING_ERROR =
+ 
+ type TsMediapipeProps = {
+   ref?: MutableRefObject<View | null>;
++  style?: ViewStyle;
+   onLandmark?: (event: any) => void;
+   face?: boolean;
+   leftArm?: boolean;
+@@ -126,6 +128,7 @@ const TsMediapipeView: React.FC<MediapipeComponentProps> = (props) => {
+       ]}
+     >
+       <TsMediapipe
++        style={StyleSheet.absoluteFill}
+         height={
+           isAndroid ? PixelRatio.getPixelSizeForLayoutSize(height) : height
+         }

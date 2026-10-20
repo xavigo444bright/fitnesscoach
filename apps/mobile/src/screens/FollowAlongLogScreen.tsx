@@ -6,6 +6,7 @@ import {
   effectiveBodyweightKg,
   formatWeightAmount,
   getCatalogEntry,
+  isBodyweightRef,
   isTimedCatalogId,
   openWorkout,
   parseWeightToKg,
@@ -30,6 +31,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ShellButton from '../components/ShellButton';
+import { useTr } from '../i18n';
 import WeightUnitToggle from '../components/WeightUnitToggle';
 import type { RootStackParamList } from '../navigation/types';
 import {
@@ -51,6 +53,7 @@ export default function FollowAlongLogScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'FollowAlongLog'>>();
   const { catalogId, cameraReps, formSummary, workoutId } = route.params;
+  const tr = useTr();
   const timed = isTimedCatalogId(catalogId);
   const name = getCatalogEntry(catalogId)?.name ?? catalogId;
   const [countText, setCountText] = useState(String(cameraReps));
@@ -85,18 +88,20 @@ export default function FollowAlongLogScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={[styles.sheet, { paddingBottom: insets.bottom + space.md }]}>
-        <Text style={styles.kicker}>记入本节</Text>
-        <Text style={styles.title}>{name}</Text>
+        <Text style={styles.kicker}>{tr('记入本节')}</Text>
+        <Text style={styles.title}>{tr(name)}</Text>
         {formSummary ? (
-          <Text style={styles.summary}>{formSummary}</Text>
+          <Text style={styles.summary}>{tr(formSummary)}</Text>
         ) : null}
-        <Text style={styles.label}>{timed ? '秒（相机预填，可改）' : '次数（相机预填，可改）'}</Text>
+        <Text style={styles.label}>
+          {tr(timed ? '秒（相机预填，可改）' : '次数（相机预填，可改）')}
+        </Text>
         <TextInput
           value={countText}
           onChangeText={setCountText}
           keyboardType="decimal-pad"
           style={styles.input}
-          accessibilityLabel={timed ? '秒' : '次数'}
+          accessibilityLabel={tr(timed ? '秒' : '次数')}
         />
         {timed ? null : (
           <>
@@ -111,12 +116,13 @@ export default function FollowAlongLogScreen() {
               value={kgText}
               onChangeText={setKgText}
               keyboardType="decimal-pad"
-              placeholder="选填"
+              placeholder={tr('选填')}
               placeholderTextColor={colors.tabInactive}
               style={styles.input}
-              accessibilityLabel={weightUnitLabel(entryUnit)}
+              accessibilityLabel={tr(weightUnitLabel(entryUnit))}
             />
-            {bodyweightKg == null ? null : (
+            {bodyweightKg == null ||
+            isBodyweightRef({ kind: 'catalog', catalogId }) ? null : (
               <ShellButton
                 variant="ghost"
                 label="用自重"

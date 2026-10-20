@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { angleBetween, jointAngle } from "./angles.js";
+import { angleBetween, jointAngle, jointAngleImage } from "./angles.js";
 import { LandmarkIndex, type Pose } from "./types.js";
 
 const p = (x: number, y: number) => ({ x, y });
@@ -58,5 +58,30 @@ describe("jointAngle", () => {
       c: LandmarkIndex.RightAnkle,
     });
     expect(deg).toBeNull();
+  });
+
+  it("有世界坐标时正面和侧面是同一个膝角，画面二维可以差很多", () => {
+    const joints = {
+      a: LandmarkIndex.LeftHip,
+      b: LandmarkIndex.LeftKnee,
+      c: LandmarkIndex.LeftAnkle,
+    };
+    const world = {
+      hip: { wx: 0, wy: 0, wz: 0 },
+      knee: { wx: 0, wy: -0.5, wz: 0 },
+      ankle: { wx: 0.5, wy: -0.5, wz: 0 },
+    };
+    const front: Pose = [];
+    front[LandmarkIndex.LeftHip] = { x: 0.5, y: 0.4, ...world.hip };
+    front[LandmarkIndex.LeftKnee] = { x: 0.5, y: 0.62, ...world.knee };
+    front[LandmarkIndex.LeftAnkle] = { x: 0.5, y: 0.88, ...world.ankle };
+    const side: Pose = [];
+    side[LandmarkIndex.LeftHip] = { x: 0.3, y: 0.4, ...world.hip };
+    side[LandmarkIndex.LeftKnee] = { x: 0.3, y: 0.7, ...world.knee };
+    side[LandmarkIndex.LeftAnkle] = { x: 0.62, y: 0.7, ...world.ankle };
+    expect(jointAngle(front, joints)).toBeCloseTo(90, 4);
+    expect(jointAngle(side, joints)).toBeCloseTo(jointAngle(front, joints)!, 4);
+    expect(jointAngleImage(front, joints)).toBeCloseTo(180, 4);
+    expect(jointAngleImage(side, joints)).toBeCloseTo(90, 4);
   });
 });

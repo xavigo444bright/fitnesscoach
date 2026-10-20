@@ -59,7 +59,7 @@ describe("uniqueCatalogMatchForQuery / followAlongCatalogId", () => {
       undefined,
     );
     expect(followAlongCatalogId({ kind: "catalog", catalogId: "goblet-squat" })).toBe(
-      undefined,
+      "goblet-squat",
     );
   });
 });

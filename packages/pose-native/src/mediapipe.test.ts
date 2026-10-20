@@ -4,6 +4,7 @@ import {
   extractMediapipeLandmarks,
   poseFromMediapipeEvent,
   posesFromMediapipeEvent,
+  probeWorldLandmarks,
   timestampMsFromMediapipeEvent,
 } from "./mediapipe.js";
 
@@ -70,5 +71,29 @@ describe("mediapipe adapter (M2A-T4)", () => {
     expect(all).toHaveLength(2);
     expect(all[0]![0]).toMatchObject({ x: 0.2 });
     expect(all[1]![0]).toMatchObject({ x: 0.8 });
+  });
+
+  it("worldLandmarks 写到 wx/wy/wz，画面 x/y 仍是原坐标", () => {
+    const event = {
+      landmarks: [{ x: 0.2, y: 0.3, z: 0.01, visibility: 1 }],
+      worldLandmarks: [{ x: 0.1, y: -0.4, z: 0.2 }],
+    };
+    expect(probeWorldLandmarks(event)).toEqual({
+      present: true,
+      count: 1,
+      hasZ: true,
+    });
+    expect(poseFromMediapipeEvent(event)?.[0]).toMatchObject({
+      x: 0.2,
+      y: 0.3,
+      wx: 0.1,
+      wy: -0.4,
+      wz: 0.2,
+    });
+    expect(probeWorldLandmarks({ landmarks: event.landmarks })).toEqual({
+      present: false,
+      count: 0,
+      hasZ: false,
+    });
   });
 });

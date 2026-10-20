@@ -33,10 +33,10 @@
 | `windowKind` | `reps` 动态次数 / `hold` 静力支撑（平板） |
 | `timeSource` | `user-verified` 你核过时间；`seeked` 已按「行程可读」seek；`transcript` **仅查找带**，入点仍须对齐完整行程（未对齐前不要当核过）；`short-clip` 短示范去掉片头后仍须对齐行程；`unverified` 占位，**必须你改** |
 | `timeNote` | 标定说明；授权前请目视 |
-| `status` | `proposed` 待你确认 / `authorized` 你已确认 / `rejected` / `ingested` 已提轨迹 |
+| `status` | `proposed` 待你确认 / `authorized` 你已确认 / `rejected` 作废（ingest 跳过，不下载、不裁、不提骨） / `ingested` 已提轨迹 |
 | `role` | `primary` 首选 / `backup` 备选 |
 
-`status` 只给人看。ingest **不**读取它当下载开关。
+`rejected` 会从 ingest 跳过。其余状态不作为许可开关。
 
 ## 选窗（硬规则，加载 clips.json 即校验）
 
@@ -164,6 +164,16 @@ pnpm --filter @fitness-coach/trajectory-source-ingest ingest -- \
   --crop-only --scout-id \
   lateral-raise-front-01,front-raise-side-01,rear-delt-fly-three_quarter-01,face-pull-three_quarter-01,pike-pushup-side-01
 ```
+
+## Phase G（catalog 12 条，2026-10-02 核窗）
+
+必收机位都有可用片，`clips.json` 共 67 条。已裁 mp4 在 `media/trajectory-source/<id>/<clip>.mp4`。12 条已接到训练会话，真机 VT 未过。未 commit。
+
+- `lat-pulldown-front-01`、`calf-raise-front-01` 实际从背后拍，当正面用。写规则时左右相反。
+- `lat-pulldown-side-01` 手持（`trajectorySource: false`），只作示范窗，不提轨迹。其余已裁片镜头固定。
+- `hanging-knee-raise-side-01` 实际是正面，`camera` 已标 `front`，id 不改。
+- `band-row-side-01` 实际是斜前 3/4，当侧面用。没有真侧面，不另补。侧平板规格里没有侧面。鸟狗式 3/4 可选，不补。
+- 未下载的备选保持 `proposed`：`lat-pulldown-front-02`、`seated-row-side-02`、`band-row-side-02`、`leg-press-side-02`、`calf-raise-side-02`、`goblet-squat-side-02`、`dead-bug-side-02`、`bird-dog-side-02`、`side-plank-front-02`。
 
 ## ingest
 

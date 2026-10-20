@@ -2,7 +2,7 @@
   "expo": {
     "name": "Fitness Coach",
     "slug": "fitness-coach",
-    "version": "0.1.0",
+    "version": "2.0",
     "scheme": "fitness-coach",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -14,12 +14,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.Myfitco.mobile",
       "appleTeamId": "93UHA7C4LM",
-      "buildNumber": "1",
+      "buildNumber": "4",
       "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "需要摄像头以实时分析您的健身动作",
         "NSFaceIDUsageDescription": "用于在这台手机上找回登录密码",
         "NSLocalNetworkUsageDescription": "仅用于开发调试时连接同一局域网",
+        "NSPhotoLibraryAddUsageDescription": "录屏保存在这台手机的相册里，不会上传",
         "ITSAppUsesNonExemptEncryption": false,
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
@@ -48,6 +49,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "./plugins/with-fc-native.js",
       "expo-apple-authentication",
       [
         "expo-local-authentication",

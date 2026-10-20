@@ -4,8 +4,9 @@
 import { isCoachableId } from '@fitness-coach/core';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { peekAccount, subscribeAccount } from '../accountStorage';
 import FloatingTabBar from '../components/FloatingTabBar';
 import DevPoseScreen from '../screens/DevPoseScreen';
@@ -18,12 +19,22 @@ import RestTimerScreen from '../screens/RestTimerScreen';
 import SessionSummaryScreen from '../screens/SessionSummaryScreen';
 import TrainingScreen from '../screens/TrainingScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
+import { lockSessionOrientation } from '../orientationPolicy';
 import type { MainTabParamList, RootStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+function useSessionOrientation(allowLandscape: boolean) {
+  useFocusEffect(
+    useCallback(() => {
+      lockSessionOrientation(allowLandscape);
+    }, [allowLandscape]),
+  );
+}
+
 function MainTabs() {
+  useSessionOrientation(false);
   return (
     <Tab.Navigator
       tabBar={(props) => <FloatingTabBar {...props} />}
@@ -44,6 +55,7 @@ function DetailRoute({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Detail'>) {
   const { catalogId, workoutId } = route.params;
+  useSessionOrientation(false);
   return (
     <ExerciseDetailScreen
       exerciseId={catalogId}
@@ -61,6 +73,7 @@ function PrepareRoute({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Prepare'>) {
   const { exerciseId, workoutId } = route.params;
+  useSessionOrientation(true);
   return (
     <PrepareScreen
       onBack={() => navigation.goBack()}
@@ -74,6 +87,7 @@ function TrainingRoute({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Training'>) {
   const { exerciseId, workoutId } = route.params;
+  useSessionOrientation(true);
   return (
     <TrainingScreen
       exerciseId={exerciseId}
@@ -94,6 +108,7 @@ function SummaryRoute({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Summary'>) {
   const { summary, exerciseId } = route.params;
+  useSessionOrientation(false);
   return (
     <SessionSummaryScreen
       summary={summary}
@@ -109,7 +124,23 @@ function SummaryRoute({
 }
 
 function DevPoseRoute() {
+  useSessionOrientation(true);
   return <DevPoseScreen variant="debug" exerciseId="squat" />;
+}
+
+function FollowAlongRoute() {
+  useSessionOrientation(false);
+  return <FollowAlongLogScreen />;
+}
+
+function RestRoute() {
+  useSessionOrientation(true);
+  return <RestTimerScreen />;
+}
+
+function WelcomeRoute() {
+  useSessionOrientation(false);
+  return <WelcomeScreen />;
 }
 
 export default function RootNavigator() {
@@ -122,7 +153,7 @@ export default function RootNavigator() {
       screenOptions={{ headerShown: false }}
     >
       {account == null ? (
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeRoute} />
       ) : (
         <>
           <Stack.Screen name="MainTabs" component={MainTabs} />
@@ -137,10 +168,10 @@ export default function RootNavigator() {
             component={TrainingRoute}
             options={{ gestureEnabled: false }}
           />
-          <Stack.Screen name="FollowAlongLog" component={FollowAlongLogScreen} />
+          <Stack.Screen name="FollowAlongLog" component={FollowAlongRoute} />
           <Stack.Screen
             name="RestTimer"
-            component={RestTimerScreen}
+            component={RestRoute}
             options={{ gestureEnabled: false }}
           />
           <Stack.Screen name="Summary" component={SummaryRoute} />

@@ -4,6 +4,7 @@ import {
   clampPipPosition,
   collapsedTabPosition,
   defaultPipPosition,
+  pipSizeForScreen,
   restoredPipPosition,
 } from "./pipPosition.js";
 
@@ -55,6 +56,23 @@ describe("pipPosition（示范窗可拖、不吸附贴边）", () => {
     expect(tab.x).toBe(0);
   });
 
+  it("横屏时窗口仍完整落在底栏之上、右侧安全区内", () => {
+    const screenW = 852;
+    const screenH = 393;
+    const size = pipSizeForScreen(screenW, screenH, layout.bottomBarHeight + 21);
+    expect(size.height).toBeLessThanOrEqual(screenH - layout.bottomBarHeight - 21);
+    expect(size.width).toBeLessThanOrEqual(screenW);
+    const p = defaultPipPosition(screenW, screenH, size.width, size.height, {
+      right: 59,
+      bottom: 21,
+    });
+    expect(p.x).toBeGreaterThanOrEqual(0);
+    expect(p.y).toBeGreaterThanOrEqual(0);
+    expect(p.x + size.width).toBeLessThanOrEqual(screenW - 59);
+    expect(p.y + size.height).toBeLessThanOrEqual(
+      screenH - layout.bottomBarHeight - 21,
+    );
+  });
   it("拉开回到收起前位置并夹回屏内", () => {
     const saved = { x: 40, y: 80 };
     expect(restoredPipPosition(saved, W, H)).toEqual(saved);

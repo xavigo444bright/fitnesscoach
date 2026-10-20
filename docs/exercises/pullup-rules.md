@@ -3,7 +3,7 @@ exercise: pullup
 name: 引体向上
 camera_hint: side
 prd_ref: FR-088
-version: 0.1.0
+version: 0.2.0
 status: active
 ---
 
@@ -20,7 +20,7 @@ status: active
 
 ## 推荐机位
 
-- **侧面**（3/4 亦可）；看清肩、肘。脚常出画，**不参与计次**。
+- **侧面、斜侧、正面、正背后都计次，也都指导。** 看清肩、肘即可。脚常出画，不参与计次。样片仍是侧面 `pullup-side-01`，不拿它当唯一朝向。
 
 ## 驱动角
 

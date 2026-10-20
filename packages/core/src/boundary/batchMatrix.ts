@@ -2,11 +2,13 @@
  * 平板/划船/推举/卧推边界矩阵（VT-RB-001/002/004 / FR-088）。
  */
 import { buildPushupPose } from "../fixtures/pushup.js";
-import { buildDbFlyPose } from "../fixtures/dbFly.js";
+import { buildArmTiltPose, buildDbFlyPose } from "../fixtures/dbFly.js";
 import { buildRaisePose } from "../fixtures/raise.js";
 import { buildSquatPose } from "../fixtures/index.js";
 import {
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   dbRowWorkingElbowAngle,
   meanVisibleElbowAngle,
   preferredVisibleElbowAngle,
@@ -19,7 +21,9 @@ import {
 import { LandmarkIndex, type Pose } from "../types.js";
 import { pushupBodyLineDeg, torsoLeanFromVertical } from "../validate.js";
 import {
+  buildCableNearDriveMeasured,
   buildDbFlyNearDriveMeasured,
+  buildRearDeltNearDriveMeasured,
   buildPlankNearPikeLineMeasured,
   buildPushupNearBodyLineMeasured,
   buildPushupNearElbowMeasured,
@@ -966,7 +970,7 @@ export const CABLE_CROSSOVER_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "crossover-depth",
     kind: "critical_ok",
     phase: "bottom",
-    pose: buildDbFlyNearDriveMeasured(89.5),
+    pose: buildCableNearDriveMeasured(89.5),
     description: "drive≈89.5°",
     expectTriggered: false,
   },
@@ -976,7 +980,7 @@ export const CABLE_CROSSOVER_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "crossover-depth",
     kind: "critical_fault",
     phase: "bottom",
-    pose: buildDbFlyNearDriveMeasured(90.5),
+    pose: buildCableNearDriveMeasured(90.5),
     description: "drive≈90.5°",
     expectTriggered: true,
     expectStatus: "warning",
@@ -1015,7 +1019,7 @@ export const CABLE_CROSSOVER_SWEEPS: SweepSpec[] = [
     samples: Array.from({ length: 21 }, (_, i) => {
       const included = 50 + i * 4;
       const pose = buildDbFlyPose({ wristIncludedDeg: included });
-      const measured = dbFlyDriveDeg(pose) ?? 180 - included;
+      const measured = cableCrossoverDriveDeg(pose) ?? 180 - included;
       return {
         label: `inc=${included} meas=${measured.toFixed(1)}`,
         pose,
@@ -1282,7 +1286,7 @@ export const REAR_DELT_FLY_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "fly-depth",
     kind: "ok",
     phase: "bottom",
-    pose: buildDbFlyPose({ wristIncludedDeg: 70 }),
+    pose: buildArmTiltPose({ tiltDeg: 70 }),
     description: "打开够开",
     expectTriggered: false,
   },
@@ -1292,7 +1296,7 @@ export const REAR_DELT_FLY_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "fly-depth",
     kind: "critical_ok",
     phase: "bottom",
-    pose: buildDbFlyNearDriveMeasured(134.5),
+    pose: buildRearDeltNearDriveMeasured(134.5),
     description: "drive≈134.5°",
     expectTriggered: false,
   },
@@ -1302,7 +1306,7 @@ export const REAR_DELT_FLY_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "fly-depth",
     kind: "critical_fault",
     phase: "bottom",
-    pose: buildDbFlyNearDriveMeasured(135.5),
+    pose: buildRearDeltNearDriveMeasured(135.5),
     description: "drive≈135.5°",
     expectTriggered: true,
     expectStatus: "warning",
@@ -1313,7 +1317,7 @@ export const REAR_DELT_FLY_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "fly-depth",
     kind: "violation",
     phase: "bottom",
-    pose: buildDbFlyPose({ wristIncludedDeg: 25 }),
+    pose: buildArmTiltPose({ tiltDeg: 20 }),
     description: "明显没打开",
     expectTriggered: true,
     expectStatus: "warning",
@@ -1324,7 +1328,7 @@ export const REAR_DELT_FLY_BOUNDARY_CASES: BoundaryCase[] = [
     ruleId: "fly-depth",
     kind: "phase_off",
     phase: "stand",
-    pose: buildDbFlyPose({ wristIncludedDeg: 25 }),
+    pose: buildArmTiltPose({ tiltDeg: 20 }),
     description: "合拢相位不评估打开",
     expectTriggered: false,
     expectRuleAbsent: true,
@@ -1339,11 +1343,11 @@ export const REAR_DELT_FLY_SWEEPS: SweepSpec[] = [
     phase: "bottom",
     description: "drive ≥135 触发 fly-depth",
     samples: Array.from({ length: 21 }, (_, i) => {
-      const included = 20 + i * 4;
-      const pose = buildDbFlyPose({ wristIncludedDeg: included });
-      const measured = dbFlyDriveDeg(pose) ?? 180 - included;
+      const tilt = 10 + i * 4;
+      const pose = buildArmTiltPose({ tiltDeg: tilt });
+      const measured = rearDeltFlyDriveDeg(pose) ?? 180 - tilt;
       return {
-        label: `inc=${included} meas=${measured.toFixed(1)}`,
+        label: `tilt=${tilt} meas=${measured.toFixed(1)}`,
         pose,
         phase: "bottom" as const,
         valueDeg: measured,

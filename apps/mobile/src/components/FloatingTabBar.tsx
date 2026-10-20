@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FLOATING_TAB_BAR_HEIGHT } from '../navigation/chrome';
+import { useTr } from '../i18n';
 
 const ICONS = {
   Home: { on: 'home', off: 'home-outline' },
@@ -25,6 +26,7 @@ export default function FloatingTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const tr = useTr();
   if (state.routes.length !== SHELL_TABS.length) {
     throw new Error(
       `shell tab count must be ${SHELL_TABS.length}, got ${state.routes.length}`,
@@ -41,11 +43,12 @@ export default function FloatingTabBar({
         {routes.map((route, index) => {
           const focused = state.index === index;
           const { options } = descriptors[route.key];
-          const label =
+          const label = tr(
             SHELL_TABS[index]?.label ??
-            options.tabBarLabel?.toString() ??
-            options.title ??
-            route.name;
+              options.tabBarLabel?.toString() ??
+              options.title ??
+              route.name,
+          );
           const icons = route.name === 'Log' ? ICONS.Log : ICONS.Home;
           const onPress = () => {
             const event = navigation.emit({

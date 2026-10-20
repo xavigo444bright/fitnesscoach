@@ -12,9 +12,11 @@ import {
   exerciseDisplayName,
   followAlongCatalogId,
   formatWeightAmount,
+  isBodyweightRef,
   lastLoadForExercise,
   parseWeightToKg,
   patchSet,
+  patchSlot,
   patchWorkout,
   removeSet,
   removeSlot,
@@ -36,15 +38,22 @@ import {
 } from '@fitness-coach/core';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Dimensions,
+  Animated,
+  Keyboard,
+  LayoutAnimation,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  type GestureResponderEvent,
+  type KeyboardEvent,
 } from 'react-native';
 import EmptyPane from './EmptyPane';
 import ExercisePoseIcon from './ExercisePoseIcon';
@@ -52,9 +61,115 @@ import ShellButton from './ShellButton';
 import WeightUnitToggle from './WeightUnitToggle';
 import TemplateSheet from './TemplateSheet';
 import { commitWorkoutLog } from '../workoutLogStorage';
+import { scrollIntoKeyboard, type WindowNode } from '../keyboardField';
+import { useTr } from '../i18n';
 
 const PLACEHOLDER_REPS = 8;
 const PLACEHOLDER_SEC = 45;
+/** 标题字号下最多排下的视觉字宽。汉字算 1，英文约 0.55。再长就降字号，不省略。 */
+const SLOT_NAME_FULL_UNITS = 6;
+
+function nameVisualUnits(name: string): number {
+  let units = 0;
+  for (const ch of name) {
+    const code = ch.codePointAt(0) ?? 0;
+    units += code > 0xff ? 1 : 0.55;
+  }
+  return units;
+}
+
+function slotNameFontSize(name: string): number {
+  const units = nameVisualUnits(name);
+  if (units <= SLOT_NAME_FULL_UNITS) return fontSize.title;
+  if (units <= 8) return fontSize.body;
+  if (units <= 11) return fontSize.caption;
+  return fontSize.meta;
+}
+const composerFocused = { current: false };
+
+type FieldNode = WindowNode & {
+  measureLayout: View['measureLayout'];
+};
+
+/** 底栏只在快速输入聚焦时抬起。课名、自重、已记的组、加动作都不抬。 */
+const keyboardGate = {
+  composer: () => {},
+  other: (_node: FieldNode | null) => {},
+  dropDock: () => {},
+};
+const HOLD_MS = 250;
+const REVEAL_X = 72;
+const COL_INDEX = 32;
+const COL_REPS = 56;
+const COL_LOAD = 68;
+const COL_UNIT = 76;
+const COL_ACTION = 36;
+
+function useBlankHold(onReveal: () => void) {
+  const holding = useRef(false);
+  const origin = useRef({ x: 0, y: 0 });
+  const frame = useRef<number | null>(null);
+  const arm = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startedAt = useRef(0);
+  const [progress, setProgress] = useState(0);
+
+  const stop = () => {
+    holding.current = false;
+    if (arm.current != null) clearTimeout(arm.current);
+    arm.current = null;
+    if (frame.current != null) cancelAnimationFrame(frame.current);
+    frame.current = null;
+    setProgress(0);
+  };
+
+  useEffect(
+    () => () => {
+      holding.current = false;
+      if (arm.current != null) clearTimeout(arm.current);
+      if (frame.current != null) cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
+
+  const tick = () => {
+    if (!holding.current) return;
+    const next = Math.min(1, (Date.now() - startedAt.current) / HOLD_MS);
+    setProgress(next);
+    if (next >= 1) {
+      holding.current = false;
+      frame.current = null;
+      onReveal();
+      return;
+    }
+    frame.current = requestAnimationFrame(tick);
+  };
+
+  return {
+    progress,
+    stop,
+    onTouchStart: (event: GestureResponderEvent) => {
+      holding.current = true;
+      startedAt.current = Date.now();
+      origin.current = {
+        x: event.nativeEvent.pageX,
+        y: event.nativeEvent.pageY,
+      };
+      arm.current = setTimeout(() => {
+        arm.current = null;
+        if (!holding.current) return;
+        frame.current = requestAnimationFrame(tick);
+      }, 60);
+    },
+    onTouchMove: (event: GestureResponderEvent) => {
+      if (!holding.current) return;
+      const dx = event.nativeEvent.pageX - origin.current.x;
+      const dy = event.nativeEvent.pageY - origin.current.y;
+      if (dx * dx + dy * dy > 64) stop();
+    },
+    onTouchEnd: stop,
+    onTouchCancel: stop,
+  };
+}
 
 type Props = {
   log: WorkoutLog;
@@ -90,6 +205,8 @@ export default function WorkoutSessionPane({
   );
   const [repsText, setRepsText] = useState('');
   const [kgText, setKgText] = useState('');
+  const [leftText, setLeftText] = useState('');
+  const [rightText, setRightText] = useState('');
   const [entryUnit, setEntryUnit] = useState<WeightUnit>('kg');
   const [secText, setSecText] = useState('');
   const [titleText, setTitleText] = useState(workout?.title ?? '');
@@ -97,6 +214,22 @@ export default function WorkoutSessionPane({
   const [bwText, setBwText] = useState(
     effectiveBw != null ? String(effectiveBw) : '',
   );
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const tr = useTr();
+  const [liftDock, setLiftDock] = useState(false);
+  const keyboardInsetRef = useRef(0);
+  const focusedFieldRef = useRef<FieldNode | null>(null);
+  const pickerOpenRef = useRef(false);
+  pickerOpenRef.current = pickerOpen;
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
+  const contentRef = useRef<View>(null);
+  const composerRef = useRef<View>(null);
+  const titleRef = useRef<TextInput>(null);
+  const bwRef = useRef<TextInput>(null);
+  const pendingReveal = useRef(false);
+  const revealComposerRef = useRef<() => void>(() => undefined);
+  const skipComposerScroll = useRef(true);
 
   useEffect(() => {
     setTitleText(workout?.title ?? '');
@@ -139,13 +272,150 @@ export default function WorkoutSessionPane({
       setSecText(last ? String(last.reps) : '');
       setRepsText('');
       setKgText('');
+      setLeftText('');
+      setRightText('');
       return;
     }
     setRepsText(last ? String(last.reps) : '');
     setEntryUnit('kg');
-    setKgText(suggestKg != null ? String(suggestKg) : '');
     setSecText('');
-  }, [selectedSlot?.id, log]);
+    if (selectedSlot.loadMode === 'sides') {
+      const split = last?.weightLeftKg != null || last?.weightRightKg != null;
+      setLeftText(
+        split
+          ? last?.weightLeftKg != null
+            ? String(last.weightLeftKg)
+            : ''
+          : last
+            ? String(last.weightKg)
+            : '',
+      );
+      setRightText(
+        split && last?.weightRightKg != null ? String(last.weightRightKg) : '',
+      );
+      setKgText('');
+      return;
+    }
+    setKgText(suggestKg != null ? String(suggestKg) : '');
+    setLeftText('');
+    setRightText('');
+  }, [selectedSlot?.id, selectedSlot?.loadMode, log]);
+
+  const scrollField = (node: WindowNode | null) => {
+    scrollIntoKeyboard(
+      node,
+      keyboardInsetRef.current,
+      scrollY,
+      scrollRef.current,
+      space.md,
+    );
+  };
+
+  revealComposerRef.current = () => {
+    const content = contentRef.current;
+    const composer = composerRef.current;
+    if (!content || !composer) return;
+    if (keyboardInsetRef.current > 0) {
+      pendingReveal.current = false;
+      scrollField(composer);
+      return;
+    }
+    composer.measureLayout(
+      content,
+      (_x, y) => {
+        pendingReveal.current = false;
+        scrollRef.current?.scrollTo({
+          y: Math.max(0, y - space.lg),
+          animated: true,
+        });
+      },
+      () => undefined,
+    );
+  };
+
+  keyboardGate.composer = () => {
+    composerFocused.current = true;
+    pendingReveal.current = true;
+    focusedFieldRef.current = null;
+    if (keyboardInsetRef.current > 0 && !pickerOpenRef.current) {
+      setLiftDock(true);
+    }
+  };
+  keyboardGate.other = (node) => {
+    composerFocused.current = false;
+    focusedFieldRef.current = node;
+    setLiftDock(false);
+    if (keyboardInsetRef.current > 0) scrollField(node);
+  };
+  keyboardGate.dropDock = () => {
+    composerFocused.current = false;
+    focusedFieldRef.current = null;
+    setLiftDock(false);
+  };
+
+  useEffect(() => {
+    const showName =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideName =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const onShow = (event: KeyboardEvent) => {
+      const height = event.endCoordinates?.height ?? 0;
+      keyboardInsetRef.current = height;
+      if (Platform.OS === 'ios') {
+        LayoutAnimation.configureNext(
+          LayoutAnimation.create(
+            event.duration && event.duration > 0 ? event.duration : 250,
+            LayoutAnimation.Types.keyboard,
+            LayoutAnimation.Properties.opacity,
+          ),
+        );
+      }
+      setKeyboardHeight(height);
+      const lift = composerFocused.current && !pickerOpenRef.current;
+      setLiftDock(lift);
+      if (lift) {
+        setTimeout(
+          () => revealComposerRef.current(),
+          Platform.OS === 'ios' ? 280 : 80,
+        );
+        return;
+      }
+      if (pickerOpenRef.current) return;
+      const node = focusedFieldRef.current;
+      if (!node) return;
+      setTimeout(() => scrollField(node), Platform.OS === 'ios' ? 280 : 80);
+    };
+    const onHide = (event: KeyboardEvent) => {
+      keyboardInsetRef.current = 0;
+      if (Platform.OS === 'ios') {
+        LayoutAnimation.configureNext(
+          LayoutAnimation.create(
+            event.duration && event.duration > 0 ? event.duration : 250,
+            LayoutAnimation.Types.keyboard,
+            LayoutAnimation.Properties.opacity,
+          ),
+        );
+      }
+      setKeyboardHeight(0);
+      setLiftDock(false);
+    };
+    const showSub = Keyboard.addListener(showName, onShow);
+    const hideSub = Keyboard.addListener(hideName, onHide);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (skipComposerScroll.current) {
+      skipComposerScroll.current = false;
+      return;
+    }
+    pendingReveal.current = true;
+    const timer = setTimeout(() => revealComposerRef.current(), 50);
+    return () => clearTimeout(timer);
+  }, [selectedSlotId]);
 
   if (!workout) {
     return (
@@ -158,8 +428,13 @@ export default function WorkoutSessionPane({
     );
   }
 
-  const volume = workoutVolumeKg(workout);
+  const volume = workoutVolumeKg(workout, log.bodyweightKg);
   const timed = selectedSlot?.countMode === 'timed';
+  const sides = selectedSlot?.loadMode === 'sides';
+  const bodyweightSlot =
+    selectedSlot != null &&
+    !timed &&
+    isBodyweightRef(selectedSlot.exercise);
 
   const applySessionMeta = (next: WorkoutLog) =>
     patchWorkout(next, workout.id, {
@@ -188,6 +463,20 @@ export default function WorkoutSessionPane({
         ).log;
       }
       const reps = parseOptionalNumber(repsText) ?? PLACEHOLDER_REPS;
+      if (selectedSlot.loadMode === 'sides') {
+        return addSet(
+          patched,
+          workout.id,
+          selectedSlot.id,
+          {
+            reps,
+            weightLeftKg: parseWeightToKg(leftText, entryUnit),
+            weightRightKg: parseWeightToKg(rightText, entryUnit),
+            weightUnit: entryUnit,
+          },
+          ids,
+        ).log;
+      }
       return addSet(
         patched,
         workout.id,
@@ -202,36 +491,56 @@ export default function WorkoutSessionPane({
     });
   };
 
+  const onComposerFocus = () => {
+    keyboardGate.composer();
+  };
+
   return (
-    <View style={styles.wrap}>
+    <View
+      style={[
+        styles.wrap,
+        liftDock ? { paddingBottom: keyboardHeight } : null,
+      ]}
+    >
       <ScrollView
+        ref={scrollRef}
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingBottom: space.lg }}
+        contentContainerStyle={{
+          paddingBottom: space.lg,
+          paddingHorizontal: space.md,
+        }}
         keyboardShouldPersistTaps="handled"
+        onScroll={(event) => {
+          scrollY.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
       >
+        <View ref={contentRef} collapsable={false}>
         <Pressable
           onPress={onClose}
           style={styles.backRow}
           accessibilityRole="button"
-          accessibilityLabel="返回"
+          accessibilityLabel={tr('返回')}
         >
-          <Text style={styles.backText}>返回</Text>
+          <Text style={styles.backText}>{tr('返回')}</Text>
         </Pressable>
         <TextInput
+          ref={titleRef}
           value={titleText}
+          onFocus={() => keyboardGate.other(titleRef.current)}
           onChangeText={(t) => {
             setTitleText(t);
             persistTitle(t);
           }}
           onEndEditing={() => persistTitle(titleText)}
-          placeholder="训练主题，如 推日"
+          placeholder={tr('训练主题，如 推日')}
           placeholderTextColor={colors.tabInactive}
           style={styles.themeInput}
-          accessibilityLabel="训练主题"
+          accessibilityLabel={tr('训练主题')}
         />
         <View style={styles.aggregateRow}>
           <Text style={styles.aggregate}>
-            {workoutExerciseSummary(workout) || '还没有动作'}
+            {tr(workoutExerciseSummary(workout) || '还没有动作')}
           </Text>
           <Pressable
             onPress={
@@ -242,7 +551,7 @@ export default function WorkoutSessionPane({
             disabled={workout.slots.length === 0}
             style={styles.templateIcon}
             accessibilityRole="button"
-            accessibilityLabel="存为模板"
+            accessibilityLabel={tr('存为模板')}
             accessibilityState={{ disabled: workout.slots.length === 0 }}
           >
             <Ionicons
@@ -256,13 +565,15 @@ export default function WorkoutSessionPane({
             />
           </Pressable>
         </View>
-        {isOpen ? null : <Text style={styles.ended}>已结束</Text>}
+        {isOpen ? null : <Text style={styles.ended}>{tr('已结束')}</Text>}
         <View style={styles.metaRow}>
-          <Text style={styles.volume}>容量 {volume} kg</Text>
+          <Text style={styles.volume}>{tr(`容量 ${volume} kg`)}</Text>
           <View style={styles.bwCell}>
-            <Text style={styles.bwCellLabel}>自重</Text>
+            <Text style={styles.bwCellLabel}>{tr('自重')}</Text>
             <TextInput
+              ref={bwRef}
               value={bwText}
+              onFocus={() => keyboardGate.other(bwRef.current)}
               onChangeText={setBwText}
               onEndEditing={() => {
                 const stored = effectiveBodyweightKg(log, workout);
@@ -280,130 +591,125 @@ export default function WorkoutSessionPane({
               placeholderTextColor={colors.tabInactive}
               keyboardType="decimal-pad"
               style={styles.bwCellInput}
-              accessibilityLabel="本节自重"
+              accessibilityLabel={tr('本节自重')}
             />
             <Text style={styles.bwCellUnit}>kg</Text>
           </View>
         </View>
         {workout.slots.length === 0 ? (
-          <Text style={styles.hint}>先加动作，再记组。</Text>
+          <Text style={styles.hint}>{tr('先加动作，再记组。')}</Text>
         ) : null}
         {workout.slots.map((slot) => (
-          <View
-            key={slot.id}
-            style={[
-              styles.slot,
-              selectedSlotId === slot.id && styles.slotOn,
-            ]}
-          >
-            <View style={styles.slotHead}>
-              <Pressable
-                onPress={() => setSelectedSlotId(slot.id)}
-                style={styles.slotHeadMain}
-                accessibilityRole="button"
-                accessibilityLabel={exerciseDisplayName(slot.exercise)}
-              >
-                <ExercisePoseIcon
-                  catalogId={
-                    slot.exercise.kind === 'catalog'
-                      ? slot.exercise.catalogId
-                      : undefined
-                  }
-                  size={36}
-                />
-                <Text style={styles.slotTitle} numberOfLines={1}>
-                  {exerciseDisplayName(slot.exercise)}
-                </Text>
-              </Pressable>
-              {followAlongCatalogId(slot.exercise) ? (
-                <Pressable
-                  onPress={() => {
+          <View key={slot.id}>
+          <SlotCard
+            slot={slot}
+            selected={selectedSlotId === slot.id}
+            onSelect={() => {
+              if (slot.id !== selectedSlotId) pendingReveal.current = true;
+              setSelectedSlotId(slot.id);
+            }}
+            onFollow={
+              followAlongCatalogId(slot.exercise)
+                ? () => {
                     const catalogId = followAlongCatalogId(slot.exercise);
-                    if (!catalogId) return;
-                    onFollowAlong(catalogId);
-                  }}
-                  style={styles.followBtn}
-                  accessibilityRole="button"
-                  accessibilityLabel={`跟练${exerciseDisplayName(slot.exercise)}`}
-                >
-                  <Text style={styles.followText}>跟练</Text>
-                </Pressable>
-              ) : null}
-            </View>
-            {slot.sets.length === 0 ? (
-              <Text style={styles.meta}>还没有组</Text>
-            ) : (
-              <>
-                <View style={styles.setHead}>
-                  <Text style={[styles.setHeadCell, styles.colNum]}>组</Text>
-                  <Text style={[styles.setHeadCell, styles.colVal]}>
-                    {slot.countMode === 'timed' ? '秒' : '次'}
-                  </Text>
-                  {slot.countMode === 'timed' ? null : (
-                    <Text style={[styles.setHeadCell, styles.colVal]}>重量</Text>
-                  )}
-                  <Text style={[styles.setHeadCell, styles.colDel]} />
-                </View>
-                {slot.sets.map((set, i) => (
-                  <SetRow
-                    key={set.id}
-                    index={i}
-                    set={set}
-                    timed={slot.countMode === 'timed'}
-                    onPatch={(patch) => {
-                      void commitWorkoutLog((next) =>
-                        patchSet(next, workout.id, slot.id, set.id, patch),
-                      );
-                    }}
-                    onDelete={() => {
-                      void commitWorkoutLog((next) =>
-                        removeSet(next, workout.id, slot.id, set.id),
-                      );
-                    }}
-                    onCopy={() => {
-                      void commitWorkoutLog((next, ids) =>
-                        copySet(next, workout.id, slot.id, set.id, ids).log,
-                      );
-                    }}
-                  />
-                ))}
-              </>
-            )}
-            {selectedSlotId === slot.id ? (
-              <Pressable
-                onPress={() => {
-                  void commitWorkoutLog((next) =>
-                    removeSlot(next, workout.id, slot.id),
-                  );
-                }}
-                style={styles.removeSlot}
-                accessibilityRole="button"
-                accessibilityLabel="移除动作"
-              >
-                <Text style={styles.removeSlotText}>移除动作</Text>
-              </Pressable>
-            ) : null}
-          </View>
-        ))}
-
-        {selectedSlot ? (
-          <View style={styles.composer}>
+                    if (catalogId) onFollowAlong(catalogId);
+                  }
+                : undefined
+            }
+            onToggleSides={() => {
+              void commitWorkoutLog((next) =>
+                patchSlot(next, workout.id, slot.id, {
+                  loadMode: slot.loadMode === 'sides' ? 'single' : 'sides',
+                }),
+              );
+            }}
+            onPatchSet={(setId, patch) => {
+              void commitWorkoutLog((next) =>
+                patchSet(next, workout.id, slot.id, setId, patch),
+              );
+            }}
+            onDeleteSet={(setId) => {
+              void commitWorkoutLog((next) =>
+                removeSet(next, workout.id, slot.id, setId),
+              );
+            }}
+            onCopySet={(setId) => {
+              void commitWorkoutLog((next, ids) =>
+                copySet(next, workout.id, slot.id, setId, ids).log,
+              );
+            }}
+            onRemove={() => {
+              void commitWorkoutLog((next) =>
+                removeSlot(next, workout.id, slot.id),
+              );
+            }}
+          />
+          {selectedSlotId === slot.id && selectedSlot ? (
+          <View
+            ref={composerRef}
+            collapsable={false}
+            style={styles.composer}
+            onLayout={() => {
+              if (!pendingReveal.current) return;
+              revealComposerRef.current();
+            }}
+          >
             {timed ? (
               <Field
+                onFocus={onComposerFocus}
                 label="秒"
                 value={secText}
                 onChange={setSecText}
                 placeholder={String(PLACEHOLDER_SEC)}
+                fill
               />
-            ) : (
+            ) : sides ? (
               <View style={styles.row}>
                 <Field
+                  onFocus={onComposerFocus}
                   label="次数"
                   value={repsText}
                   onChange={setRepsText}
                   placeholder={String(PLACEHOLDER_REPS)}
                 />
-                <View style={styles.field}>
+                <Field
+                  onFocus={onComposerFocus}
+                  label="左"
+                  value={leftText}
+                  onChange={setLeftText}
+                  placeholder="选填"
+                />
+                <Field
+                  onFocus={onComposerFocus}
+                  label="右"
+                  value={rightText}
+                  onChange={setRightText}
+                  placeholder="选填"
+                />
+                <WeightUnitToggle
+                  unit={entryUnit}
+                  onChange={(next) => {
+                    setLeftText((cur) =>
+                      retargetWeightText(cur, entryUnit, next),
+                    );
+                    setRightText((cur) =>
+                      retargetWeightText(cur, entryUnit, next),
+                    );
+                    setEntryUnit(next);
+                  }}
+                />
+              </View>
+            ) : (
+              <View style={styles.composerRow}>
+                <Field
+                  onFocus={onComposerFocus}
+                  label="次数"
+                  value={repsText}
+                  onChange={setRepsText}
+                  placeholder={String(PLACEHOLDER_REPS)}
+                  fill
+                />
+                <View style={styles.composerField}>
                   <WeightUnitToggle
                     unit={entryUnit}
                     onChange={(next) => {
@@ -416,16 +722,29 @@ export default function WorkoutSessionPane({
                   <TextInput
                     value={kgText}
                     onChangeText={setKgText}
-                    placeholder="选填"
+                    onFocus={onComposerFocus}
+                    placeholder={tr('选填')}
                     placeholderTextColor={colors.tabInactive}
                     keyboardType="decimal-pad"
                     style={styles.input}
-                    accessibilityLabel="重量"
+                    accessibilityLabel={tr('重量')}
                   />
                 </View>
               </View>
             )}
-            {timed || parseOptionalNumber(bwText) == null ? null : (
+            {bodyweightSlot ? (
+              <Text style={styles.meta}>
+                {tr(
+                  effectiveBw != null
+                    ? '未填重量时按自重计入'
+                    : '填了自重后，未填重量的组按自重计入',
+                )}
+              </Text>
+            ) : null}
+            {timed ||
+            sides ||
+            bodyweightSlot ||
+            parseOptionalNumber(bwText) == null ? null : (
               <ShellButton
                 variant="ghost"
                 label="用自重"
@@ -437,10 +756,20 @@ export default function WorkoutSessionPane({
               />
             )}
           </View>
-        ) : null}
+          ) : null}
+          </View>
+        ))}
+        </View>
       </ScrollView>
 
-      <View style={[styles.dock, { paddingBottom: contentBottomInset }]}>
+      <View
+        style={[
+          styles.dock,
+          {
+            paddingBottom: liftDock ? space.sm : contentBottomInset,
+          },
+        ]}
+      >
         {selectedSlot ? (
           <>
             <ShellButton label="记一组" onPress={logCurrentSet} />
@@ -460,7 +789,10 @@ export default function WorkoutSessionPane({
             <ShellButton
               variant="ghost"
               label="加动作"
-              onPress={() => setPickerOpen(true)}
+              onPress={() => {
+                keyboardGate.dropDock();
+                setPickerOpen(true);
+              }}
             />
           </View>
         </View>
@@ -512,6 +844,7 @@ export default function WorkoutSessionPane({
               slotId = added.slotId;
               return added.log;
             });
+            pendingReveal.current = true;
             setSelectedSlotId(slotId);
             setPickerOpen(false);
           })();
@@ -534,6 +867,7 @@ export default function WorkoutSessionPane({
               slotId = added.slotId;
               return added.log;
             });
+            pendingReveal.current = true;
             setSelectedSlotId(slotId);
             setCustomName('');
             setPickerOpen(false);
@@ -566,10 +900,228 @@ export default function WorkoutSessionPane({
   );
 }
 
+function SlotCard({
+  slot,
+  selected,
+  onSelect,
+  onFollow,
+  onToggleSides,
+  onPatchSet,
+  onDeleteSet,
+  onCopySet,
+  onRemove,
+}: {
+  slot: LogSlot;
+  selected: boolean;
+  onSelect: () => void;
+  onFollow?: () => void;
+  onToggleSides: () => void;
+  onPatchSet: (
+    setId: string,
+    patch: {
+      reps?: number;
+      weightKg?: number;
+      weightLeftKg?: number;
+      weightRightKg?: number;
+      weightUnit?: WeightUnit;
+      durationSec?: number;
+    },
+  ) => void;
+  onDeleteSet: (setId: string) => void;
+  onCopySet: (setId: string) => void;
+  onRemove: () => void;
+}) {
+  const [revealed, setRevealed] = useState(false);
+  const skipClose = useRef(false);
+  const slide = useRef(new Animated.Value(0)).current;
+  const hold = useBlankHold(() => {
+    skipClose.current = true;
+    setRevealed(true);
+  });
+  const timed = slot.countMode === 'timed';
+  const sides = slot.loadMode === 'sides';
+  const tr = useTr();
+  const name = exerciseDisplayName(slot.exercise);
+  const shownName = tr(name);
+  const titleSize = slotNameFontSize(shownName);
+
+  useEffect(() => {
+    Animated.timing(slide, {
+      toValue: revealed ? -REVEAL_X : 0,
+      duration: 160,
+      useNativeDriver: true,
+    }).start();
+  }, [revealed, slide]);
+
+  const onHoldStart = (event: GestureResponderEvent) => {
+    if (revealed) return;
+    hold.onTouchStart(event);
+  };
+  const onHoldEnd = () => {
+    hold.onTouchEnd();
+    if (skipClose.current) {
+      skipClose.current = false;
+      return;
+    }
+    if (revealed) setRevealed(false);
+  };
+
+  const table = (
+    <>
+      <View style={styles.setHead}>
+        <Text style={[styles.setHeadCell, { width: COL_INDEX }]}>{tr('组')}</Text>
+        <Text style={[styles.setHeadCell, { width: COL_REPS }]}>
+          {tr(timed ? '秒' : '次')}
+        </Text>
+        {timed ? null : sides ? (
+          <>
+            <Text style={[styles.setHeadCell, { width: COL_LOAD }]}>{tr('左')}</Text>
+            <Text style={[styles.setHeadCell, { width: COL_LOAD }]}>{tr('右')}</Text>
+            <View style={{ width: COL_UNIT }} />
+          </>
+        ) : (
+          <>
+            <Text style={[styles.setHeadCell, { width: COL_LOAD }]}>{tr('重量')}</Text>
+            <View style={{ width: COL_UNIT }} />
+          </>
+        )}
+        <View style={{ width: COL_ACTION }} />
+        <View style={{ width: COL_ACTION }} />
+      </View>
+      {slot.sets.map((set, i) => (
+        <SetRow
+          key={set.id}
+          index={i}
+          set={set}
+          timed={timed}
+          sides={sides}
+          onPatch={(patch) => onPatchSet(set.id, patch)}
+          onDelete={() => onDeleteSet(set.id)}
+          onCopy={() => onCopySet(set.id)}
+        />
+      ))}
+    </>
+  );
+
+  return (
+    <View
+      style={[
+        styles.slot,
+        selected && styles.slotOn,
+        hold.progress > 0 && styles.slotCharging,
+      ]}
+      accessibilityHint={tr('按住空白处，卡片左滑后点删除')}
+    >
+      <Pressable
+        onPress={onRemove}
+        style={styles.revealDelete}
+        accessibilityRole="button"
+        accessibilityLabel={`${tr('删除')} ${shownName}`}
+      >
+        <Text style={styles.revealDeleteText}>{tr('删除')}</Text>
+      </Pressable>
+      <Animated.View
+        style={[styles.slotFace, { transform: [{ translateX: slide }] }]}
+      >
+        <View
+          style={styles.holdLayer}
+          onTouchStart={onHoldStart}
+          onTouchMove={hold.onTouchMove}
+          onTouchEnd={onHoldEnd}
+          onTouchCancel={onHoldEnd}
+        />
+        {hold.progress > 0 ? (
+          <View
+            pointerEvents="none"
+            style={[styles.charge, { width: `${hold.progress * 100}%` }]}
+          />
+        ) : null}
+        <View style={styles.slotHead}>
+          <Pressable
+            onPress={() => {
+              if (revealed) {
+                setRevealed(false);
+                return;
+              }
+              onSelect();
+            }}
+            onTouchStart={onHoldStart}
+            onTouchMove={hold.onTouchMove}
+            onTouchEnd={onHoldEnd}
+            onTouchCancel={onHoldEnd}
+            style={styles.slotHeadMain}
+            accessibilityRole="button"
+            accessibilityLabel={shownName}
+          >
+            <ExercisePoseIcon
+              catalogId={
+                slot.exercise.kind === 'catalog'
+                  ? slot.exercise.catalogId
+                  : undefined
+              }
+              size={36}
+            />
+            <View style={styles.slotTitleWrap}>
+              <Text
+                style={[styles.slotTitle, { fontSize: titleSize }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={fontSize.meta / titleSize}
+                ellipsizeMode="clip"
+              >
+                {shownName}
+              </Text>
+            </View>
+          </Pressable>
+          {timed ? null : (
+            <Pressable
+              onPress={onToggleSides}
+              style={styles.followBtn}
+              accessibilityRole="button"
+              accessibilityLabel={tr('左右分别记重')}
+              accessibilityState={{ selected: sides }}
+            >
+              <Text style={[styles.followText, !sides && styles.followOff]}>
+                {tr('左右')}
+              </Text>
+            </Pressable>
+          )}
+          {onFollow ? (
+            <Pressable
+              onPress={onFollow}
+              style={styles.followBtn}
+              accessibilityRole="button"
+              accessibilityLabel={`${tr('跟练')} ${shownName}`}
+            >
+              <Text style={styles.followText}>{tr('跟练')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        {slot.sets.length === 0 ? (
+          <Text style={styles.meta} pointerEvents="none">
+            {tr('还没有组')}
+          </Text>
+        ) : (
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            style={styles.setScroll}
+          >
+            <View>{table}</View>
+          </ScrollView>
+        )}
+      </Animated.View>
+    </View>
+  );
+}
+
 function SetRow({
   index,
   set,
   timed,
+  sides,
   onPatch,
   onDelete,
   onCopy,
@@ -577,22 +1129,33 @@ function SetRow({
   index: number;
   set: LogSet;
   timed: boolean;
+  sides: boolean;
   onPatch: (patch: {
     reps?: number;
     weightKg?: number;
+    weightLeftKg?: number;
+    weightRightKg?: number;
     weightUnit?: WeightUnit;
     durationSec?: number;
   }) => void;
   onDelete: () => void;
   onCopy: () => void;
 }) {
+  const tr = useTr();
   const unit = recordedWeightUnit(set.weightUnit);
+  const leftShown =
+    set.weightLeftKg != null && set.weightLeftKg > 0
+      ? set.weightLeftKg
+      : set.weightRightKg != null && set.weightRightKg > 0
+        ? undefined
+        : set.weightKg;
   return (
     <View style={styles.setRow}>
-      <Text style={[styles.setIndex, styles.colNum]}>{index + 1}</Text>
+      <Text style={[styles.setIndex, { width: COL_INDEX }]}>{index + 1}</Text>
       {timed ? (
         <EditableNum
           value={set.durationSec}
+          width={COL_REPS}
           accessibilityLabel={`第${index + 1}组秒`}
           onCommit={(n) => {
             if (n == null) return;
@@ -603,18 +1166,64 @@ function SetRow({
         <>
           <EditableNum
             value={set.reps}
+            width={COL_REPS}
             accessibilityLabel={`第${index + 1}组次数`}
             onCommit={(n) => {
               if (n == null) return;
               onPatch({ reps: n });
             }}
           />
-          <WeightNum
-            storedKg={set.weightKg}
-            unit={unit}
-            accessibilityLabel={`第${index + 1}组${weightUnitLabel(unit)}`}
-            onCommit={(patch) => onPatch(patch)}
-          />
+          {sides ? (
+            <>
+              <WeightNum
+                storedKg={leftShown}
+                unit={unit}
+                width={COL_LOAD}
+                showUnit={false}
+                accessibilityLabel={`第${index + 1}组左侧重量`}
+                onCommit={({ weightKg: next, weightUnit }) => {
+                  onPatch({
+                    weightLeftKg: next,
+                    weightRightKg: set.weightRightKg,
+                    weightKg: undefined,
+                    weightUnit,
+                  });
+                }}
+              />
+              <WeightNum
+                storedKg={set.weightRightKg}
+                unit={unit}
+                width={COL_LOAD}
+                showUnit={false}
+                accessibilityLabel={`第${index + 1}组右侧重量`}
+                onCommit={({ weightKg: next, weightUnit }) => {
+                  onPatch({
+                    weightLeftKg: leftShown,
+                    weightRightKg: next,
+                    weightKg: undefined,
+                    weightUnit,
+                  });
+                }}
+              />
+              <View style={[styles.unitCol, { width: COL_UNIT }]}>
+                <WeightUnitToggle
+                  inline
+                  unit={unit}
+                  onChange={(next) => {
+                    onPatch({ weightUnit: next });
+                  }}
+                />
+              </View>
+            </>
+          ) : (
+            <WeightNum
+              storedKg={set.weightKg}
+              unit={unit}
+              width={COL_LOAD}
+              accessibilityLabel={`第${index + 1}组${weightUnitLabel(unit)}`}
+              onCommit={(patch) => onPatch(patch)}
+            />
+          )}
         </>
       )}
       <Pressable
@@ -635,7 +1244,7 @@ function SetRow({
         accessibilityRole="button"
         accessibilityLabel={`删除第${index + 1}组`}
       >
-        <Text style={styles.delText}>删</Text>
+        <Text style={styles.delText}>{tr('删')}</Text>
       </Pressable>
     </View>
   );
@@ -644,76 +1253,94 @@ function SetRow({
 function WeightNum({
   storedKg,
   unit,
+  width,
+  showUnit = true,
   onCommit,
   accessibilityLabel,
 }: {
   storedKg: number | undefined;
   unit: WeightUnit;
+  width: number;
+  showUnit?: boolean;
   onCommit: (patch: { weightKg?: number; weightUnit: WeightUnit }) => void;
   accessibilityLabel: string;
 }) {
   const shown = storedKg == null ? '' : formatWeightAmount(storedKg, unit);
+  const inputRef = useRef<TextInput>(null);
   const [text, setText] = useState(shown);
   const [textUnit, setTextUnit] = useState(unit);
   useEffect(() => {
     setText(shown);
     setTextUnit(unit);
   }, [shown, unit]);
+  const input = (
+    <TextInput
+      ref={inputRef}
+      value={text}
+      onChangeText={setText}
+      onFocus={() => keyboardGate.other(inputRef.current)}
+      onEndEditing={() => {
+        const baseline =
+          storedKg == null ? '' : formatWeightAmount(storedKg, textUnit);
+        if (text === baseline && textUnit === unit) return;
+        onCommit({
+          weightKg: parseWeightToKg(text, textUnit),
+          weightUnit: textUnit,
+        });
+      }}
+      keyboardType="decimal-pad"
+      style={[styles.setInput, { width }]}
+      accessibilityLabel={accessibilityLabel}
+    />
+  );
+  if (!showUnit) return input;
   return (
-    <View style={styles.weightCell}>
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        onEndEditing={() => {
-          const baseline =
-            storedKg == null ? '' : formatWeightAmount(storedKg, textUnit);
-          if (text === baseline && textUnit === unit) return;
-          onCommit({
-            weightKg: parseWeightToKg(text, textUnit),
-            weightUnit: textUnit,
-          });
-        }}
-        keyboardType="decimal-pad"
-        style={styles.setInput}
-        accessibilityLabel={accessibilityLabel}
-      />
-      <WeightUnitToggle
-        inline
-        unit={textUnit}
-        onChange={(next) => {
-          const nextText = retargetWeightText(text, textUnit, next);
-          setText(nextText);
-          setTextUnit(next);
-          onCommit({
-            weightKg: parseWeightToKg(nextText, next),
-            weightUnit: next,
-          });
-        }}
-      />
+    <View style={[styles.weightCell, { width: width + space.sm + COL_UNIT }]}>
+      {input}
+      <View style={[styles.unitCol, { width: COL_UNIT }]}>
+        <WeightUnitToggle
+          inline
+          unit={textUnit}
+          onChange={(next) => {
+            const nextText = retargetWeightText(text, textUnit, next);
+            setText(nextText);
+            setTextUnit(next);
+            onCommit({
+              weightKg: parseWeightToKg(nextText, next),
+              weightUnit: next,
+            });
+          }}
+        />
+      </View>
     </View>
   );
 }
 
 function EditableNum({
   value,
+  width,
   onCommit,
   accessibilityLabel,
 }: {
   value: number | undefined;
+  width: number;
   onCommit: (n: number | undefined) => void;
   accessibilityLabel: string;
 }) {
+  const inputRef = useRef<TextInput>(null);
   const [text, setText] = useState(value == null ? '' : String(value));
   useEffect(() => {
     setText(value == null ? '' : String(value));
   }, [value]);
   return (
     <TextInput
+      ref={inputRef}
       value={text}
       onChangeText={setText}
+      onFocus={() => keyboardGate.other(inputRef.current)}
       onEndEditing={() => onCommit(parseOptionalNumber(text))}
       keyboardType="decimal-pad"
-      style={styles.setInput}
+      style={[styles.setInput, { width }]}
       accessibilityLabel={accessibilityLabel}
     />
   );
@@ -725,25 +1352,32 @@ function Field({
   onChange,
   placeholder,
   onCommit,
+  onFocus,
+  fill = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   onCommit?: () => void;
+  onFocus?: () => void;
+  fill?: boolean;
 }) {
+  const tr = useTr();
+  const shown = tr(label);
   return (
-    <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+    <View style={fill ? styles.composerField : styles.field}>
+      <Text style={styles.fieldLabel}>{shown}</Text>
       <TextInput
         value={value}
         onChangeText={onChange}
+        onFocus={onFocus}
         onEndEditing={onCommit}
-        placeholder={placeholder}
+        placeholder={tr(placeholder)}
         placeholderTextColor={colors.tabInactive}
         keyboardType="decimal-pad"
         style={styles.input}
-        accessibilityLabel={label}
+        accessibilityLabel={shown}
       />
     </View>
   );
@@ -764,6 +1398,7 @@ function AddExerciseModal({
   onPickCatalog: (id: string) => void;
   onPickCustom: () => void;
 }) {
+  const tr = useTr();
   const hits = useMemo(
     () => searchCatalogExercises(customName),
     [customName],
@@ -771,15 +1406,16 @@ function AddExerciseModal({
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modal}>
-        <Text style={styles.modalTitle}>加动作</Text>
+        <Text style={styles.modalTitle}>{tr('加动作')}</Text>
         <View style={styles.row}>
           <TextInput
             value={customName}
             onChangeText={onChangeCustom}
-            placeholder="搜索或自定义名称"
+            onFocus={() => keyboardGate.dropDock()}
+            placeholder={tr('搜索或自定义名称')}
             placeholderTextColor={colors.tabInactive}
             style={[styles.input, { flex: 1 }]}
-            accessibilityLabel="搜索或自定义动作名"
+            accessibilityLabel={tr('搜索或自定义动作名')}
             autoCorrect={false}
             autoCapitalize="none"
           />
@@ -791,7 +1427,7 @@ function AddExerciseModal({
         </View>
         <ScrollView>
           {hits.length === 0 ? (
-            <Text style={styles.hint}>没有匹配的动作，可点添加记自定义名</Text>
+            <Text style={styles.hint}>{tr('没有匹配的动作，可点添加记自定义名')}</Text>
           ) : (
             hits.map((e) => (
               <Pressable
@@ -799,12 +1435,12 @@ function AddExerciseModal({
                 onPress={() => onPickCatalog(e.id)}
                 style={styles.pickRow}
                 accessibilityRole="button"
-                accessibilityLabel={e.name}
+                accessibilityLabel={tr(e.name)}
               >
                 <ExercisePoseIcon catalogId={e.id} size={36} />
                 <View style={styles.pickMeta}>
-                  <Text style={styles.pickName}>{e.name}</Text>
-                  <Text style={styles.meta}>{EQUIPMENT_LABEL[e.equipment]}</Text>
+                  <Text style={styles.pickName}>{tr(e.name)}</Text>
+                  <Text style={styles.meta}>{tr(EQUIPMENT_LABEL[e.equipment])}</Text>
                 </View>
               </Pressable>
             ))
@@ -907,13 +1543,46 @@ const styles = StyleSheet.create({
   slot: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
-    padding: space.md,
     marginBottom: space.md,
     borderWidth: 1,
     borderColor: 'transparent',
+    overflow: 'hidden',
+  },
+  slotFace: {
+    backgroundColor: colors.surface,
+    padding: space.md,
+  },
+  revealDelete: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: REVEAL_X,
+    backgroundColor: colors.error,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  revealDeleteText: {
+    color: colors.overlayText,
+    fontSize: fontSize.body,
+    fontWeight: '700',
   },
   slotOn: {
     borderColor: colors.cta,
+  },
+  slotCharging: {
+    borderColor: colors.cta,
+  },
+  holdLayer: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  charge: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: colors.cta,
+    opacity: 0.16,
   },
   slotHead: {
     flexDirection: 'row',
@@ -929,9 +1598,13 @@ const styles = StyleSheet.create({
     gap: space.sm,
     minHeight: layout.touchMin,
   },
-  slotTitle: {
+  slotTitleWrap: {
     flex: 1,
     minWidth: 0,
+    marginRight: space.md,
+    justifyContent: 'center',
+  },
+  slotTitle: {
     color: colors.textPrimary,
     fontSize: fontSize.title,
     fontWeight: '700',
@@ -949,6 +1622,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     fontWeight: '700',
   },
+  followOff: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  setScroll: {
+    flexGrow: 0,
+  },
   setHead: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -963,18 +1643,9 @@ const styles = StyleSheet.create({
   setRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: layout.touchMin,
+    minHeight: 36,
     gap: space.sm,
     marginTop: space.xs,
-  },
-  colNum: {
-    width: 28,
-  },
-  colVal: {
-    flex: 1,
-  },
-  colDel: {
-    width: 88,
   },
   setIndex: {
     color: colors.textPrimary,
@@ -982,23 +1653,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   setInput: {
-    flex: 1,
-    minHeight: layout.touchMin,
+    height: 36,
     borderRadius: radius.sm,
     backgroundColor: colors.surfaceRaised,
     color: colors.textPrimary,
     paddingHorizontal: space.sm,
+    paddingVertical: 0,
     fontSize: fontSize.body,
   },
   weightCell: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.xs,
+    gap: space.sm,
+  },
+  unitCol: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   delBtn: {
-    width: 44,
-    minHeight: layout.touchMin,
+    width: COL_ACTION,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1006,15 +1680,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.caption,
     fontWeight: '700',
-  },
-  removeSlot: {
-    marginTop: space.sm,
-    minHeight: layout.touchMin,
-    justifyContent: 'center',
-  },
-  removeSlotText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.caption,
   },
   meta: {
     color: colors.textSecondary,
@@ -1027,11 +1692,15 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: space.md,
     alignItems: 'flex-end',
   },
   field: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: 72,
+    minWidth: 72,
+    maxWidth: 120,
   },
   fieldLabel: {
     color: colors.textSecondary,
@@ -1047,8 +1716,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.sm,
     fontSize: fontSize.body,
   },
+  composerRow: {
+    flexDirection: 'row',
+    gap: space.md,
+    alignItems: 'flex-end',
+  },
+  composerField: {
+    flex: 1,
+    minWidth: 0,
+  },
   dock: {
     paddingTop: space.sm,
+    paddingHorizontal: space.md,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     backgroundColor: colors.bg,

@@ -15,6 +15,7 @@ import {
 } from '@fitness-coach/ui';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 import PipClipPane from './PipClipPane';
 
 type Props = {
@@ -28,16 +29,20 @@ export default function ExerciseDemoPlayer({
   exerciseName,
   cameraHint,
 }: Props) {
+  const tr = useTr();
   const [playing, setPlaying] = useState(true);
+  const name = tr(exerciseName);
 
   if (!isCoachableId(exerciseId)) {
     return (
       <View
         style={styles.wrap}
-        accessibilityLabel={`${exerciseName}暂无示范片`}
+        accessibilityLabel={`${name}${tr('暂无示范片')}`}
       >
-        <Text style={styles.placeholderTitle}>暂无示范片</Text>
-        <Text style={styles.placeholderHint}>{exerciseName} · 即将支持教练</Text>
+        <Text style={styles.placeholderTitle}>{tr('暂无示范片')}</Text>
+        <Text style={styles.placeholderHint}>
+          {name} · {tr('即将支持教练')}
+        </Text>
       </View>
     );
   }
@@ -48,7 +53,9 @@ export default function ExerciseDemoPlayer({
       onPress={() => setPlaying((on) => !on)}
       accessibilityRole="button"
       accessibilityLabel={
-        playing ? `${exerciseName}示范片，点一下暂停` : `${exerciseName}示范片，点一下继续`
+        playing
+          ? `${name}${tr('示范片，点一下暂停')}`
+          : `${name}${tr('示范片，点一下继续')}`
       }
     >
       <PipClipPane
@@ -56,11 +63,11 @@ export default function ExerciseDemoPlayer({
         cameraHint={cameraHint}
         playing={playing}
         rate={DEFAULT_CLIP_PLAYBACK_RATE}
-        unavailableHint="示范片暂时播不了。机位说明仍在下方。"
+        unavailableHint={tr('示范片暂时播不了。机位说明仍在下方。')}
       />
       <View style={styles.caption} pointerEvents="none">
         <Text style={styles.captionText}>
-          {playing ? '示范 · 点一下暂停' : '已暂停 · 点一下继续'}
+          {playing ? tr('示范 · 点一下暂停') : tr('已暂停 · 点一下继续')}
         </Text>
       </View>
     </Pressable>

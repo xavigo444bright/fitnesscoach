@@ -24,6 +24,7 @@ export {
   clampPipPosition,
   collapsedTabPosition,
   defaultPipPosition,
+  pipSizeForScreen,
   restoredPipPosition,
   type PipPoint,
 } from "./pipPosition.js";

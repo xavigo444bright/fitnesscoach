@@ -97,7 +97,7 @@
 
 ## Phase G / H（扩库，2026-09-21）
 
-catalog 剩余 12 条 + 99 条新 id 的评估桶已写入 `specs.json`，与 [`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json) 同步。Grokbot 先按队列 `--yt-search`，再往 `clips.json` 加 `proposed`。未授权不 ingest。
+catalog 剩余 12 条 + 99 条新 id 的评估桶已写入 `specs.json`，与 [`asset-scout/expansion-queue.json`](./asset-scout/expansion-queue.json) 同步。Phase G 12 条已于 2026-10-02 核窗（见 [`asset-scout.md`](./asset-scout.md)）。Phase H 仍先 `--yt-search` 出 `proposed`，未授权不 ingest。
 
 ## 祖父条款
 

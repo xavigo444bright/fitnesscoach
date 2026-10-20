@@ -129,6 +129,111 @@ describe("liveSkeletonDrawSpec", () => {
     ).toBe(false);
   });
 
+  it("前平举侧面：分开的两臂都留，叠住或看不清的远侧臂丢掉", () => {
+    const raised: Pose = [];
+    raised[LandmarkIndex.LeftShoulder] = { x: 0.48, y: 0.32, visibility: 0.7 };
+    raised[LandmarkIndex.RightShoulder] = { x: 0.5, y: 0.3, visibility: 0.92 };
+    raised[LandmarkIndex.LeftElbow] = { x: 0.28, y: 0.3, visibility: 0.72 };
+    raised[LandmarkIndex.RightElbow] = { x: 0.52, y: 0.48, visibility: 0.95 };
+    raised[LandmarkIndex.LeftWrist] = { x: 0.12, y: 0.3, visibility: 0.7 };
+    raised[LandmarkIndex.RightWrist] = { x: 0.54, y: 0.62, visibility: 0.95 };
+    raised[LandmarkIndex.LeftHip] = { x: 0.49, y: 0.55, visibility: 0.5 };
+    raised[LandmarkIndex.RightHip] = { x: 0.51, y: 0.52, visibility: 0.85 };
+    raised[LandmarkIndex.RightKnee] = { x: 0.52, y: 0.72, visibility: 0.85 };
+    const spec = liveSkeletonDrawSpec({
+      requireSidePlane: true,
+      observedCamera: "side",
+      observedConfidence: 0.8,
+      pose: raised,
+      strictDrawVisibility: true,
+      exerciseId: "front-raise",
+    });
+    expect(spec.limbPolicy).toBe("near-legs");
+    const kept = filterPoseForOverlay(
+      raised,
+      spec.nearSide,
+      spec.minVisibility,
+      spec.limbPolicy,
+    );
+    expect(kept[LandmarkIndex.LeftElbow]).toBeDefined();
+    expect(kept[LandmarkIndex.LeftWrist]).toBeDefined();
+    expect(kept[LandmarkIndex.RightElbow]).toBeDefined();
+    expect(kept[LandmarkIndex.RightWrist]).toBeDefined();
+
+    const stacked: Pose = raised.slice();
+    stacked[LandmarkIndex.LeftElbow] = { x: 0.52, y: 0.47, visibility: 0.8 };
+    stacked[LandmarkIndex.LeftWrist] = { x: 0.55, y: 0.6, visibility: 0.4 };
+    const dropped = filterPoseForOverlay(
+      stacked,
+      "right",
+      STRICT_DRAW_VISIBILITY,
+      "near-legs",
+    );
+    expect(dropped[LandmarkIndex.LeftElbow]).toBeUndefined();
+    expect(dropped[LandmarkIndex.LeftWrist]).toBeUndefined();
+    expect(dropped[LandmarkIndex.RightElbow]).toBeDefined();
+  });
+
+  it("高位下拉侧面：分开的两臂都留，叠住或看不清的远侧臂丢掉", () => {
+    const raised: Pose = [];
+    raised[LandmarkIndex.LeftShoulder] = { x: 0.42, y: 0.34, visibility: 0.8 };
+    raised[LandmarkIndex.RightShoulder] = { x: 0.5, y: 0.32, visibility: 0.9 };
+    raised[LandmarkIndex.LeftElbow] = { x: 0.3, y: 0.22, visibility: 0.75 };
+    raised[LandmarkIndex.RightElbow] = { x: 0.58, y: 0.2, visibility: 0.9 };
+    raised[LandmarkIndex.LeftWrist] = { x: 0.26, y: 0.1, visibility: 0.7 };
+    raised[LandmarkIndex.RightWrist] = { x: 0.64, y: 0.1, visibility: 0.9 };
+    raised[LandmarkIndex.LeftHip] = { x: 0.46, y: 0.58, visibility: 0.7 };
+    raised[LandmarkIndex.RightHip] = { x: 0.52, y: 0.56, visibility: 0.85 };
+    const spec = liveSkeletonDrawSpec({
+      observedCamera: "side",
+      observedConfidence: 0.8,
+      pose: raised,
+      exerciseId: "lat-pulldown",
+    });
+    expect(spec.limbPolicy).toBe("near-legs");
+    expect(
+      liveSkeletonDrawSpec({
+        observedCamera: "side",
+        observedConfidence: 0.8,
+        pose: raised,
+        exerciseId: "pullup",
+      }).limbPolicy,
+    ).toBe("near-legs");
+    const kept = filterPoseForOverlay(
+      raised,
+      spec.nearSide,
+      spec.minVisibility,
+      spec.limbPolicy,
+    );
+    expect(kept[LandmarkIndex.LeftElbow]).toBeDefined();
+    expect(kept[LandmarkIndex.LeftWrist]).toBeDefined();
+    expect(kept[LandmarkIndex.RightElbow]).toBeDefined();
+    expect(kept[LandmarkIndex.RightWrist]).toBeDefined();
+
+    const stacked: Pose = raised.slice();
+    stacked[LandmarkIndex.LeftElbow] = { x: 0.58, y: 0.21, visibility: 0.8 };
+    stacked[LandmarkIndex.LeftWrist] = { x: 0.64, y: 0.12, visibility: 0.4 };
+    const dropped = filterPoseForOverlay(
+      stacked,
+      "right",
+      spec.minVisibility,
+      "near-legs",
+    );
+    expect(dropped[LandmarkIndex.LeftElbow]).toBeUndefined();
+    expect(dropped[LandmarkIndex.LeftWrist]).toBeUndefined();
+    expect(dropped[LandmarkIndex.RightElbow]).toBeDefined();
+
+    const onBar = filterPoseForOverlay(
+      stacked,
+      "right",
+      spec.minVisibility,
+      "near-legs",
+      true,
+    );
+    expect(onBar[LandmarkIndex.LeftWrist]).toBeDefined();
+    expect(onBar[LandmarkIndex.LeftElbow]).toBeDefined();
+  });
+
   it("贴边假踝不画；远侧低 vis 或叠在近侧上的臂丢掉", () => {
     const pose: Pose = [];
     pose[LandmarkIndex.LeftShoulder] = { x: 0.48, y: 0.32, visibility: 0.8 };

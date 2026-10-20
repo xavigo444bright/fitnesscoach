@@ -6,6 +6,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '@fitness-coach/ui';
 import { hydrateAccount } from './src/accountStorage';
+import { hydrateLocale } from './src/i18n/locale';
+import SavedOnDeviceFlash from './src/components/SavedOnDeviceFlash';
 import RootNavigator from './src/navigation/RootNavigator';
 import { hydrateWorkoutLog } from './src/workoutLogStorage';
 
@@ -25,7 +27,7 @@ export default function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    void Promise.all([hydrateWorkoutLog(), hydrateAccount()]).then(() => {
+    void Promise.all([hydrateWorkoutLog(), hydrateAccount(), hydrateLocale()]).then(() => {
       setReady(true);
     });
   }, []);
@@ -40,6 +42,7 @@ export default function App() {
         <NavigationContainer theme={navTheme}>
           <RootNavigator />
         </NavigationContainer>
+        <SavedOnDeviceFlash />
         <StatusBar style="light" />
       </SafeAreaProvider>
     </GestureHandlerRootView>

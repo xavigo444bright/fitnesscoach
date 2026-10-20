@@ -1,6 +1,6 @@
 /**
  * 训练页现场骨怎么画（不改相位/计数）。
- * 侧面深蹲等只留近侧；卧推类侧视保留两臂、可藏远侧腿。
+ * 侧面深蹲等只留近侧；卧推、前平举、高位下拉、引体等侧视保留两臂、可藏远侧腿。
  * 贴边假腿不画；远侧臂可见度不够或叠在近侧上则不画。
  * 3/4（hint=0）不当正侧剪半。
  */
@@ -142,11 +142,13 @@ function dropUnreliableFarArm(
   out: Pose,
   source: Pose,
   nearSide: NearLimbSide,
+  keepInFrameFarArm = false,
 ): void {
   if (nearSide === "both") return;
   for (const i of farArmDistalIndices(nearSide)) {
     const lm = out[i];
     if (!lm) continue;
+    if (keepInFrameFarArm && landmarkInFrame(lm)) continue;
     if ((lm.visibility ?? 1) < FAR_ARM_MIN_VISIBILITY) {
       delete out[i];
       continue;
@@ -168,6 +170,7 @@ export function filterPoseForOverlay(
   nearSide: NearLimbSide,
   minVisibility = 0,
   limbPolicy: OverlayLimbPolicy = "near-all",
+  keepInFrameFarArm = false,
 ): Pose {
   const out: Pose = [];
   pose.forEach((lm, i) => {
@@ -177,7 +180,7 @@ export function filterPoseForOverlay(
     if (isDistalLegLandmark(i) && !landmarkInFrame(lm)) return;
     out[i] = lm;
   });
-  dropUnreliableFarArm(out, pose, nearSide);
+  dropUnreliableFarArm(out, pose, nearSide, keepInFrameFarArm);
   return out;
 }
 

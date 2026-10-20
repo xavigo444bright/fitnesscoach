@@ -7,6 +7,7 @@ import {
 } from '@fitness-coach/core';
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'] as const;
 
@@ -27,6 +28,7 @@ export default function WorkoutCalendar({
   onChangeMonth,
   onSelectDay,
 }: Props) {
+  const tr = useTr();
   const cells = calendarMonthDays(year, month);
 
   return (
@@ -36,18 +38,16 @@ export default function WorkoutCalendar({
           onPress={() => onChangeMonth(shiftYearMonth(year, month, -1))}
           style={styles.navBtn}
           accessibilityRole="button"
-          accessibilityLabel="上个月"
+          accessibilityLabel={tr('上个月')}
         >
           <Text style={styles.navText}>‹</Text>
         </Pressable>
-        <Text style={styles.monthTitle}>
-          {year}年{month}月
-        </Text>
+        <Text style={styles.monthTitle}>{tr(`${year}年${month}月`)}</Text>
         <Pressable
           onPress={() => onChangeMonth(shiftYearMonth(year, month, 1))}
           style={styles.navBtn}
           accessibilityRole="button"
-          accessibilityLabel="下个月"
+          accessibilityLabel={tr('下个月')}
         >
           <Text style={styles.navText}>›</Text>
         </Pressable>
@@ -55,7 +55,7 @@ export default function WorkoutCalendar({
       <View style={styles.weekRow}>
         {WEEKDAYS.map((label) => (
           <Text key={label} style={styles.weekday}>
-            {label}
+            {tr(label)}
           </Text>
         ))}
       </View>
@@ -73,7 +73,7 @@ export default function WorkoutCalendar({
               onPress={() => onSelectDay(day)}
               style={styles.cell}
               accessibilityRole="button"
-              accessibilityLabel={`${month}月${dateNum}日${trained ? ' 有训练' : ''}`}
+              accessibilityLabel={`${tr(`${month}月${dateNum}日`)}${trained ? ` ${tr('有训练')}` : ''}`}
               accessibilityState={{ selected }}
             >
               <View

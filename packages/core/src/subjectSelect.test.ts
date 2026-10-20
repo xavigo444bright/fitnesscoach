@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { ghostKeyframesFor } from "./exercises/ghostKeyframes.js";
 import { buildSquatPose } from "./fixtures/index.js";
+import { buildPullupHangPose } from "./fixtures/pullupHang.js";
 import { buildPushupPose } from "./fixtures/pushup.js";
-import { LandmarkIndex, type Pose } from "./types.js";
+import { laterGhostPoses } from "./exercises/later-keyframes.js";
+import { LandmarkIndex, type Landmark, type Pose } from "./types.js";
 import {
   ExerciseSubjectLock,
   SUBJECT_SWITCH_FRAMES,
@@ -138,7 +140,121 @@ describe("ExerciseSubjectLock", () => {
       5,
     );
   });
+
+  it("引体：正后悬垂比弯腰、站立的人更像，确认后换锁", () => {
+    const templates = trajectoryTemplatesFor("pullup");
+    const hang = buildPullupHangPose({ elbowDeg: 160, view: "front" });
+    const sideHang = buildPullupHangPose({ elbowDeg: 165, view: "side" });
+    const wiping = buildPushupPose({ elbowDeg: 150 });
+    const standing = buildSquatPose({ kneeDeg: 170, torsoLeanDeg: 8 });
+    const shoulder = standing[LandmarkIndex.LeftShoulder]!;
+    standing[LandmarkIndex.LeftElbow] = {
+      x: shoulder.x,
+      y: shoulder.y + 0.12,
+      visibility: 1,
+    };
+    standing[LandmarkIndex.LeftWrist] = {
+      x: shoulder.x,
+      y: shoulder.y + 0.24,
+      visibility: 1,
+    };
+    standing[LandmarkIndex.RightElbow] = {
+      x: shoulder.x + 0.02,
+      y: shoulder.y + 0.12,
+      visibility: 1,
+    };
+    standing[LandmarkIndex.RightWrist] = {
+      x: shoulder.x + 0.02,
+      y: shoulder.y + 0.24,
+      visibility: 1,
+    };
+    const hangScore = maxTrajectoryOverlap(hang, templates);
+    expect(hangScore).toBeGreaterThan(
+      maxTrajectoryOverlap(wiping, templates) + 0.16,
+    );
+    expect(hangScore).toBeGreaterThan(
+      maxTrajectoryOverlap(standing, templates) + 0.16,
+    );
+    expect(maxTrajectoryOverlap(sideHang, templates)).toBeGreaterThan(0.9);
+
+    const lock = new ExerciseSubjectLock("pullup");
+    const wiper = translate(wiping, -0.08, 0.02);
+    expect(lock.pick([wiper])).toBeTruthy();
+    let switched = false;
+    for (let i = 0; i < SUBJECT_SWITCH_FRAMES + 2; i += 1) {
+      lock.pick([wiper, hang]);
+      if (lock.didSwitch()) switched = true;
+    }
+    expect(switched).toBe(true);
+    const after = lock.pick([wiper, hang]);
+    expect(after?.[LandmarkIndex.LeftWrist]?.y).toBeLessThan(
+      after?.[LandmarkIndex.LeftShoulder]?.y ?? 1,
+    );
+  });
+
+  it("后接入的动作有正侧火柴人", () => {
+    const templates = trajectoryTemplatesFor("lat-pulldown");
+    expect(templates.length).toBeGreaterThan(0);
+    expect(laterGhostPoses("squat")).toBeNull();
+    const spreads = templates.map((p) => {
+      const left = p[LandmarkIndex.LeftShoulder]!;
+      const right = p[LandmarkIndex.RightShoulder]!;
+      return Math.abs(right.x - left.x);
+    });
+    expect(Math.max(...spreads)).toBeGreaterThan(0.08);
+    expect(Math.min(...spreads)).toBeLessThan(0.05);
+  });
+
+  it("重合度分不开时，走行程的人在确认后换锁", () => {
+    const templates = laterGhostPoses("lat-pulldown")!;
+    const stand = templates[0]!;
+    const bottom = templates[2]!;
+    const big = scalePose(stand, 1.15);
+    const lifter = translate(bottom, 0.22, 0);
+    const lock = new ExerciseSubjectLock("lat-pulldown");
+    expect(lock.pick([big])?.[LandmarkIndex.LeftShoulder]?.x).toBeCloseTo(
+      big[LandmarkIndex.LeftShoulder]!.x,
+      5,
+    );
+    let switched = false;
+    for (let i = 0; i < SUBJECT_SWITCH_FRAMES; i += 1) {
+      lock.pick([big, lifter]);
+      if (lock.didSwitch()) switched = true;
+    }
+    expect(switched).toBe(true);
+    const after = lock.pick([big, lifter]);
+    expect(after?.[LandmarkIndex.LeftShoulder]?.x).toBeCloseTo(
+      lifter[LandmarkIndex.LeftShoulder]!.x,
+      5,
+    );
+  });
+
+  it("没有模板时，读不到行程就不计", () => {
+    const lock = new ExerciseSubjectLock("not-an-exercise");
+    const idle: Pose = [];
+    idle[LandmarkIndex.LeftShoulder] = { x: 0.4, y: 0.4, visibility: 1 };
+    idle[LandmarkIndex.RightShoulder] = { x: 0.6, y: 0.4, visibility: 1 };
+    idle[LandmarkIndex.LeftHip] = { x: 0.42, y: 0.6, visibility: 1 };
+    idle[LandmarkIndex.RightHip] = { x: 0.58, y: 0.6, visibility: 1 };
+    expect(lock.pick([idle])).toBeTruthy();
+    expect(lock.isExerciseActive()).toBe(false);
+  });
 });
+
+function scalePose(pose: Pose, scale: number): Pose {
+  const out: Pose = [];
+  for (let i = 0; i < pose.length; i += 1) {
+    const lm = pose[i];
+    if (!lm) continue;
+    const next: Landmark = {
+      ...lm,
+      x: 0.5 + (lm.x - 0.5) * scale,
+      y: 0.5 + (lm.y - 0.5) * scale,
+    };
+    out[i] = next;
+  }
+  return out;
+}
 
 describe("activity gate (FR-090)", () => {
   it("硬下降当帧关引擎；相对基线，不绑动作 id", () => {

@@ -1,8 +1,10 @@
 /**
- * FR-094：只对填了重量的次数组算 次数×公斤。
+ * FR-094：填了外加负荷的次数组算 次数×公斤（左右分记用两侧之和）。
+ * 自重动作没填负荷时，有本节或档案自重则按自重计入；没填自重则不进容量。
  * 平板等计时动作不进容量数字。
  */
 
+import { isBodyweightRef } from "./bodyweight.js";
 import type { LogExerciseRef, LogSet, Workout, WorkoutLog } from "./types.js";
 
 const TIMED_CATALOG_IDS = new Set(["plank", "side-plank"]);
@@ -16,19 +18,53 @@ export function countModeForRef(ref: LogExerciseRef): "reps" | "timed" {
   return "reps";
 }
 
-export function setVolumeKg(set: LogSet): number {
-  if (set.kind === "timed") return 0;
-  const reps = set.reps;
-  const kg = set.weightKg;
-  if (reps == null || kg == null) return 0;
-  if (!(reps > 0) || !(kg > 0)) return 0;
-  return reps * kg;
+function positiveKg(n: number | undefined): number {
+  return n != null && Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-export function workoutVolumeKg(workout: Workout): number {
+/** 这一组手填的外加负荷。左右任一有数时用两侧之和，否则用单一重量。 */
+export function externalLoadKg(set: LogSet): number | undefined {
+  const left = positiveKg(set.weightLeftKg);
+  const right = positiveKg(set.weightRightKg);
+  if (left > 0 || right > 0) return left + right;
+  const single = positiveKg(set.weightKg);
+  return single > 0 ? single : undefined;
+}
+
+export type SetVolumeOptions = {
+  /** 自重动作、且这一组没填外加负荷时，用这个公斤计入。 */
+  bodyweightKg?: number;
+  bodyweightExercise?: boolean;
+};
+
+export function setVolumeKg(set: LogSet, options?: SetVolumeOptions): number {
+  if (set.kind === "timed") return 0;
+  const reps = set.reps;
+  if (reps == null || !(reps > 0)) return 0;
+  const external = externalLoadKg(set);
+  if (external != null) return reps * external;
+  if (!options?.bodyweightExercise) return 0;
+  const body = positiveKg(options.bodyweightKg);
+  if (!(body > 0)) return 0;
+  return reps * body;
+}
+
+export function workoutVolumeKg(
+  workout: Workout,
+  profileBodyweightKg?: number,
+): number {
+  const bodyweightKg =
+    workout.bodyweightKg != null && workout.bodyweightKg > 0
+      ? workout.bodyweightKg
+      : profileBodyweightKg != null && profileBodyweightKg > 0
+        ? profileBodyweightKg
+        : undefined;
   let total = 0;
   for (const slot of workout.slots) {
-    for (const set of slot.sets) total += setVolumeKg(set);
+    const bodyweightExercise = isBodyweightRef(slot.exercise);
+    for (const set of slot.sets) {
+      total += setVolumeKg(set, { bodyweightKg, bodyweightExercise });
+    }
   }
   return total;
 }
@@ -107,7 +143,9 @@ export function calendarDayLabel(iso: string, timeZone?: string): string {
 export function dayVolumeKg(log: WorkoutLog, dayUtc: string): number {
   let total = 0;
   for (const w of log.workouts) {
-    if (calendarDayUtc(w.startedAt) === dayUtc) total += workoutVolumeKg(w);
+    if (calendarDayUtc(w.startedAt) === dayUtc) {
+      total += workoutVolumeKg(w, log.bodyweightKg);
+    }
   }
   return total;
 }

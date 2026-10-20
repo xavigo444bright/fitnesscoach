@@ -41,11 +41,13 @@ import {
   loadWorkoutLogFromMemory,
   parseWorkoutLog,
   patchSet,
+  patchSlot,
   patchWorkout,
   removeSet,
   removeSlot,
   removeWorkout,
   restDurationForRemaining,
+  restRemainingFromDrag,
   restRemainingFromSandFraction,
   restRemainingSec,
   restSandCapacitySec,
@@ -463,6 +465,13 @@ describe("ensureOpenWorkout + FR-096 剩余秒", () => {
     expect(restDurationForRemaining(started, now, 120)).toBe(150);
     expect(restRemainingSec(150, started, now)).toBe(120);
   });
+
+  it("拖动从当前秒数起算，点按不跳", () => {
+    expect(restRemainingFromDrag(185, 0, 300, 300)).toBe(185);
+    expect(restRemainingFromDrag(185, -300, 300, 300)).toBe(300);
+    expect(restRemainingFromDrag(185, 300, 300, 300)).toBe(0);
+    expect(restRemainingFromDrag(185, -30, 300, 300)).toBe(215);
+  });
 });
 
 describe("T12-R 改删复制、自重、结束后回看", () => {
@@ -706,6 +715,28 @@ describe("T12-R4 上次重量不填自重、今日多课", () => {
       b.workoutId,
       a.workoutId,
     ]);
+  });
+
+  it("跨过本地零点才结束的课，出现在结束日的首页，与日历同一天", () => {
+    const clock = ids();
+    const tz = "Asia/Shanghai";
+    const started = "2026-09-10T14:00:00.000Z";
+    const endedAt = "2026-09-10T17:30:00.000Z";
+    const now = "2026-09-11T04:00:00.000Z";
+    const created = createWorkout(emptyWorkoutLog(), started, clock);
+    expect(calendarDayLocal(started, tz)).toBe("2026-09-10");
+    expect(homeDayWorkouts(created.log, started, tz).map((w) => w.id)).toEqual([
+      created.workoutId,
+    ]);
+    const log = endWorkout(created.log, created.workoutId, endedAt);
+    expect(calendarDayLocal(endedAt, tz)).toBe("2026-09-11");
+    expect(homeDayWorkouts(log, now, tz).map((w) => w.id)).toEqual([
+      created.workoutId,
+    ]);
+    expect(
+      workoutsOnCalendarDay(log, "2026-09-11", tz).map((w) => w.id),
+    ).toEqual([created.workoutId]);
+    expect(homeDayWorkouts(log, started, tz)).toHaveLength(0);
   });
 });
 
@@ -1254,5 +1285,163 @@ describe("T25 过去日补记", () => {
     expect(() =>
       createBackdatedWorkout(emptyWorkoutLog(), "2026-09-12", now, ids(), tz),
     ).toThrow(/future/);
+  });
+});
+
+describe("左右分记与自重计入", () => {
+  it("引体只填次数时重量框不写数，有自重才进容量和成就", () => {
+    const clock = ids();
+    let log = setBodyweightKg(emptyWorkoutLog(), 70);
+    const created = createWorkout(log, "2026-10-03T08:00:00.000Z", clock);
+    log = created.log;
+    const slot = addSlot(
+      log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "pullup" },
+      clock,
+    );
+    log = addSet(slot.log, created.workoutId, slot.slotId, { reps: 8 }, clock).log;
+    const set = log.workouts[0]!.slots[0]!.sets[0]!;
+    expect(set.weightKg).toBeUndefined();
+    expect(workoutVolumeKg(log.workouts[0]!, log.bodyweightKg)).toBe(560);
+    expect(personalRecords(log)[0]).toMatchObject({
+      weightKg: 70,
+      reps: 8,
+    });
+    expect(suggestedWeightKg(log, { kind: "catalog", catalogId: "pullup" })).toBeUndefined();
+  });
+
+  it("没填自重时引体只记次数，不进容量", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-10-03T08:00:00.000Z",
+      clock,
+    );
+    const slot = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "pullup" },
+      clock,
+    );
+    const log = addSet(
+      slot.log,
+      created.workoutId,
+      slot.slotId,
+      { reps: 8 },
+      clock,
+    ).log;
+    expect(workoutVolumeKg(log.workouts[0]!)).toBe(0);
+    expect(personalRecords(log)).toEqual([]);
+  });
+
+  it("自重动作手填重量时按手填的算，不把自重再加一遍", () => {
+    const clock = ids();
+    let log = setBodyweightKg(emptyWorkoutLog(), 70);
+    const created = createWorkout(log, "2026-10-03T08:00:00.000Z", clock);
+    const slot = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "pullup" },
+      clock,
+    );
+    log = addSet(
+      slot.log,
+      created.workoutId,
+      slot.slotId,
+      { reps: 5, weightKg: 10 },
+      clock,
+    ).log;
+    expect(workoutVolumeKg(log.workouts[0]!, log.bodyweightKg)).toBe(50);
+  });
+
+  it("杠铃动作没填重量不按自重计入；目录里的自重深蹲会计", () => {
+    const clock = ids();
+    let log = setBodyweightKg(emptyWorkoutLog(), 70);
+    const created = createWorkout(log, "2026-10-03T08:00:00.000Z", clock);
+    const bench = addSlot(
+      created.log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "bench-press" },
+      clock,
+    );
+    log = addSet(
+      bench.log,
+      created.workoutId,
+      bench.slotId,
+      { reps: 8 },
+      clock,
+    ).log;
+    expect(workoutVolumeKg(log.workouts[0]!, log.bodyweightKg)).toBe(0);
+    const squat = addSlot(
+      log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "squat" },
+      clock,
+    );
+    log = addSet(
+      squat.log,
+      created.workoutId,
+      squat.slotId,
+      { reps: 8 },
+      clock,
+    ).log;
+    expect(workoutVolumeKg(log.workouts[0]!, log.bodyweightKg)).toBe(560);
+  });
+
+  it("左右分记按两侧之和计入，复制和模板都带着", () => {
+    const clock = ids();
+    const created = createWorkout(
+      emptyWorkoutLog(),
+      "2026-10-03T08:00:00.000Z",
+      clock,
+    );
+    let log = created.log;
+    const slot = addSlot(
+      log,
+      created.workoutId,
+      { kind: "catalog", catalogId: "db-row" },
+      clock,
+    );
+    log = patchSlot(slot.log, created.workoutId, slot.slotId, {
+      loadMode: "sides",
+    });
+    log = addSet(
+      log,
+      created.workoutId,
+      slot.slotId,
+      { reps: 8, weightLeftKg: 20, weightRightKg: 22.5 },
+      clock,
+    ).log;
+    expect(log.workouts[0]!.slots[0]!.loadMode).toBe("sides");
+    expect(log.workouts[0]!.slots[0]!.sets[0]!.weightKg).toBeUndefined();
+    expect(workoutVolumeKg(log.workouts[0]!)).toBe(8 * 42.5);
+    const setId = log.workouts[0]!.slots[0]!.sets[0]!.id;
+    log = copySet(log, created.workoutId, slot.slotId, setId, clock).log;
+    expect(log.workouts[0]!.slots[0]!.sets[1]!.weightRightKg).toBe(22.5);
+    const saved = saveWorkoutAsTemplate(
+      log,
+      created.workoutId,
+      "背",
+      "2026-10-03T09:00:00.000Z",
+      clock,
+    );
+    const applied = applyWorkoutTemplate(
+      saved.log,
+      saved.templateId,
+      "2026-10-04T08:00:00.000Z",
+      clock,
+    );
+    const copied = applied.log.workouts.find((w) => w.id === applied.workoutId)!;
+    expect(copied.slots[0]!.loadMode).toBe("sides");
+    expect(copied.slots[0]!.sets[0]!.weightLeftKg).toBe(20);
+    expect(workoutVolumeKg(copied)).toBe(8 * 42.5 * 2);
+    expect(lastLoadForExercise(applied.log, copied.slots[0]!.exercise)).toMatchObject({
+      weightLeftKg: 20,
+      weightRightKg: 22.5,
+    });
+    expect(
+      suggestedWeightKg(applied.log, copied.slots[0]!.exercise),
+    ).toBeUndefined();
   });
 });

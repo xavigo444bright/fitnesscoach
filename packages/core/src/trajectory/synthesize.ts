@@ -3,7 +3,7 @@
  */
 
 import { buildGluteBridgePose } from "../fixtures/gluteBridge.js";
-import { buildDbFlyPose } from "../fixtures/dbFly.js";
+import { buildArmTiltPose, buildDbFlyPose } from "../fixtures/dbFly.js";
 import { buildSquatPose } from "../fixtures/index.js";
 import { buildPushupPose } from "../fixtures/pushup.js";
 import { buildRaisePose } from "../fixtures/raise.js";
@@ -133,11 +133,11 @@ export function synthesizeMultiRepSequence(
       );
     } else if (isRearDelt(exerciseId)) {
       poses.push(
-        ...repeat(buildDbFlyPose({ wristIncludedDeg: 18 }), framesPerPhase),
-        ...repeat(buildDbFlyPose({ wristIncludedDeg: 45 }), framesPerPhase),
-        ...repeat(buildDbFlyPose({ wristIncludedDeg: 70 }), framesPerPhase),
-        ...repeat(buildDbFlyPose({ wristIncludedDeg: 45 }), framesPerPhase),
-        ...repeat(buildDbFlyPose({ wristIncludedDeg: 18 }), framesPerPhase),
+        ...repeat(buildArmTiltPose({ tiltDeg: 12 }), framesPerPhase),
+        ...repeat(buildArmTiltPose({ tiltDeg: 40 }), framesPerPhase),
+        ...repeat(buildArmTiltPose({ tiltDeg: 70 }), framesPerPhase),
+        ...repeat(buildArmTiltPose({ tiltDeg: 40 }), framesPerPhase),
+        ...repeat(buildArmTiltPose({ tiltDeg: 12 }), framesPerPhase),
       );
     } else if (isFacePull(exerciseId)) {
       poses.push(
@@ -199,7 +199,7 @@ export function synthesizeMultiRepSequence(
                     4,
                   )
                 : isRearDelt(exerciseId)
-                  ? repeat(buildDbFlyPose({ wristIncludedDeg: 18 }), 4)
+                  ? repeat(buildArmTiltPose({ tiltDeg: 12 }), 4)
                   : isFacePull(exerciseId)
                     ? repeat(buildPushupPose({ elbowDeg: 145 }), 4)
                     : isPikePushup(exerciseId)
@@ -293,7 +293,7 @@ export function synthesizeSmoothRepPoses(
         i <= half
           ? i / half
           : 1 - (i - half) / (samples - 1 - half || 1);
-      poses.push(buildDbFlyPose({ wristIncludedDeg: lerp(18, 70, t) }));
+      poses.push(buildArmTiltPose({ tiltDeg: lerp(12, 70, t) }));
     } else if (isFacePull(exerciseId)) {
       const t =
         i <= half

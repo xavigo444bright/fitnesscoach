@@ -16,12 +16,17 @@ apps/mobile/.expo/
 apps/mobile/ios/
 apps/mobile/android/
 
-# WeChat miniprogram
-apps/miniprogram/node_modules/
-apps/miniprogram/miniprogram_npm/
-apps/miniprogram/local_modules/
-apps/miniprogram/packageTrain/node_modules/
-apps/miniprogram/packageTrain/miniprogram_npm/
+# Abandoned WeChat miniprogram (removed from tree)
+apps/miniprogram/
+
+# Agent / local-only (not product source)
+.claude/
+.cursor/skills/
+tools/count-loop/
+packages/core/src/countLoop/
+product-360-viewer/
+docs/promo/
+docs/session-compression*.md
 
 # IDE
 .idea/
@@ -48,6 +53,8 @@ media/trajectory-source/**/_candidates/_preview*/
 media/trajectory-source/**/_candidates/_frontscan/
 media/trajectory-source/**/_candidates/_survey/
 media/trajectory-source/**/_candidates/_user_pick/
+media/trajectory-source/**/_candidates/
+media/trajectory-source/_fetch-log.txt
 
 # 轨迹提取本地环境
 tools/trajectory-extract/.venv/

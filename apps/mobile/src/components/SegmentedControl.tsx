@@ -3,6 +3,7 @@
  */
 import { colors, fontSize, layout, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 export type SegmentItem<K extends string> = { key: K; label: string };
 
@@ -17,6 +18,7 @@ export default function SegmentedControl<K extends string>({
   value,
   onChange,
 }: Props<K>) {
+  const tr = useTr();
   return (
     <View style={styles.row} accessibilityRole="tablist">
       {items.map((item) => {
@@ -27,11 +29,11 @@ export default function SegmentedControl<K extends string>({
             onPress={() => onChange(item.key)}
             accessibilityRole="tab"
             accessibilityState={{ selected }}
-            accessibilityLabel={item.label}
+            accessibilityLabel={tr(item.label)}
             style={styles.item}
           >
             <Text style={[styles.label, selected && styles.labelOn]}>
-              {item.label}
+              {tr(item.label)}
             </Text>
             <View style={[styles.underline, selected && styles.underlineOn]} />
           </Pressable>

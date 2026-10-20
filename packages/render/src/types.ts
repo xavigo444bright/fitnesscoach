@@ -4,20 +4,23 @@
 
 import type { ValidationStatus } from "@fitness-coach/core";
 
+/** 校验色，加上读不到的点。叠点只涂这些点，不整副涂灰。 */
+export type SkeletonPaint = ValidationStatus | "muted";
+
 /** 归一化或像素坐标的关节点。 */
 export interface RenderJoint {
   /** MediaPipe 索引。 */
   index: number;
   x: number;
   y: number;
-  status: ValidationStatus;
+  status: SkeletonPaint;
 }
 
 /** 骨骼连线（两端均为关节索引）。 */
 export interface RenderBone {
   from: number;
   to: number;
-  status: ValidationStatus;
+  status: SkeletonPaint;
 }
 
 /** 一帧可绘制骨架（用户骨或临时 2D 参考骨占位）。 */

@@ -5,12 +5,18 @@
  * 本文件只放类型，不含任何逻辑；禁止依赖摄像头或 UI。
  */
 
-/** 归一化坐标（0–1，相对帧宽高）；z 为可选深度，visibility 为置信度 0–1。 */
+/**
+ * 归一化坐标（0–1，相对帧宽高）；z 为画面相对深度，visibility 为置信度 0–1。
+ * wx/wy/wz 是米制世界坐标（髋为原点）。有这三项时，关节角用它们，不用画面 x/y。
+ */
 export interface Landmark {
   x: number;
   y: number;
   z?: number;
   visibility?: number;
+  wx?: number;
+  wy?: number;
+  wz?: number;
 }
 
 /**
@@ -120,7 +126,8 @@ export interface RepEvent {
 /** 本帧刚发生的周期结算（仅事件帧非 null，供 UI 提示）。 */
 export type RepCycleOutcome =
   | { type: "counted" }
-  | { type: "rejected"; reason: "shallow" | "depth_fault" };
+  | { type: "rejected"; reason: "shallow" | "depth_fault" }
+  | { type: "short" };
 
 /** repCounter 状态。 */
 export interface RepCounterState {

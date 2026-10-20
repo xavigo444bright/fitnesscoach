@@ -122,12 +122,18 @@ describe("activeMusclesForExercise (FR-085)", () => {
     expect(isCoachableId("rear-delt-fly")).toBe(true);
     expect(isCoachableId("face-pull")).toBe(true);
     expect(isCoachableId("pike-pushup")).toBe(true);
-    expect(isCoachableId("goblet-squat")).toBe(false);
+    expect(isCoachableId("goblet-squat")).toBe(true);
+    expect(isCoachableId("lat-pulldown")).toBe(true);
+    expect(isCoachableId("side-plank")).toBe(true);
+    expect(isCoachableId("hanging-knee-raise")).toBe(true);
   });
 
   it("overlayKeepsBothArmsOnSide：卧推类侧面留两臂", () => {
     expect(overlayKeepsBothArmsOnSide("bench-press")).toBe(true);
     expect(overlayKeepsBothArmsOnSide("chest-press-machine")).toBe(true);
+    expect(overlayKeepsBothArmsOnSide("front-raise")).toBe(true);
+    expect(overlayKeepsBothArmsOnSide("lat-pulldown")).toBe(true);
+    expect(overlayKeepsBothArmsOnSide("pullup")).toBe(true);
     expect(overlayKeepsBothArmsOnSide("squat")).toBe(false);
     expect(overlayKeepsBothArmsOnSide("rdl")).toBe(false);
   });

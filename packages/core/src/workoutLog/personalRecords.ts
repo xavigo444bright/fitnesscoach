@@ -1,12 +1,15 @@
+import { effectiveBodyweightKg, isBodyweightRef } from "./bodyweight.js";
 import { exerciseDisplayName } from "./display.js";
 import {
   exerciseKey,
   type LogExerciseRef,
   type LogSet,
+  type LogSlot,
+  type Workout,
   type WorkoutLog,
 } from "./types.js";
 import { recordedWeightUnit } from "./units.js";
-import { calendarDayLocal } from "./volume.js";
+import { calendarDayLocal, externalLoadKg } from "./volume.js";
 
 export const PR_PREVIEW_LIMIT = 4;
 
@@ -20,14 +23,18 @@ export type ExercisePr = {
   achievedAt: string;
 };
 
-function isPrSet(set: LogSet): set is LogSet & { weightKg: number; reps: number } {
-  if (set.kind === "timed") return false;
-  return (
-    set.weightKg != null &&
-    set.weightKg > 0 &&
-    set.reps != null &&
-    set.reps > 0
-  );
+function prWeightKg(
+  set: LogSet,
+  slot: LogSlot,
+  workout: Workout,
+  log: WorkoutLog,
+): number | undefined {
+  if (set.kind === "timed") return undefined;
+  if (set.reps == null || !(set.reps > 0)) return undefined;
+  const external = externalLoadKg(set);
+  if (external != null) return external;
+  if (!isBodyweightRef(slot.exercise)) return undefined;
+  return effectiveBodyweightKg(log, workout);
 }
 
 function isBetterPr(next: ExercisePr, current: ExercisePr): boolean {
@@ -84,10 +91,11 @@ export function personalRecords(log: WorkoutLog): ExercisePr[] {
   for (const workout of log.workouts) {
     for (const slot of workout.slots) {
       for (const set of slot.sets) {
-        if (!isPrSet(set)) continue;
+        const weightKg = prWeightKg(set, slot, workout, log);
+        if (weightKg == null || set.reps == null) continue;
         const next: ExercisePr = {
           exercise: slot.exercise,
-          weightKg: set.weightKg,
+          weightKg,
           weightUnit: recordedWeightUnit(set.weightUnit),
           reps: set.reps,
           achievedAt: workout.startedAt,

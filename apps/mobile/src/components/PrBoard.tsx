@@ -14,25 +14,31 @@ import {
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 type Props = {
   log: WorkoutLog;
 };
 
 export default function PrBoard({ log }: Props) {
+  const tr = useTr();
   const [expanded, setExpanded] = useState(false);
   const rows = personalRecords(log);
   const shown = visiblePersonalRecords(rows, expanded);
   const canToggle = rows.length > PR_PREVIEW_LIMIT;
 
   return (
-    <View style={styles.wrap} accessibilityLabel="成就">
-      <Text style={styles.title}>成就</Text>
-      <Text style={styles.lead}>每个动作最重的一组。记下重量就会点亮。</Text>
+    <View style={styles.wrap} accessibilityLabel={tr('成就')}>
+      <Text style={styles.title}>{tr('成就')}</Text>
+      <Text style={styles.lead}>
+        {tr('每个动作最重的一组。记下重量就会点亮。')}
+      </Text>
       {rows.length === 0 ? (
         <View style={styles.emptyTile}>
-          <Text style={styles.emptyKicker}>未点亮</Text>
-          <Text style={styles.emptyBody}>先在训练里给某组填上重量。</Text>
+          <Text style={styles.emptyKicker}>{tr('未点亮')}</Text>
+          <Text style={styles.emptyBody}>
+            {tr('先在训练里给某组填上重量。')}
+          </Text>
         </View>
       ) : (
         <>
@@ -45,15 +51,15 @@ export default function PrBoard({ log }: Props) {
                 <View
                   key={exerciseKey(row.exercise)}
                   style={styles.tile}
-                  accessibilityLabel={`${name} ${amount}${unitLabel} ${row.reps}次`}
+                  accessibilityLabel={`${tr(name)} ${amount}${unitLabel} ${row.reps}`}
                 >
                   <Text style={styles.tileKicker}>BEST</Text>
                   <Text style={styles.tileName} numberOfLines={2}>
-                    {name}
+                    {tr(name)}
                   </Text>
                   <Text style={styles.tileKg}>{amount}</Text>
                   <Text style={styles.tileMeta}>
-                    {unitLabel} · {row.reps} 次
+                    {unitLabel} · {row.reps} {tr('次')}
                   </Text>
                 </View>
               );
@@ -64,10 +70,10 @@ export default function PrBoard({ log }: Props) {
               onPress={() => setExpanded((value) => !value)}
               style={styles.toggle}
               accessibilityRole="button"
-              accessibilityLabel={expanded ? '收起成就' : '展开全部成就'}
+              accessibilityLabel={tr(expanded ? '收起成就' : '展开全部成就')}
             >
               <Text style={styles.toggleText}>
-                {expanded ? '收起' : `展开全部 · 还有 ${rows.length - shown.length} 个`}
+                {tr(expanded ? '收起' : `展开全部 · 还有 ${rows.length - shown.length} 个`)}
               </Text>
             </Pressable>
           ) : null}

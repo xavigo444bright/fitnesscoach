@@ -77,7 +77,10 @@ export function placementConfigFor(exerciseId: string): Partial<PlacementConfig>
     exerciseId === "lateral-raise" ||
     exerciseId === "front-raise" ||
     exerciseId === "rear-delt-fly" ||
-    exerciseId === "face-pull"
+    exerciseId === "face-pull" ||
+    exerciseId === "lat-pulldown" ||
+    exerciseId === "seated-row" ||
+    exerciseId === "band-row"
   ) {
     return UPPER_BODY_PLACEMENT_CONFIG;
   }
@@ -87,6 +90,7 @@ export function placementConfigFor(exerciseId: string): Partial<PlacementConfig>
 /**
  * FR-022：能算出驱动角则允许计数。机位正面误判只出文案，不冻计数。
  */
+/** 日志 C06-02。尝试动作的站位提示另见 C07-08。 */
 export function allowSessionCount(
   placement: PlacementGuideResult,
   driveLive: number | null,
@@ -103,7 +107,9 @@ export interface PlacementHintContext {
   holdSecond?: boolean;
   /** 趴地动作不能「后退」，改口「把手机放远」 */
   floorHold?: boolean;
-  /** 规格只允许正面计次时，侧面提示面对镜头 */
+  /**
+   * 保留给调用方。机位不对不再写成提示；纠错是否开启见 cueView。
+   */
   requireFrontPlane?: boolean;
 }
 
@@ -135,28 +141,83 @@ function shoulderVisible(pose: Pose, minVisibility: number): boolean {
   );
 }
 
-function sidePresent(
+function jointInPicture(
   pose: Pose,
-  hip: LandmarkIndex,
-  ankle: LandmarkIndex,
+  index: LandmarkIndex,
   minVisibility: number,
-): boolean {
-  return (
-    isPresent(pose, hip, minVisibility) &&
-    isPresent(pose, ankle, minVisibility)
-  );
-}
-
-function sideInPicture(
-  pose: Pose,
-  hip: LandmarkIndex,
-  ankle: LandmarkIndex,
   epsilon: number,
 ): boolean {
-  const h = pose[hip];
+  if (!isPresent(pose, index, minVisibility)) return false;
+  const lm = pose[index];
+  if (!lm) return false;
+  return inPicture(lm.x, lm.y, epsilon);
+}
+
+/**
+ * 踝缺失，或只从画面下沿出去。左右出画不算，那种要提示。
+ */
+function ankleBottomCropped(
+  pose: Pose,
+  ankle: LandmarkIndex,
+  minVisibility: number,
+  epsilon: number,
+): boolean {
   const a = pose[ankle];
-  if (!h || !a) return false;
-  return inPicture(h.x, h.y, epsilon) && inPicture(a.x, a.y, epsilon);
+  if (!a) return true;
+  if (a.visibility != null && a.visibility < minVisibility) return true;
+  return a.y > 1 + epsilon && a.x >= -epsilon && a.x <= 1 + epsilon;
+}
+
+function missingLegLabel(
+  pose: Pose,
+  vis: number,
+  eps: number,
+  eitherSide: boolean,
+): string {
+  const sides = [
+    {
+      label: "左",
+      hip: LandmarkIndex.LeftHip,
+      knee: LandmarkIndex.LeftKnee,
+      ankle: LandmarkIndex.LeftAnkle,
+    },
+    {
+      label: "右",
+      hip: LandmarkIndex.RightHip,
+      knee: LandmarkIndex.RightKnee,
+      ankle: LandmarkIndex.RightAnkle,
+    },
+  ] as const;
+  const bits: string[] = [];
+  for (const side of sides) {
+    if (sideReady(pose, side.hip, side.knee, side.ankle, vis, eps)) continue;
+    if (!jointInPicture(pose, side.hip, vis, eps)) bits.push(`${side.label}髋`);
+    else if (!jointInPicture(pose, side.knee, vis, eps)) {
+      bits.push(`${side.label}膝`);
+    } else bits.push(`${side.label}踝`);
+  }
+  if (bits.length === 0) return eitherSide ? "一侧髋、膝" : "髋、膝";
+  return bits.join("、");
+}
+
+/**
+ * 髋在画面里，并且踝也在；或者踝贴在下沿之外、但膝还在。
+ * 深蹲脚靠近底边时继续计次。
+ */
+function sideReady(
+  pose: Pose,
+  hip: LandmarkIndex,
+  knee: LandmarkIndex,
+  ankle: LandmarkIndex,
+  minVisibility: number,
+  epsilon: number,
+): boolean {
+  if (!jointInPicture(pose, hip, minVisibility, epsilon)) return false;
+  if (jointInPicture(pose, ankle, minVisibility, epsilon)) return true;
+  return (
+    jointInPicture(pose, knee, minVisibility, epsilon) &&
+    ankleBottomCropped(pose, ankle, minVisibility, epsilon)
+  );
 }
 
 /**
@@ -214,76 +275,84 @@ export function evaluatePlacement(
     return { visible: false, hint: null, reason: "ok" };
   }
 
-  const leftP = sidePresent(
+  const leftReady = sideReady(
     pose,
     LandmarkIndex.LeftHip,
+    LandmarkIndex.LeftKnee,
     LandmarkIndex.LeftAnkle,
     vis,
+    eps,
   );
-  const rightP = sidePresent(
+  const rightReady = sideReady(
     pose,
     LandmarkIndex.RightHip,
+    LandmarkIndex.RightKnee,
     LandmarkIndex.RightAnkle,
     vis,
+    eps,
   );
-  const presentOk =
-    merged.hipAnkleMode === "either_side" ? leftP || rightP : leftP && rightP;
+  const frameOk =
+    merged.hipAnkleMode === "either_side"
+      ? leftReady || rightReady
+      : leftReady && rightReady;
 
-  const ankleCount = [
-    LandmarkIndex.LeftAnkle,
-    LandmarkIndex.RightAnkle,
-  ].filter((i) => isPresent(pose, i, vis)).length;
+  const kneeIn =
+    jointInPicture(pose, LandmarkIndex.LeftKnee, vis, eps) ||
+    jointInPicture(pose, LandmarkIndex.RightKnee, vis, eps);
+  const ankleIn =
+    jointInPicture(pose, LandmarkIndex.LeftAnkle, vis, eps) ||
+    jointInPicture(pose, LandmarkIndex.RightAnkle, vis, eps);
 
-  if (!presentOk) {
-    if (ankleCount === 0 && shoulderVisible(pose, vis)) {
+  if (!frameOk) {
+    if (!kneeIn && !ankleIn && shoulderVisible(pose, vis)) {
       return {
         visible: true,
         hint: "请把手机放远，让髋和脚踝入画，勿挡住镜头",
         reason: "too_close",
       };
     }
+    const named = missingLegLabel(
+      pose,
+      vis,
+      eps,
+      merged.hipAnkleMode === "either_side",
+    );
     return {
       visible: true,
-      hint: "请让髋和脚踝入画，勿挡住镜头",
+      hint: `请让${named}入画`,
       reason: "missing_keypoints",
-    };
-  }
-
-  const leftF =
-    leftP &&
-    sideInPicture(
-      pose,
-      LandmarkIndex.LeftHip,
-      LandmarkIndex.LeftAnkle,
-      eps,
-    );
-  const rightF =
-    rightP &&
-    sideInPicture(
-      pose,
-      LandmarkIndex.RightHip,
-      LandmarkIndex.RightAnkle,
-      eps,
-    );
-  const frameOk =
-    merged.hipAnkleMode === "either_side" ? leftF || rightF : leftF && rightF;
-  if (!frameOk) {
-    return {
-      visible: true,
-      hint: "请把手机放远，让髋与脚踝入画",
-      reason: "out_of_frame",
     };
   }
 
   const hipsY: number[] = [];
   const anklesY: number[] = [];
-  if (leftF) {
-    hipsY.push(pose[LandmarkIndex.LeftHip]!.y);
-    anklesY.push(pose[LandmarkIndex.LeftAnkle]!.y);
-  }
-  if (rightF) {
-    hipsY.push(pose[LandmarkIndex.RightHip]!.y);
-    anklesY.push(pose[LandmarkIndex.RightAnkle]!.y);
+  const pushSpan = (ready: boolean, hip: LandmarkIndex, knee: LandmarkIndex, ankle: LandmarkIndex) => {
+    if (!ready) return;
+    const hipLm = pose[hip];
+    if (!hipLm) return;
+    hipsY.push(hipLm.y);
+    const ankleLm = pose[ankle];
+    const kneeLm = pose[knee];
+    if (ankleLm && inPicture(ankleLm.x, ankleLm.y, eps)) {
+      anklesY.push(ankleLm.y);
+    } else if (kneeLm && inPicture(kneeLm.x, kneeLm.y, eps)) {
+      anklesY.push(kneeLm.y);
+    }
+  };
+  pushSpan(
+    leftReady,
+    LandmarkIndex.LeftHip,
+    LandmarkIndex.LeftKnee,
+    LandmarkIndex.LeftAnkle,
+  );
+  pushSpan(
+    rightReady,
+    LandmarkIndex.RightHip,
+    LandmarkIndex.RightKnee,
+    LandmarkIndex.RightAnkle,
+  );
+  if (hipsY.length === 0 || anklesY.length === 0) {
+    return { visible: false, hint: null, reason: "ok" };
   }
   const span = Math.max(...anklesY) - Math.min(...hipsY);
   if (span > merged.maxBodySpanY) {
@@ -298,38 +367,32 @@ export function evaluatePlacement(
 }
 
 /**
- * 把站位原因 + 推荐机位合成一条提示（FR-022）。
- * 仅有侧片的动作正对镜头时，示范窗仍播侧面；文案改叫用户侧对手机。
+ * 站位提示只在关键点出画时出现，并点明是哪一处（FR-022）。
+ * 机位不理想不再要求换到侧面或正面；计次照常，纠错按看得到的关节关掉。
  * 趴地动作用「把手机放远」，不用「后退」。
  */
 export function composePlacementHint(
   result: PlacementGuideResult,
   ctx: PlacementHintContext,
 ): string | null {
-  const needSide =
-    ctx.recommendedCamera === "side" && ctx.observedCamera === "front";
-  const needFront =
-    Boolean(ctx.requireFrontPlane) && ctx.observedCamera === "side";
-  const needBack =
+  const needJoints =
     result.reason === "missing_keypoints" ||
     result.reason === "too_close" ||
     result.reason === "out_of_frame";
 
-  if (!needSide && !needFront && !needBack) return result.hint;
+  if (!needJoints) return result.hint;
+  if (result.hint) {
+    if (ctx.holdSecond && !result.hint.includes("计秒")) {
+      return `${result.hint}后再计秒`;
+    }
+    return result.hint;
+  }
 
   const move =
     ctx.floorHold || ctx.holdSecond ? "请把手机放远" : "请后退";
-  const bits: string[] = [];
-  if (needFront) bits.push("请面对镜头");
-  if (needSide) bits.push("请把手机放到身体侧面");
-  if (needBack) {
-    bits.push(
-      ctx.holdSecond
-        ? `${move}，让${ctx.jointsCue}入画后再计秒`
-        : `${move}，让${ctx.jointsCue}入画`,
-    );
-  }
-  return bits.join("；");
+  return ctx.holdSecond
+    ? `${move}，让${ctx.jointsCue}入画后再计秒`
+    : `${move}，让${ctx.jointsCue}入画`;
 }
 
 /** 站位条展示文案：动作引导，禁止写成「示范窗」。 */

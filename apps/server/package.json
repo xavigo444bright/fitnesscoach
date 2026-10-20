@@ -1,0 +1,20 @@
+{
+  "name": "@fitness-coach/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@fitness-coach/core": "workspace:*",
+    "jose": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

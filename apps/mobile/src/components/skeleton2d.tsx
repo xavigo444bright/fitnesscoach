@@ -15,6 +15,8 @@ export function skeletonStatusColor(status: string): string {
       return colors.warning;
     case 'error':
       return colors.error;
+    case 'muted':
+      return colors.tabInactive;
     default:
       return colors.correct;
   }

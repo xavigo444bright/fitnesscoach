@@ -1,15 +1,16 @@
 /**
- * hold_second 中央计时（UX-009）：与 UX-007 打勾同位置同尺寸，
- * 撑稳时显示有效秒数提示「计时进行中」；暂停隐藏。底栏仍做汇总。
+ * hold_second 计时：与打勾同一角落，撑稳时显示秒数。
  */
 import type { HoldTimerOverlayProps } from '@fitness-coach/ui';
-import { colors, motion } from '@fitness-coach/ui';
+import { colors, layout, motion } from '@fitness-coach/ui';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = HoldTimerOverlayProps;
 
 export default function HoldTimerOverlay({ active, seconds }: Props) {
+  const insets = useSafeAreaInsets();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.6)).current;
   const prevActive = useRef(false);
@@ -52,7 +53,16 @@ export default function HoldTimerOverlay({ active, seconds }: Props) {
   if (!active) return null;
 
   return (
-    <View style={styles.wrap} pointerEvents="none">
+    <View
+      style={[
+        styles.wrap,
+        {
+          paddingLeft: Math.max(16, insets.left),
+          paddingBottom: layout.bottomBarHeight + Math.max(insets.bottom, 8) + 8,
+        },
+      ]}
+      pointerEvents="none"
+    >
       <Animated.View
         style={[styles.badge, { opacity, transform: [{ scale }] }]}
         accessibilityRole="text"
@@ -71,8 +81,8 @@ export default function HoldTimerOverlay({ active, seconds }: Props) {
 const styles = StyleSheet.create({
   wrap: {
     ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
     zIndex: 90,
   },
   badge: {

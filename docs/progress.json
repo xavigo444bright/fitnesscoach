@@ -1,9 +1,9 @@
 {
   "version": "0.6.59",
   "plan": "module-based",
-  "last_updated": "2026-09-24T00:02:00+08:00",
+  "last_updated": "2026-10-03T22:30:00+08:00",
   "status": "in_progress",
-  "blocker": "TestFlight 0.1.0/1 已上传。内测三条改动在工作区：站位不稳时示范窗不跳、跟练可跳过、休息可拖沙漏。尚未打进 TestFlight。勿 arm。",
+  "blocker": "交接 docs/session-compression-2026-10-03-gym.md。G4B：FC Debug 连 Metro；Fitness Coach 离线包已含记重组表、飞鸟、前平举双臂、高位下拉、引体。不要点重新提交审核。真机 VT 未过。勿 arm。",
   "focus": "app",
   "backlog": [
     {
@@ -37,7 +37,7 @@
     {
       "id": "APP-DISTRIBUTE",
       "title": "App 内测分发与上架（TestFlight / Store）",
-      "note": "2026-09-24：production IPA 已提交 TestFlight（build a30ef3de，ASC 6814918688，0.1.0/1）。待测试员装上，才算 VT-P4-005b。",
+      "note": "ASC 6814918688。审核仍是 2026-09-25 的 2.1.0 拒绝，不要点重新提交。0.1.0（2）已上传 TestFlight。G4B 离线包是本机 Release，不是 TestFlight 包。VT-P4-005b 未过。",
       "before": "launch",
       "status": "in_progress"
     },
@@ -65,7 +65,7 @@
     {
       "id": "ASSET-SCOUT",
       "title": "批量扩动作库：选片清单 + 版权门闩 + ingest",
-      "note": "2026-09-21：用户要求 grokbot 扩库。Phase G=catalog 12 条优先；Phase H=99 条新 id。机位已写入 specs.json。先 --yt-search 出 proposed，未授权不 download。真源 docs/exercises/asset-scout/expansion-queue.json。",
+      "note": "2026-10-02：Phase G 12 条已接到 core 与 App 训练会话，tier=coachable，真机 VT 未过。鸟狗 bottomBelow 改为 40。clips.json 67 条未 commit。rejected 跳过；lat-pulldown-side-01 只作示范。背后拍摄：lat-pulldown-front-01、calf-raise-front-01。不补弹力带真侧面、侧平板侧面、鸟狗 3/4。Phase H 未开工。",
       "after": "M13-GATE",
       "status": "in_progress"
     },
@@ -203,7 +203,7 @@
     "stopped_at": null,
     "stop_reason": null,
     "stop_after_next_tick": false,
-    "note": "T26 已通过。用户下令首页动作在前，并做可安装包。勿 arm。"
+    "note": "2026-10-03 健身房改动已写入离线包，真机未勾。交接 docs/session-compression-2026-10-03-gym.md。勿 arm。"
   },
   "current_module": "M13",
   "modules": {
@@ -403,6 +403,15 @@
   ],
   "iteration_log": [
     {
+      "at": "2026-10-03T22:30:00+08:00",
+      "module": "M13",
+      "task": "session-compress",
+      "result": "partial",
+      "summary": "健身房改动精炼进 docs/session-compression-2026-10-03-gym.md。离线包已装 G4B，含组表、飞鸟 0.2.0、前平举双臂、高位下拉臂链、引体不强制侧面。核心 515 测绿。未勾 VT。未 arm。未 commit。",
+      "next": "新对话先读交接。用户发录屏则先分析，等说改再写。不要建议换机位。",
+      "human_action_needed": true
+    },
+    {
       "at": "2026-09-24T00:02:00+08:00",
       "module": "M8",
       "task": "APP-DISTRIBUTE",
@@ -479,7 +488,7 @@
       "module": "M8",
       "task": "T23",
       "result": "partial",
-      "summary": "G4B 已安装 com.Myfitco.mobile，签名 93UHA7C4LM 且含 com.apple.developer.applesignin。codesign 用 Apple Development: Ruiyi Fang。未伪绑定。未 arm。等人真机验系统框。",
+      "summary": "G4B 已安装 com.Myfitco.mobile，签名 93UHA7C4LM 且含 com.apple.developer.applesignin。codesign 用 Apple Development: Apple Developer。未伪绑定。未 arm。等人真机验系统框。",
       "next": "用户打开新装的 Fitness Coach，点通过 Apple 登录：出系统框、取消仍游客、登录后课表还在。口令：T23 通过。",
       "human_action_needed": true
     },
@@ -488,7 +497,7 @@
       "module": "M8",
       "task": "T23",
       "result": "partial",
-      "summary": "已有 Apple Development: Ruiyi Fang（93UHA7C4LM）。xcodebuild 仍 No Accounts：DVT Apple ID 列表为空，没有 com.Myfitco.mobile 描述文件。未重装。未伪绑定。未 arm。",
+      "summary": "已有 Apple Development: Apple Developer（93UHA7C4LM）。xcodebuild 仍 No Accounts：DVT Apple ID 列表为空，没有 com.Myfitco.mobile 描述文件。未重装。未伪绑定。未 arm。",
       "next": "用户在 Xcode Accounts 重新登录付费 Apple ID，确认左边出现邮箱后再回「左边有邮箱」。然后重装 G4B。口令：T23 通过。",
       "human_action_needed": true
     },
@@ -497,8 +506,8 @@
       "module": "M8",
       "task": "T23",
       "result": "partial",
-      "summary": "Team 改为 Ruiyi Fang / 93UHA7C4LM，Bundle com.Myfitco.mobile，applesignin 已写。xcodebuild 失败：Xcode 账号 keychain 失效（No Accounts / missing Xcode-Username）。未重装。未伪绑定。未 arm。",
-      "next": "用户在 Xcode Settings → Accounts 重新登录付费 Apple ID，看到 Ruiyi Fang 后回「已登录」。然后重装 G4B。口令：T23 通过。",
+      "summary": "Team 改为 Apple Developer / 93UHA7C4LM，Bundle com.Myfitco.mobile，applesignin 已写。xcodebuild 失败：Xcode 账号 keychain 失效（No Accounts / missing Xcode-Username）。未重装。未伪绑定。未 arm。",
+      "next": "用户在 Xcode Settings → Accounts 重新登录付费 Apple ID，看到 Apple Developer 后回「已登录」。然后重装 G4B。口令：T23 通过。",
       "human_action_needed": true
     },
     {

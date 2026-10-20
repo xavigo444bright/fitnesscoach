@@ -1,3 +1,4 @@
+import { probeWorldLandmarks } from '@fitness-coach/pose-native';
 import { RNMediapipe, switchCamera } from '@thinksys/react-native-mediapipe';
 import { useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
@@ -36,6 +37,7 @@ export default function PoseSpikeScreen() {
   const [landmarkCount, setLandmarkCount] = useState(0);
   const [fps, setFps] = useState(0);
   const [rawPreview, setRawPreview] = useState('');
+  const [worldLine, setWorldLine] = useState('世界坐标 检测中');
   const frameTimes = useRef<number[]>([]);
 
   const onLandmark = useCallback((data: unknown) => {
@@ -45,6 +47,12 @@ export default function PoseSpikeScreen() {
     frameTimes.current = times;
     setFps(times.length);
     setLandmarkCount(countLandmarks(data));
+    const world = probeWorldLandmarks(data);
+    setWorldLine(
+      world.present
+        ? `世界坐标 有 · ${world.count} 点${world.hasZ ? ' · 含 z' : ''}`
+        : '世界坐标 无',
+    );
     try {
       setRawPreview(JSON.stringify(data).slice(0, 120));
     } catch {
@@ -96,6 +104,7 @@ export default function PoseSpikeScreen() {
         <Text style={styles.hudTitle}>M0-T4 姿态 Spike · MediaPipe</Text>
         <Text style={styles.hudText}>关键点: {landmarkCount}（目标 ≥17）</Text>
         <Text style={styles.hudText}>FPS: {fps}（目标 ≥15）</Text>
+        <Text style={styles.hudText}>{worldLine}</Text>
         {rawPreview ? (
           <Text style={styles.raw} numberOfLines={2}>
             raw: {rawPreview}

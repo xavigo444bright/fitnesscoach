@@ -5,6 +5,8 @@
  */
 import { colors, fontSize, layout } from '@fitness-coach/ui';
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTr } from '../i18n';
 
 type Props = {
   visible: boolean;
@@ -12,19 +14,28 @@ type Props = {
 };
 
 export default function PlacementGuide({ visible, hint }: Props) {
+  const insets = useSafeAreaInsets();
+  const tr = useTr();
   if (!visible || !hint) return null;
   return (
     <View style={styles.root} pointerEvents="none">
-      <View style={styles.hintBar}>
+      <View
+        style={[
+          styles.hintBar,
+          {
+            bottom: layout.bottomBarHeight + Math.max(insets.bottom, 8),
+            left: Math.max(16, insets.left),
+          },
+        ]}
+      >
         <Text
           style={styles.hint}
-          numberOfLines={1}
+          numberOfLines={2}
           adjustsFontSizeToFit
-          minimumFontScale={0.62}
+          minimumFontScale={0.7}
           allowFontScaling={false}
-          ellipsizeMode="clip"
         >
-          {hint}
+          {tr(hint)}
         </Text>
       </View>
     </View>
@@ -37,15 +48,12 @@ const styles = StyleSheet.create({
   },
   hintBar: {
     position: 'absolute',
-    bottom: layout.bottomBarHeight + 20,
-    left: 16,
-    right: 16,
+    maxWidth: 280,
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: colors.overlayScrim,
     borderRadius: 8,
     overflow: 'hidden',
-    justifyContent: 'center',
   },
   hint: {
     color: colors.overlayText,

@@ -4,6 +4,7 @@
 import { colors, fontSize, layout, radius, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { useTr } from '../i18n';
 
 type Props = {
   title: string;
@@ -22,19 +23,21 @@ export default function WorkoutModuleCard({
   onPress,
   onDelete,
 }: Props) {
+  const tr = useTr();
+  const shownTitle = tr(title);
   const card = (
     <Pressable
       onPress={onPress}
       style={styles.card}
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={shownTitle}
     >
       <View style={styles.top}>
-        <Text style={styles.title}>{title}</Text>
-        {badge ? <Text style={styles.badge}>{badge}</Text> : null}
+        <Text style={styles.title}>{shownTitle}</Text>
+        {badge ? <Text style={styles.badge}>{tr(badge)}</Text> : null}
       </View>
-      <Text style={styles.meta}>{meta}</Text>
-      <Text style={styles.summary}>{summary}</Text>
+      <Text style={styles.meta}>{tr(meta)}</Text>
+      <Text style={styles.summary}>{tr(summary)}</Text>
     </Pressable>
   );
 

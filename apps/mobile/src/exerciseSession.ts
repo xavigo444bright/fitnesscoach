@@ -35,6 +35,42 @@ import {
   PIKE_PUSHUP,
   PIKE_PUSHUP_DEPTH_RULE_ID,
   PIKE_PUSHUP_RULES,
+  LAT_PULLDOWN,
+  LAT_PULLDOWN_DEPTH_RULE_ID,
+  LAT_PULLDOWN_RULES,
+  SEATED_ROW,
+  SEATED_ROW_DEPTH_RULE_ID,
+  SEATED_ROW_RULES,
+  SUPERMAN,
+  SUPERMAN_DEPTH_RULE_ID,
+  SUPERMAN_RULES,
+  BAND_ROW,
+  BAND_ROW_DEPTH_RULE_ID,
+  BAND_ROW_RULES,
+  LEG_PRESS,
+  LEG_PRESS_DEPTH_RULE_ID,
+  LEG_PRESS_RULES,
+  CALF_RAISE,
+  CALF_RAISE_DEPTH_RULE_ID,
+  CALF_RAISE_RULES,
+  GOBLET_SQUAT,
+  GOBLET_SQUAT_DEPTH_RULE_ID,
+  GOBLET_SQUAT_RULES,
+  DEAD_BUG,
+  DEAD_BUG_DEPTH_RULE_ID,
+  DEAD_BUG_RULES,
+  BIRD_DOG,
+  BIRD_DOG_DEPTH_RULE_ID,
+  BIRD_DOG_RULES,
+  CRUNCH,
+  CRUNCH_DEPTH_RULE_ID,
+  CRUNCH_RULES,
+  SIDE_PLANK,
+  SIDE_PLANK_DEPTH_RULE_ID,
+  SIDE_PLANK_RULES,
+  HANGING_KNEE_RAISE,
+  HANGING_KNEE_RAISE_DEPTH_RULE_ID,
+  HANGING_KNEE_RAISE_RULES,
   DB_ROW,
   DB_ROW_DEPTH_RULE_ID,
   DB_ROW_RULES,
@@ -49,6 +85,18 @@ import {
   DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
   DEFAULT_FACE_PULL_PHASE_CONFIG,
   DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
+  DEFAULT_LAT_PULLDOWN_PHASE_CONFIG,
+  DEFAULT_SEATED_ROW_PHASE_CONFIG,
+  DEFAULT_SUPERMAN_PHASE_CONFIG,
+  DEFAULT_BAND_ROW_PHASE_CONFIG,
+  DEFAULT_LEG_PRESS_PHASE_CONFIG,
+  DEFAULT_CALF_RAISE_PHASE_CONFIG,
+  DEFAULT_GOBLET_SQUAT_PHASE_CONFIG,
+  DEFAULT_DEAD_BUG_PHASE_CONFIG,
+  DEFAULT_BIRD_DOG_PHASE_CONFIG,
+  DEFAULT_CRUNCH_PHASE_CONFIG,
+  DEFAULT_SIDE_PLANK_PHASE_CONFIG,
+  DEFAULT_HANGING_KNEE_RAISE_PHASE_CONFIG,
   DEFAULT_DB_ROW_PHASE_CONFIG,
   DEFAULT_GLUTE_BRIDGE_PHASE_CONFIG,
   DEFAULT_LUNGE_PHASE_CONFIG,
@@ -80,7 +128,9 @@ import {
   RDL_RULES,
   SQUAT,
   SQUAT_RULES,
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   dbRowWorkingElbowAngle,
   gluteBridgeDriveDeg,
   lungeWorkingKneeAngle,
@@ -88,11 +138,18 @@ import {
   preferredVisibleElbowAngle,
   plankDriveDeg,
   pullupWorkingElbowAngle,
+  latPulldownWorkingElbowAngle,
   pushupElbowAngle,
   rdlHipAngle,
   lateralRaiseDriveDeg,
   shoulderRaiseDriveDeg,
   squatKneeAngle,
+  calfRaiseDriveDeg,
+  crunchDriveDeg,
+  deadBugDriveDeg,
+  birdDogDriveDeg,
+  hangingKneeHipAngle,
+  supermanDriveDeg,
   type AngleFn,
   type CoachableExerciseId,
   type EvaluableRule,
@@ -253,7 +310,7 @@ const SESSIONS: Record<ExerciseId, ExerciseSession> = {
     cues: [
       '肩下沉启动，拉至下巴过杆',
       '控制下放，少借摆浪',
-      '手机侧面摆放，看清肩、肘',
+      '肩、肘入画即可',
     ],
   },
   'db-fly': {
@@ -303,7 +360,7 @@ const SESSIONS: Record<ExerciseId, ExerciseSession> = {
     def: CABLE_CROSSOVER,
     rules: CABLE_CROSSOVER_RULES,
     phaseConfig: DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG,
-    angleFn: dbFlyDriveDeg,
+    angleFn: cableCrossoverDriveDeg,
     depthRuleId: CABLE_CROSSOVER_DEPTH_RULE_ID,
     bodyPart: '胸部',
     cues: [
@@ -359,7 +416,7 @@ const SESSIONS: Record<ExerciseId, ExerciseSession> = {
     def: REAR_DELT_FLY,
     rules: REAR_DELT_FLY_RULES,
     phaseConfig: DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
-    angleFn: dbFlyDriveDeg,
+    angleFn: rearDeltFlyDriveDeg,
     depthRuleId: REAR_DELT_FLY_DEPTH_RULE_ID,
     bodyPart: '肩部',
     cues: [
@@ -394,6 +451,175 @@ const SESSIONS: Record<ExerciseId, ExerciseSession> = {
       '髋高耸成倒 V',
       '头向地面下降再撑起',
       '手机侧面摆放，看清肩、肘、髋、踝',
+    ],
+  },
+  'lat-pulldown': {
+    id: 'lat-pulldown',
+    def: LAT_PULLDOWN,
+    rules: LAT_PULLDOWN_RULES,
+    phaseConfig: DEFAULT_LAT_PULLDOWN_PHASE_CONFIG,
+    angleFn: latPulldownWorkingElbowAngle,
+    depthRuleId: LAT_PULLDOWN_DEPTH_RULE_ID,
+    bodyPart: '背部',
+    cues: [
+      '杆拉至上胸，肘向下向后',
+      '少借躯干后仰',
+      '肩、肘入画即可',
+    ],
+  },
+  'seated-row': {
+    id: 'seated-row',
+    def: SEATED_ROW,
+    rules: SEATED_ROW_RULES,
+    phaseConfig: DEFAULT_SEATED_ROW_PHASE_CONFIG,
+    angleFn: dbRowWorkingElbowAngle,
+    depthRuleId: SEATED_ROW_DEPTH_RULE_ID,
+    bodyPart: '背部',
+    cues: [
+      '躯干直立，肘收到髋侧',
+      '少借躯干前后摆',
+      '手机侧面摆放，看清肩、肘、髋',
+    ],
+  },
+  superman: {
+    id: 'superman',
+    def: SUPERMAN,
+    rules: SUPERMAN_RULES,
+    phaseConfig: DEFAULT_SUPERMAN_PHASE_CONFIG,
+    angleFn: supermanDriveDeg,
+    depthRuleId: SUPERMAN_DEPTH_RULE_ID,
+    bodyPart: '背部',
+    cues: [
+      '俯卧，胸和腿一起抬离垫子',
+      '抬到能离开垫面即可',
+      '手机侧面摆放，看清肩、髋、膝',
+    ],
+  },
+  'band-row': {
+    id: 'band-row',
+    def: BAND_ROW,
+    rules: BAND_ROW_RULES,
+    phaseConfig: DEFAULT_BAND_ROW_PHASE_CONFIG,
+    angleFn: dbRowWorkingElbowAngle,
+    depthRuleId: BAND_ROW_DEPTH_RULE_ID,
+    bodyPart: '背部',
+    cues: [
+      '锚点在身前，肘收到身侧',
+      '少借躯干后仰',
+      '手机斜侧 3/4 当侧面，看清肩、肘',
+    ],
+  },
+  'leg-press': {
+    id: 'leg-press',
+    def: LEG_PRESS,
+    rules: LEG_PRESS_RULES,
+    phaseConfig: DEFAULT_LEG_PRESS_PHASE_CONFIG,
+    angleFn: lungeWorkingKneeAngle,
+    depthRuleId: LEG_PRESS_DEPTH_RULE_ID,
+    bodyPart: '下肢',
+    cues: [
+      '腰贴靠垫，膝再屈到约平行',
+      '不要只做半程',
+      '手机侧面或斜侧摆放，看清髋、膝、踝',
+    ],
+  },
+  'calf-raise': {
+    id: 'calf-raise',
+    def: CALF_RAISE,
+    rules: CALF_RAISE_RULES,
+    phaseConfig: DEFAULT_CALF_RAISE_PHASE_CONFIG,
+    angleFn: calfRaiseDriveDeg,
+    depthRuleId: CALF_RAISE_DEPTH_RULE_ID,
+    bodyPart: '下肢',
+    cues: [
+      '站立抬脚跟',
+      '控制下落',
+      '手机侧面摆放，看清膝、踝、脚尖',
+    ],
+  },
+  'goblet-squat': {
+    id: 'goblet-squat',
+    def: GOBLET_SQUAT,
+    rules: GOBLET_SQUAT_RULES,
+    phaseConfig: DEFAULT_GOBLET_SQUAT_PHASE_CONFIG,
+    angleFn: lungeWorkingKneeAngle,
+    depthRuleId: GOBLET_SQUAT_DEPTH_RULE_ID,
+    bodyPart: '下肢',
+    cues: [
+      '铃贴胸，蹲到膝角进入底部',
+      '躯干不要折得太前',
+      '手机侧面摆放，看清肩、髋、膝、踝',
+    ],
+  },
+  'dead-bug': {
+    id: 'dead-bug',
+    def: DEAD_BUG,
+    rules: DEAD_BUG_RULES,
+    phaseConfig: DEFAULT_DEAD_BUG_PHASE_CONFIG,
+    angleFn: deadBugDriveDeg,
+    depthRuleId: DEAD_BUG_DEPTH_RULE_ID,
+    bodyPart: '核心',
+    cues: [
+      '对侧手脚伸出去再收回，左右各算一次',
+      '腰离开垫子就把腰压回去',
+      '手机侧面摆放，看清肩、髋、膝',
+    ],
+  },
+  'bird-dog': {
+    id: 'bird-dog',
+    def: BIRD_DOG,
+    rules: BIRD_DOG_RULES,
+    phaseConfig: DEFAULT_BIRD_DOG_PHASE_CONFIG,
+    angleFn: birdDogDriveDeg,
+    depthRuleId: BIRD_DOG_DEPTH_RULE_ID,
+    bodyPart: '核心',
+    cues: [
+      '对侧手脚向后伸，抬平即可',
+      '髋别翻、腿别踢太高',
+      '手机侧面摆放，看清肩、髋、膝',
+    ],
+  },
+  crunch: {
+    id: 'crunch',
+    def: CRUNCH,
+    rules: CRUNCH_RULES,
+    phaseConfig: DEFAULT_CRUNCH_PHASE_CONFIG,
+    angleFn: crunchDriveDeg,
+    depthRuleId: CRUNCH_DEPTH_RULE_ID,
+    bodyPart: '核心',
+    cues: [
+      '下背贴地，肩胛离地即可',
+      '不必坐起来',
+      '手机侧面摆放，看清肩、髋',
+    ],
+  },
+  'side-plank': {
+    id: 'side-plank',
+    def: SIDE_PLANK,
+    rules: SIDE_PLANK_RULES,
+    phaseConfig: DEFAULT_SIDE_PLANK_PHASE_CONFIG,
+    angleFn: plankDriveDeg,
+    depthRuleId: SIDE_PLANK_DEPTH_RULE_ID,
+    bodyPart: '核心',
+    countMode: 'hold_second',
+    cues: [
+      '身体撑成一条线，髋不要掉下去',
+      '撑稳按秒计',
+      '手机斜对身体正面，看清肩、髋、踝',
+    ],
+  },
+  'hanging-knee-raise': {
+    id: 'hanging-knee-raise',
+    def: HANGING_KNEE_RAISE,
+    rules: HANGING_KNEE_RAISE_RULES,
+    phaseConfig: DEFAULT_HANGING_KNEE_RAISE_PHASE_CONFIG,
+    angleFn: hangingKneeHipAngle,
+    depthRuleId: HANGING_KNEE_RAISE_DEPTH_RULE_ID,
+    bodyPart: '核心',
+    cues: [
+      '屈膝向胸口抬到髋的高度',
+      '少借摆浪',
+      '手机侧面摆放，看清肩、髋、膝',
     ],
   },
 };
@@ -444,6 +670,41 @@ export function driveAngleHud(
   }
   if (id === 'face-pull' || id === 'pike-pushup') {
     return { label: '肘角', displayDeg: driveDeg };
+  }
+  if (
+    id === 'lat-pulldown' ||
+    id === 'seated-row' ||
+    id === 'band-row'
+  ) {
+    return { label: '工作肘角', displayDeg: driveDeg };
+  }
+  if (id === 'leg-press' || id === 'goblet-squat') {
+    return { label: '工作膝角', displayDeg: driveDeg };
+  }
+  if (id === 'hanging-knee-raise') {
+    return { label: '髋角', displayDeg: driveDeg };
+  }
+  if (
+    id === 'superman' ||
+    id === 'calf-raise' ||
+    id === 'dead-bug' ||
+    id === 'bird-dog' ||
+    id === 'crunch' ||
+    id === 'side-plank'
+  ) {
+    return {
+      label:
+        id === 'superman'
+          ? '抬伸角'
+          : id === 'calf-raise'
+            ? '踝角'
+            : id === 'crunch'
+              ? '卷起角'
+              : id === 'side-plank'
+                ? '身体一线'
+                : '伸髋角',
+      displayDeg: driveDeg == null ? null : 180 - driveDeg,
+    };
   }
   return { label: '膝角', displayDeg: driveDeg };
 }

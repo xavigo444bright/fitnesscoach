@@ -1,7 +1,8 @@
 import { buildRdlNearHipMeasured } from "../boundary/poseTune.js";
 import { buildRaisePose } from "../fixtures/raise.js";
-import { buildDbFlyPose } from "../fixtures/dbFly.js";
+import { buildArmTiltPose, buildDbFlyPose } from "../fixtures/dbFly.js";
 import { buildPushupPose } from "../fixtures/pushup.js";
+import { buildPullupHangPose } from "../fixtures/pullupHang.js";
 import type { Phase, Pose } from "../types.js";
 
 export type PushupLikeGhostId =
@@ -61,7 +62,32 @@ export const OHP_GHOST_KEYFRAMES = set(165, 130, 90);
 
 export const BENCH_PRESS_GHOST_KEYFRAMES = set(170, 140, 95);
 
-export const PULLUP_GHOST_KEYFRAMES = set(165, 125, 75);
+function pullupHangKeyframes(view: "side" | "front") {
+  const frame = (
+    id: PushupLikeGhostId,
+    phaseHint: PushupLikeKeyframe["phaseHint"],
+    elbowDeg: number,
+  ): PushupLikeKeyframe => ({
+    id,
+    phaseHint,
+    pose: buildPullupHangPose({ elbowDeg, view }),
+  });
+  return {
+    stand: frame("stand", "stand", 165),
+    descend_mid: frame("descend_mid", "descend_mid", 125),
+    bottom: frame("bottom", "bottom", 75),
+    ascend_mid: frame("ascend_mid", "ascend_mid", 125),
+  };
+}
+
+/** 侧面竖直悬垂。正后/正面形状由认人模板另加，不替换这套侧面关键帧。 */
+export const PULLUP_GHOST_KEYFRAMES = pullupHangKeyframes("side");
+
+export const PULLUP_FRONT_HANG_POSES = [
+  buildPullupHangPose({ elbowDeg: 165, view: "front" }),
+  buildPullupHangPose({ elbowDeg: 125, view: "front" }),
+  buildPullupHangPose({ elbowDeg: 75, view: "front" }),
+];
 
 export const DIP_GHOST_KEYFRAMES = set(165, 130, 80);
 
@@ -119,22 +145,22 @@ export const REAR_DELT_FLY_GHOST_KEYFRAMES = {
   stand: {
     id: "stand" as const,
     phaseHint: "stand" as const,
-    pose: buildDbFlyPose({ wristIncludedDeg: 18 }),
+    pose: buildArmTiltPose({ tiltDeg: 12 }),
   },
   descend_mid: {
     id: "descend_mid" as const,
     phaseHint: "descend_mid" as const,
-    pose: buildDbFlyPose({ wristIncludedDeg: 45 }),
+    pose: buildArmTiltPose({ tiltDeg: 40 }),
   },
   bottom: {
     id: "bottom" as const,
     phaseHint: "bottom" as const,
-    pose: buildDbFlyPose({ wristIncludedDeg: 70 }),
+    pose: buildArmTiltPose({ tiltDeg: 70 }),
   },
   ascend_mid: {
     id: "ascend_mid" as const,
     phaseHint: "ascend_mid" as const,
-    pose: buildDbFlyPose({ wristIncludedDeg: 45 }),
+    pose: buildArmTiltPose({ tiltDeg: 40 }),
   },
 };
 

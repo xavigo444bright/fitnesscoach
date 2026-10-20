@@ -2,8 +2,9 @@
  * PG-004 FeedbackBar 最小实现（M3-T3）
  */
 import type { FeedbackBarItem } from '@fitness-coach/render';
-import { colors, layout } from '@fitness-coach/ui';
+import { colors, fontSize, layout } from '@fitness-coach/ui';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 type Props = {
   items: FeedbackBarItem[];
@@ -18,6 +19,7 @@ function barColor(item: FeedbackBarItem): string {
 }
 
 export default function FeedbackBar({ items }: Props) {
+  const tr = useTr();
   if (items.length === 0) return null;
   return (
     <View style={styles.wrap} pointerEvents="none">
@@ -25,10 +27,13 @@ export default function FeedbackBar({ items }: Props) {
         <Text
           key={`${item.phase}-${item.ruleId}`}
           style={[styles.line, { color: barColor(item) }]}
-          numberOfLines={1}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          allowFontScaling={false}
         >
           {item.phase === 'recovered' ? '✓ ' : '⚠ '}
-          {item.message}
+          {tr(item.message)}
         </Text>
       ))}
     </View>
@@ -37,6 +42,7 @@ export default function FeedbackBar({ items }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
+    width: '100%',
     minHeight: layout.feedbackBarMinHeight,
     backgroundColor: colors.overlayScrim,
     borderRadius: 10,
@@ -46,7 +52,7 @@ const styles = StyleSheet.create({
   },
   line: {
     color: colors.overlayText,
-    fontSize: 18,
+    fontSize: fontSize.feedback,
     fontWeight: '600',
     marginBottom: 2,
   },

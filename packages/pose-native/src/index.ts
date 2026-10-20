@@ -28,7 +28,9 @@ export {
   extractMediapipePoseLists,
   poseFromMediapipeEvent,
   posesFromMediapipeEvent,
+  probeWorldLandmarks,
   timestampMsFromMediapipeEvent,
+  type WorldLandmarkProbe,
 } from "./mediapipe.js";
 export {
   AdaptiveQualityController,

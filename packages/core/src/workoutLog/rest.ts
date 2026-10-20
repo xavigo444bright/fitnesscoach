@@ -27,6 +27,24 @@ export function restSandCapacitySec(durationSec: number): number {
 }
 
 /**
+ * 从当前剩余秒起拖。deltaYpx 向下为正，时间减少；向上为负，时间增加。
+ * 整段沙漏高度对应 capacitySec，点下去本身不改秒数。
+ */
+export function restRemainingFromDrag(
+  startRemainingSec: number,
+  deltaYpx: number,
+  heightPx: number,
+  capacitySec: number,
+): number {
+  const cap = Math.max(1, capacitySec);
+  const span = Math.max(1, heightPx);
+  const deltaSec = (-deltaYpx / span) * cap;
+  const next = startRemainingSec + deltaSec;
+  if (!Number.isFinite(next)) return 0;
+  return Math.min(cap, Math.max(0, Math.round(next)));
+}
+
+/**
  * 手指在沙漏上的位置。fractionFromTop：0 在顶（满）、1 在底（空）。
  */
 export function restRemainingFromSandFraction(

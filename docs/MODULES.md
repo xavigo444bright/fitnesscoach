@@ -137,7 +137,7 @@ flowchart TD
 
 ## M2B — Pose 适配层（小程序）**已取消（2026-09-07）**
 
-不再排期、不再验收。遗留 `packages/pose-mp` 不维护。
+不再排期、不再验收。`packages/pose-mp` 已从仓库移除。
 
 ---
 
@@ -192,7 +192,7 @@ flowchart TD
 
 ## M5 — 小程序应用壳 **已取消（2026-09-07）**
 
-不再排期、不再验收。遗留 `apps/miniprogram` 不维护。
+不再排期、不再验收。`apps/miniprogram` 已从仓库移除。
 
 ---
 

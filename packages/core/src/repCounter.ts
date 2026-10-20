@@ -78,7 +78,19 @@ export interface RepCounterOptions {
     | "front-raise"
     | "rear-delt-fly"
     | "face-pull"
-    | "pike-pushup";
+    | "pike-pushup"
+    | "lat-pulldown"
+    | "seated-row"
+    | "superman"
+    | "band-row"
+    | "leg-press"
+    | "calf-raise"
+    | "goblet-squat"
+    | "dead-bug"
+    | "bird-dog"
+    | "crunch"
+    | "side-plank"
+    | "hanging-knee-raise";
   /** 默认 rep；平板用 hold_second（撑稳每满 1s +1）。 */
   countMode?: "rep" | "hold_second";
   /** hold_second 用的墙钟；缺省按 50ms/帧。 */
@@ -272,7 +284,19 @@ export function messageForRepReject(
     | "front-raise"
     | "rear-delt-fly"
     | "face-pull"
-    | "pike-pushup" = "squat",
+    | "pike-pushup"
+    | "lat-pulldown"
+    | "seated-row"
+    | "superman"
+    | "band-row"
+    | "leg-press"
+    | "calf-raise"
+    | "goblet-squat"
+    | "dead-bug"
+    | "bird-dog"
+    | "crunch"
+    | "side-plank"
+    | "hanging-knee-raise" = "squat",
 ): string {
   if (exerciseId === "pushup") {
     if (reason === "shallow") return "降得不够低，未计入次数";
@@ -345,6 +369,54 @@ export function messageForRepReject(
   if (exerciseId === "pike-pushup") {
     if (reason === "shallow") return "降得不够低，未计入次数";
     return "头再靠近地面一些";
+  }
+  if (exerciseId === "lat-pulldown") {
+    if (reason === "shallow") return "拉得不够低，未计入次数";
+    return "再拉低一些，杆收到上胸";
+  }
+  if (exerciseId === "seated-row") {
+    if (reason === "shallow") return "拉得不够后，未计入次数";
+    return "再往后拉，肘收到髋侧";
+  }
+  if (exerciseId === "superman") {
+    if (reason === "shallow") return "抬得不够高，未计入次数";
+    return "胸和腿再抬离垫子一些";
+  }
+  if (exerciseId === "band-row") {
+    if (reason === "shallow") return "拉得不够后，未计入次数";
+    return "再往后拉，肘收到身侧";
+  }
+  if (exerciseId === "leg-press") {
+    if (reason === "shallow") return "屈膝不够，未计入次数";
+    return "再屈膝一些，不要只做半程";
+  }
+  if (exerciseId === "calf-raise") {
+    if (reason === "shallow") return "脚跟抬得不够，未计入次数";
+    return "脚跟再抬高一些";
+  }
+  if (exerciseId === "goblet-squat") {
+    if (reason === "shallow") return "蹲得不够深，未计入次数";
+    return "再蹲深一些";
+  }
+  if (exerciseId === "dead-bug") {
+    if (reason === "shallow") return "腿没伸开，未计入次数";
+    return "腰离开垫子了，把腰压回去";
+  }
+  if (exerciseId === "bird-dog") {
+    if (reason === "shallow") return "腿没伸平，未计入次数";
+    return "腿抬平就好，髋别翻";
+  }
+  if (exerciseId === "crunch") {
+    if (reason === "shallow") return "卷得不够，未计入次数";
+    return "再卷起来一些，肩胛离地";
+  }
+  if (exerciseId === "side-plank") {
+    if (reason === "shallow") return "身体没撑直，未计入秒数";
+    return "髋掉下去了，把身体撑成一条线";
+  }
+  if (exerciseId === "hanging-knee-raise") {
+    if (reason === "shallow") return "膝抬得不够高，未计入次数";
+    return "膝再向胸口抬";
   }
   if (reason === "shallow") return "蹲得不够深，未计入次数";
   return "蹲得不够深，臀部再下沉一些";

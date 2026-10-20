@@ -28,7 +28,19 @@ export type TrajectoryExerciseId =
   | "front-raise"
   | "rear-delt-fly"
   | "face-pull"
-  | "pike-pushup";
+  | "pike-pushup"
+  | "lat-pulldown"
+  | "seated-row"
+  | "superman"
+  | "band-row"
+  | "leg-press"
+  | "calf-raise"
+  | "goblet-squat"
+  | "dead-bug"
+  | "bird-dog"
+  | "crunch"
+  | "side-plank"
+  | "hanging-knee-raise";
 
 export type TrajectorySourceType = "synthetic" | "video" | "pose_dump";
 

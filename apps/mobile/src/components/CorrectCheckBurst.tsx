@@ -1,9 +1,10 @@
 /**
- * 有效 rep +1 时绿色打勾小动效（UX-007）
+ * 有效次数的勾，落在次数胶囊上方，不挡画面中间。
  */
-import { colors, motion } from '@fitness-coach/ui';
+import { colors, layout, motion } from '@fitness-coach/ui';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   /** 传入当前 rep；增加时播一次。 */
@@ -16,6 +17,7 @@ export default function CorrectCheckBurst({
   repCount,
   enabled = true,
 }: Props) {
+  const insets = useSafeAreaInsets();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.6)).current;
   const prev = useRef(repCount);
@@ -65,7 +67,16 @@ export default function CorrectCheckBurst({
   if (!enabled) return null;
 
   return (
-    <View style={styles.wrap} pointerEvents="none">
+    <View
+      style={[
+        styles.wrap,
+        {
+          paddingLeft: Math.max(16, insets.left),
+          paddingBottom: layout.bottomBarHeight + Math.max(insets.bottom, 8) + 8,
+        },
+      ]}
+      pointerEvents="none"
+    >
       <Animated.View
         style={[
           styles.badge,
@@ -83,8 +94,8 @@ export default function CorrectCheckBurst({
 const styles = StyleSheet.create({
   wrap: {
     ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
     zIndex: 90,
   },
   badge: {

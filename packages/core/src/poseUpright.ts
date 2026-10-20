@@ -16,6 +16,12 @@ const LYING_OR_FLOOR = new Set<string>([
   "incline-pushup",
   "plank",
   "pike-pushup",
+  "superman",
+  "dead-bug",
+  "bird-dog",
+  "crunch",
+  "side-plank",
+  "leg-press",
 ]);
 
 export function poseUprightApplies(exerciseId: string): boolean {

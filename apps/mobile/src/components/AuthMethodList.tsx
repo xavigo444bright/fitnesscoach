@@ -33,6 +33,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTr } from '../i18n';
 import {
   appleBindFailureMessage,
   bindWithApple,
@@ -268,6 +269,7 @@ function PasswordForm({
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const tr = useTr();
   const title = mode === 'register' ? '注册' : mode === 'reset' ? '设置新密码' : '登录';
   const needsUsername = mode !== 'reset';
 
@@ -300,16 +302,16 @@ function PasswordForm({
 
   return (
     <>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title}>{tr(title)}</Text>
       {mode === 'reset' && accountCount > 1 ? (
-        <Text style={styles.hint}>上次登录：{lockedUsername}</Text>
+        <Text style={styles.hint}>{tr(`上次登录：${lockedUsername}`)}</Text>
       ) : null}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={styles.error}>{tr(error)}</Text> : null}
       {needsUsername ? (
         <TextInput
           value={username}
           onChangeText={setUsername}
-          placeholder="用户名或邮箱"
+          placeholder={tr('用户名或邮箱')}
           placeholderTextColor={colors.tabInactive}
           autoCapitalize="none"
           autoCorrect={false}
@@ -317,13 +319,13 @@ function PasswordForm({
           textContentType="username"
           keyboardType="email-address"
           style={styles.input}
-          accessibilityLabel="用户名或邮箱"
+          accessibilityLabel={tr('用户名或邮箱')}
         />
       ) : null}
       <TextInput
         value={password}
         onChangeText={setPassword}
-        placeholder={mode === 'login' ? '密码' : '至少 8 位密码'}
+        placeholder={tr(mode === 'login' ? '密码' : '至少 8 位密码')}
         placeholderTextColor={colors.tabInactive}
         secureTextEntry
         autoCapitalize="none"
@@ -331,7 +333,7 @@ function PasswordForm({
         autoComplete={mode === 'login' ? 'password' : 'password-new'}
         textContentType={mode === 'login' ? 'password' : 'newPassword'}
         style={styles.input}
-        accessibilityLabel="密码"
+        accessibilityLabel={tr('密码')}
       />
       <ShellButton
         label={busy ? '提交中' : title}

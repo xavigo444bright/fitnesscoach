@@ -4,8 +4,10 @@ import {
   assertScoutMatches,
   inferWindowKind,
   intersectSearchBandWithReadableRom,
+  ingestSkipReason,
   loadScoutRegistry,
   parseScoutIdList,
+  poseSkipReason,
   requireScoutClip,
   resolveScoutUrl,
   urlsReferToSameSource,
@@ -32,25 +34,35 @@ function proposedClip(over: Partial<ScoutClip>): ScoutClip {
 }
 
 describe("ASSET-SCOUT registry", () => {
-  it("loads grandfathered 10 plus Phase E 5 plus Phase F 5 and unique ids", () => {
+  it("loads grandfathered 10 plus Phase E/F/G and unique ids", () => {
     const reg = loadScoutRegistry();
     expect(reg.schemaVersion).toBe("1.0");
+    expect(reg.clips.length).toBe(67);
     const ids = new Set(reg.clips.map((c) => c.id));
     expect(ids.size).toBe(reg.clips.length);
     const exercises = new Set(reg.clips.map((c) => c.exerciseId));
     expect([...exercises].sort()).toEqual(
       [
+        "band-row",
         "bench-press",
+        "bird-dog",
         "cable-crossover",
+        "calf-raise",
         "chest-press-machine",
+        "crunch",
         "db-fly",
         "db-row",
+        "dead-bug",
         "dip",
         "face-pull",
         "front-raise",
         "glute-bridge",
+        "goblet-squat",
+        "hanging-knee-raise",
         "incline-pushup",
+        "lat-pulldown",
         "lateral-raise",
+        "leg-press",
         "lunge",
         "ohp",
         "pike-pushup",
@@ -59,7 +71,10 @@ describe("ASSET-SCOUT registry", () => {
         "pushup",
         "rdl",
         "rear-delt-fly",
+        "seated-row",
+        "side-plank",
         "squat",
+        "superman",
       ].sort(),
     );
   });
@@ -289,6 +304,27 @@ describe("ASSET-SCOUT registry", () => {
     expect(() =>
       assertScoutMatches(clip, { url: "https://youtu.be/tqp5XQPpTxY" }),
     ).not.toThrow();
+  });
+
+  it("Phase G：作废片跳过，手持下拉只作示范", () => {
+    const reg = loadScoutRegistry();
+    const rejected = reg.clips.filter((c) => c.status === "rejected");
+    expect(rejected.length).toBeGreaterThan(0);
+    for (const clip of rejected) {
+      expect(ingestSkipReason(clip)).toBe("status=rejected");
+      expect(poseSkipReason(clip)).toBe("status=rejected");
+    }
+    const demoOnly = requireScoutClip("lat-pulldown-side-01");
+    expect(demoOnly.cameraStability).toBe("handheld");
+    expect(demoOnly.trajectorySource).toBe(false);
+    expect(ingestSkipReason(demoOnly)).toBeNull();
+    expect(poseSkipReason(demoOnly)).toMatch(/trajectorySource=false/);
+    const front = requireScoutClip("lat-pulldown-front-01");
+    const calf = requireScoutClip("calf-raise-front-01");
+    expect(front.timeNote).toMatch(/背面|背后/);
+    expect(calf.timeNote).toMatch(/背后/);
+    expect(poseSkipReason(front)).toBeNull();
+    expect(poseSkipReason(requireScoutClip("dip-front-01"))).toMatch(/moving/);
   });
 
   it("resolves local: scout urls inside the repo", () => {

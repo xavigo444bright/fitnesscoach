@@ -66,6 +66,8 @@
 | 11 | side-plank | 侧平板 | 正面 | `front` | hold |
 | 12 | hanging-knee-raise | 悬垂提膝 | 侧面 | `side` | reps |
 
+**2026-10-02** 核窗通过，12 条已接到 `packages/core` 与训练会话，`tier=coachable`。真机 VT 未过。鸟狗进底改为 drive ≲40°，偏离 > 26° 才能在 bottom 里报。`rejected` 不提骨。`lat-pulldown-side-01` 只作示范。两条正面片（高位下拉、提踵）从背后拍，左右相反。弹力带划船无真侧面、侧平板无侧面规格、鸟狗 3/4 可选，都不补。未裁的 `proposed` 备选不下载。
+
 ### Phase H（99 条新 id，尚未进 catalog）
 
 胸 16 · 肩 7 · 背/臂 21 · 下肢 29 · 核心 26。弯举暂挂 `back`，臂屈伸暂挂 `chest`/`shoulders`（库里还没有「手臂」分区）。

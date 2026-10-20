@@ -18,6 +18,7 @@ import {
   View,
 } from 'react-native';
 import ExerciseCard from '../components/ExerciseCard';
+import { useTr } from '../i18n';
 
 type Props = {
   onSelectExercise: (id: string) => void;
@@ -45,6 +46,7 @@ export default function ExerciseLibraryScreen({
   embedded = false,
   contentBottomInset,
 }: Props) {
+  const tr = useTr();
   const byPart = catalogByBodyPart();
 
   return (
@@ -57,8 +59,8 @@ export default function ExerciseLibraryScreen({
     >
       {embedded ? null : (
         <>
-          <Text style={styles.title}>健身教练</Text>
-          <Text style={styles.sub}>自用 Dev Client · 语音默认开</Text>
+          <Text style={styles.title}>{tr('健身教练')}</Text>
+          <Text style={styles.sub}>{tr('自用 Dev Client · 语音默认开')}</Text>
         </>
       )}
       <ScrollView
@@ -72,7 +74,7 @@ export default function ExerciseLibraryScreen({
           if (!items.length) return null;
           return (
             <View key={part} style={styles.section}>
-              <Text style={styles.sectionTitle}>{BODY_PART_LABEL[part]}</Text>
+              <Text style={styles.sectionTitle}>{tr(BODY_PART_LABEL[part])}</Text>
               {items.map((e) => (
                 <ExerciseCard
                   key={e.id}
@@ -86,10 +88,6 @@ export default function ExerciseLibraryScreen({
             </View>
           );
         })}
-        <Text style={styles.privacy}>
-          姿态在本机分析，视频不上传（详见隐私说明）。动作图：Everkinetic /
-          Bryl Lim，CC BY-SA 4.0。
-        </Text>
       </ScrollView>
       {onOpenDevPose ? (
         <Pressable style={styles.devLink} onPress={onOpenDevPose}>
@@ -138,12 +136,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     fontWeight: '700',
     marginBottom: 4,
-  },
-  privacy: {
-    color: colors.textSecondary,
-    fontSize: fontSize.caption,
-    marginTop: space.md,
-    lineHeight: 18,
   },
   devLink: {
     paddingVertical: space.sm,

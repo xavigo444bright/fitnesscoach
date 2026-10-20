@@ -34,6 +34,18 @@ const BY_FILE: Record<string, number> = {
   'rear-delt-fly-side-01.mp4': require('../assets/samples/rear-delt-fly-side-01.mp4'),
   'face-pull-side-01.mp4': require('../assets/samples/face-pull-side-01.mp4'),
   'pike-pushup-side-01.mp4': require('../assets/samples/pike-pushup-side-01.mp4'),
+  'lat-pulldown-front-01.mp4': require('../assets/samples/lat-pulldown-front-01.mp4'),
+  'seated-row-side-04.mp4': require('../assets/samples/seated-row-side-04.mp4'),
+  'superman-side-03.mp4': require('../assets/samples/superman-side-03.mp4'),
+  'band-row-side-01.mp4': require('../assets/samples/band-row-side-01.mp4'),
+  'leg-press-side-01.mp4': require('../assets/samples/leg-press-side-01.mp4'),
+  'calf-raise-side-03.mp4': require('../assets/samples/calf-raise-side-03.mp4'),
+  'goblet-squat-side-01.mp4': require('../assets/samples/goblet-squat-side-01.mp4'),
+  'dead-bug-side-01.mp4': require('../assets/samples/dead-bug-side-01.mp4'),
+  'bird-dog-side-01.mp4': require('../assets/samples/bird-dog-side-01.mp4'),
+  'crunch-side-01.mp4': require('../assets/samples/crunch-side-01.mp4'),
+  'side-plank-front-01.mp4': require('../assets/samples/side-plank-front-01.mp4'),
+  'hanging-knee-raise-side-02.mp4': require('../assets/samples/hanging-knee-raise-side-02.mp4'),
 };
 
 /** 无打包轨迹时仍可播的原片（臀桥/弓步 JSON 未进 JS 包）。 */
@@ -64,6 +76,24 @@ const CLIP_WITHOUT_TRAJECTORY: Partial<
   'rear-delt-fly': { side: 'rear-delt-fly-side-01.mp4' },
   'face-pull': { side: 'face-pull-side-01.mp4' },
   'pike-pushup': { side: 'pike-pushup-side-01.mp4' },
+  'lat-pulldown': {
+    front: 'lat-pulldown-front-01.mp4',
+    side: 'lat-pulldown-front-01.mp4',
+  },
+  'seated-row': { side: 'seated-row-side-04.mp4' },
+  superman: { side: 'superman-side-03.mp4' },
+  'band-row': { side: 'band-row-side-01.mp4' },
+  'leg-press': { side: 'leg-press-side-01.mp4' },
+  'calf-raise': { side: 'calf-raise-side-03.mp4' },
+  'goblet-squat': { side: 'goblet-squat-side-01.mp4' },
+  'dead-bug': { side: 'dead-bug-side-01.mp4' },
+  'bird-dog': { side: 'bird-dog-side-01.mp4' },
+  crunch: { side: 'crunch-side-01.mp4' },
+  'side-plank': {
+    front: 'side-plank-front-01.mp4',
+    side: 'side-plank-front-01.mp4',
+  },
+  'hanging-knee-raise': { side: 'hanging-knee-raise-side-02.mp4' },
 };
 
 export type SampleClipRef = {

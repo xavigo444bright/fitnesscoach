@@ -7,6 +7,7 @@ import {
   collapsedTabPosition,
   defaultPipPosition,
   layout,
+  pipSizeForScreen,
   restoredPipPosition,
 } from '@fitness-coach/ui';
 import { useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
@@ -15,39 +16,70 @@ import { Animated, PanResponder } from 'react-native';
 type Props = {
   screenW: number;
   screenH: number;
+  insetRight?: number;
+  insetBottom?: number;
   collapsed: boolean;
   children: ReactNode;
 };
 
-const PIP_W = layout.refPersonPipWidth;
-const PIP_H = layout.refPersonPipHeight;
 const TAB_W = layout.refPersonPipTabWidth;
 const TAB_H = layout.refPersonPipTabHeight;
 
 export default function DraggablePip({
   screenW,
   screenH,
+  insetRight = 0,
+  insetBottom = 0,
   collapsed,
   children,
 }: Props) {
-  const pipW = collapsed ? TAB_W : PIP_W;
-  const pipH = collapsed ? TAB_H : PIP_H;
+  const expanded = pipSizeForScreen(
+    screenW,
+    screenH,
+    layout.bottomBarHeight + insetBottom,
+  );
+  const pipW = collapsed ? TAB_W : expanded.width;
+  const pipH = collapsed ? TAB_H : expanded.height;
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const posRef = useRef({ x: 0, y: 0 });
   const dragStartRef = useRef({ x: 0, y: 0 });
   const readyRef = useRef(false);
   const expandedPosRef = useRef({ x: 0, y: 0 });
   const wasCollapsedRef = useRef(false);
+  const landscapeRef = useRef(screenW > screenH);
 
   useLayoutEffect(() => {
     if (screenW <= 0 || screenH <= 0) return;
-    if (!readyRef.current) {
-      const start = defaultPipPosition(screenW, screenH, PIP_W, PIP_H);
-      posRef.current = start;
+    const landscape = screenW > screenH;
+    const flipped = readyRef.current && landscapeRef.current !== landscape;
+    landscapeRef.current = landscape;
+    const placeDefault = () => {
+      const start = defaultPipPosition(
+        screenW,
+        screenH,
+        expanded.width,
+        expanded.height,
+        { right: insetRight, bottom: insetBottom },
+      );
       expandedPosRef.current = start;
-      pan.setValue(start);
+      const next = collapsed
+        ? collapsedTabPosition(
+            start,
+            screenW,
+            screenH,
+            expanded.width,
+            expanded.height,
+            TAB_W,
+            TAB_H,
+          )
+        : start;
+      posRef.current = next;
+      pan.setValue(next);
       readyRef.current = true;
       wasCollapsedRef.current = collapsed;
+    };
+    if (!readyRef.current || flipped) {
+      placeDefault();
       return;
     }
 
@@ -57,8 +89,8 @@ export default function DraggablePip({
         expandedPosRef.current,
         screenW,
         screenH,
-        PIP_W,
-        PIP_H,
+        expanded.width,
+        expanded.height,
         TAB_W,
         TAB_H,
       );
@@ -69,8 +101,8 @@ export default function DraggablePip({
         expandedPosRef.current,
         screenW,
         screenH,
-        PIP_W,
-        PIP_H,
+        expanded.width,
+        expanded.height,
       );
       posRef.current = restored;
       pan.setValue(restored);
@@ -87,7 +119,18 @@ export default function DraggablePip({
       pan.setValue(next);
     }
     wasCollapsedRef.current = collapsed;
-  }, [collapsed, pan, pipH, pipW, screenH, screenW]);
+  }, [
+    collapsed,
+    expanded.height,
+    expanded.width,
+    insetBottom,
+    insetRight,
+    pan,
+    pipH,
+    pipW,
+    screenH,
+    screenW,
+  ]);
 
   const responder = useMemo(
     () =>

@@ -1,5 +1,5 @@
 import { calendarDayLocal, countModeForRef, isoAtLocalNoon } from "./volume.js";
-import { backdateKind } from "./calendar.js";
+import { backdateKind, workoutCalendarDay } from "./calendar.js";
 import type {
   LogExerciseRef,
   LogSet,
@@ -120,6 +120,8 @@ export function addSet(
     kind,
     reps: patch.reps,
     weightKg: patch.weightKg,
+    weightLeftKg: patch.weightLeftKg,
+    weightRightKg: patch.weightRightKg,
     weightUnit:
       patch.weightUnit === "lb" || patch.weightUnit === "kg"
         ? patch.weightUnit
@@ -230,6 +232,8 @@ export function copySet(
       kind: source.kind,
       reps: source.reps,
       weightKg: source.weightKg,
+      weightLeftKg: source.weightLeftKg,
+      weightRightKg: source.weightRightKg,
       weightUnit: source.weightUnit,
       durationSec: source.durationSec,
       restSec: source.restSec,
@@ -250,6 +254,23 @@ export function copyLastSet(
   const last = slot.sets.at(-1);
   if (!last) throw new Error("no set to copy");
   return copySet(log, workoutId, slotId, last.id, ids);
+}
+
+export function patchSlot(
+  log: WorkoutLog,
+  workoutId: string,
+  slotId: string,
+  patch: { loadMode?: "single" | "sides" },
+): WorkoutLog {
+  const workout = requireWorkout(log, workoutId);
+  const slot = workout.slots.find((s) => s.id === slotId);
+  if (!slot) throw new Error(`slot not found: ${slotId}`);
+  const loadMode = patch.loadMode === "sides" ? "sides" : undefined;
+  const nextSlot: LogSlot = { ...slot, loadMode };
+  return replaceWorkout(log, {
+    ...workout,
+    slots: workout.slots.map((s) => (s.id === slotId ? nextSlot : s)),
+  });
 }
 
 export function patchWorkout(
@@ -302,7 +323,10 @@ export function homeSessionWorkout(
   return ended.at(-1);
 }
 
-/** 首页模块：今天开始的课 + 跨日仍进行中的课。改其中一节不删除其他节。 */
+/**
+ * 首页模块：今天的课 + 跨日仍进行中的课。
+ * 已结束的课按结束日，与日历同一天；进行中的课按开始日。
+ */
 export function homeDayWorkouts(
   log: WorkoutLog,
   nowIso: string,
@@ -311,8 +335,12 @@ export function homeDayWorkouts(
   const day = calendarDayLocal(nowIso, timeZone);
   const startedDesc = (a: Workout, b: Workout) =>
     b.startedAt.localeCompare(a.startedAt);
+  const onThisDay = (w: Workout) =>
+    w.status === "ended"
+      ? workoutCalendarDay(w, timeZone) === day
+      : calendarDayLocal(w.startedAt, timeZone) === day;
   const today = log.workouts
-    .filter((w) => calendarDayLocal(w.startedAt, timeZone) === day)
+    .filter(onThisDay)
     .slice()
     .sort((a, b) => {
       if (a.status === "open" && b.status !== "open") return -1;

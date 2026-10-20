@@ -3,12 +3,14 @@
  */
 
 import { buildGluteBridgePose } from "../fixtures/gluteBridge.js";
-import { buildDbFlyPose } from "../fixtures/dbFly.js";
+import { buildArmTiltPose, buildDbFlyPose } from "../fixtures/dbFly.js";
 import { buildRaisePose } from "../fixtures/raise.js";
 import { buildPushupPose } from "../fixtures/pushup.js";
 import { buildSquatPose } from "../fixtures/index.js";
 import {
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   gluteBridgeHipAngle,
   plankBodyLineDeg,
   pushupElbowAngle,
@@ -272,6 +274,62 @@ export function buildDbFlyNearDriveMeasured(targetMeasuredDeg: number): Pose {
     }
     if (err < 0.15) return pose;
     // included↑ → drive↓
+    if (m > targetMeasuredDeg) lo = mid;
+    else hi = mid;
+  }
+  return best;
+}
+
+/** 夹胸：按三维开合 drive 反找腕夹角。夹角↑ → drive↓。 */
+export function buildCableNearDriveMeasured(targetMeasuredDeg: number): Pose {
+  let lo = 4;
+  let hi = 170;
+  let best = buildDbFlyPose({ wristIncludedDeg: 180 - targetMeasuredDeg });
+  let bestErr = Infinity;
+  for (let i = 0; i < 48; i += 1) {
+    const mid = (lo + hi) / 2;
+    const pose = buildDbFlyPose({ wristIncludedDeg: mid });
+    const m = cableCrossoverDriveDeg(pose);
+    if (m == null) {
+      hi = mid;
+      continue;
+    }
+    const err = Math.abs(m - targetMeasuredDeg);
+    if (err < bestErr) {
+      bestErr = err;
+      best = pose;
+    }
+    if (err < 0.15) return pose;
+    if (m > targetMeasuredDeg) lo = mid;
+    else hi = mid;
+  }
+  return best;
+}
+
+/** 俯身飞鸟：按相对竖直 drive 反找 tilt。tilt↑ → drive↓。 */
+export function buildRearDeltNearDriveMeasured(
+  targetMeasuredDeg: number,
+): Pose {
+  let lo = 0;
+  let hi = 90;
+  let best = buildArmTiltPose({
+    tiltDeg: Math.min(90, Math.max(0, 180 - targetMeasuredDeg)),
+  });
+  let bestErr = Infinity;
+  for (let i = 0; i < 48; i += 1) {
+    const mid = (lo + hi) / 2;
+    const pose = buildArmTiltPose({ tiltDeg: mid });
+    const m = rearDeltFlyDriveDeg(pose);
+    if (m == null) {
+      hi = mid;
+      continue;
+    }
+    const err = Math.abs(m - targetMeasuredDeg);
+    if (err < bestErr) {
+      bestErr = err;
+      best = pose;
+    }
+    if (err < 0.15) return pose;
     if (m > targetMeasuredDeg) lo = mid;
     else hi = mid;
   }

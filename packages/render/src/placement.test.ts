@@ -88,20 +88,27 @@ describe("evaluatePlacement (M3-T5 / VT-P3A-006 / FR-022)", () => {
       jointsCue: "肩、髋、踝",
       holdSecond: true,
     });
-    expect(hint).toMatch(/侧面/);
     expect(hint).toMatch(/放远/);
+    expect(hint).toMatch(/髋/);
     expect(hint).toMatch(/计秒/);
+    expect(hint).not.toMatch(/侧面/);
   });
 
-  it("composePlacementHint：正面计次动作侧对镜头", () => {
+  it("composePlacementHint：人在画面里时不要求换侧面或正面", () => {
     const ok = evaluatePlacement(fullBody());
-    const hint = composePlacementHint(ok, {
+    const side = composePlacementHint(ok, {
+      recommendedCamera: "side",
+      observedCamera: "front",
+      jointsCue: "肩、肘、髋",
+    });
+    const front = composePlacementHint(ok, {
       recommendedCamera: "front",
       observedCamera: "side",
       jointsCue: "肩、肘",
       requireFrontPlane: true,
     });
-    expect(hint).toMatch(/面对镜头/);
+    expect(side).toBeNull();
+    expect(front).toBeNull();
   });
 
   it("formatPlacementCoachHint：请调整姿势，不出现示范窗", () => {
@@ -127,14 +134,27 @@ describe("evaluatePlacement (M3-T5 / VT-P3A-006 / FR-022)", () => {
     expect(r.reason).toBe("ok");
   });
 
-  it("坐标远离画面才 out_of_frame", () => {
+  it("左踝贴在画面下沿之外、左膝也不在，点名左膝", () => {
     const r = evaluatePlacement(
       fullBody({
         [LandmarkIndex.LeftAnkle]: { x: 0.4, y: 1.4, visibility: 1 },
       }),
     );
-    expect(r.reason).toBe("out_of_frame");
-    expect(r.hint).toMatch(/放远|入画/);
+    expect(r.reason).toBe("missing_keypoints");
+    expect(r.hint).toMatch(/左膝/);
+  });
+
+  it("脚在下沿外、髋和膝都在画面里，继续算站好", () => {
+    const r = evaluatePlacement(
+      fullBody({
+        [LandmarkIndex.LeftKnee]: { x: 0.42, y: 0.72, visibility: 1 },
+        [LandmarkIndex.RightKnee]: { x: 0.58, y: 0.72, visibility: 1 },
+        [LandmarkIndex.LeftAnkle]: { x: 0.42, y: 1.25, visibility: 1 },
+        [LandmarkIndex.RightAnkle]: { x: 0.58, y: 1.25, visibility: 1 },
+      }),
+    );
+    expect(r.reason).toBe("ok");
+    expect(r.visible).toBe(false);
   });
 
   it("hips_only：脚出画、髋可见 → ok（划船近景）", () => {

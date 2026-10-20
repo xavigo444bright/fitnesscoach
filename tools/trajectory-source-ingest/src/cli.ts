@@ -29,7 +29,9 @@ import { isScoutCamera, poseCameraHint } from "./cameraPlanes.js";
 import { estimateCameraMotionFromVideo } from "./cameraMotion.js";
 import {
   assertScoutMatches,
+  ingestSkipReason,
   parseScoutIdList,
+  poseSkipReason,
   requireScoutClip,
   resolveScoutUrl,
 } from "./scout.js";
@@ -55,10 +57,10 @@ Usage:
 Notes:
   - --scout-id is required except --yt-search (docs/exercises/asset-scout/clips.json)
   - Comma-separated or repeated --scout-id = one authorized batch (one network grant)
-  - Status/license is NOT gated here; the owner confirms authorization
+  - rejected scout ids are skipped; other statuses are not a license gate
   - --download-only: full video to _inbox, skip PoseDump/crop
   - --crop-only: cut verified look-window from _inbox; skip download and PoseDump
-  - --pose-only: PoseDump cropped <exercise>/<id>.mp4 (skips cameraStability=moving)
+  - --pose-only: PoseDump cropped <exercise>/<id>.mp4 (skips rejected, moving, trajectorySource=false)
   - --yt-search / --yt-probe: yt-dlp only; do not WebFetch youtube.com
   - --check-camera-motion: corner SAD on cropped <exercise>/<id>.mp4
   - Downloads land in media/trajectory-source/<exercise>/_inbox/
@@ -89,6 +91,12 @@ async function ingestClip(argv: string[], scoutId: string): Promise<void> {
     camera: cameraFlag,
     url: urlFlag,
   });
+
+  const skipped = ingestSkipReason(clip);
+  if (skipped) {
+    console.log(`skip ${clip.id}: ${skipped}`);
+    return;
+  }
 
   const exercise = clip.exerciseId;
   const camera: CameraHint = poseCameraHint(clip.camera);
@@ -225,10 +233,9 @@ async function ingestClip(argv: string[], scoutId: string): Promise<void> {
   }
 
   if (poseOnly) {
-    if (clip.cameraStability === "moving") {
-      console.log(
-        `skip pose-only ${clip.id}: cameraStability=moving (not a 2D trajectory source)`,
-      );
+    const poseSkip = poseSkipReason(clip);
+    if (poseSkip) {
+      console.log(`skip pose-only ${clip.id}: ${poseSkip}`);
       return;
     }
     const formalMp4 = path.join(dirs.root, `${clip.id}.mp4`);

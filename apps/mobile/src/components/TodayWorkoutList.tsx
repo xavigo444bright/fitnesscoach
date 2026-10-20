@@ -28,6 +28,7 @@ import ShellButton from './ShellButton';
 import WorkoutModuleCard from './WorkoutModuleCard';
 import TemplateSheet from './TemplateSheet';
 import { commitWorkoutLog } from '../workoutLogStorage';
+import { useTr } from '../i18n';
 
 type Props = {
   log: WorkoutLog;
@@ -40,6 +41,7 @@ export default function TodayWorkoutList({
   contentBottomInset,
   onOpenWorkout,
 }: Props) {
+  const tr = useTr();
   const today = homeDayWorkouts(log, new Date().toISOString());
   const [chooserOpen, setChooserOpen] = useState(false);
   const [pickOpen, setPickOpen] = useState(false);
@@ -74,7 +76,7 @@ export default function TodayWorkoutList({
               key={workout.id}
               title={workoutTitleDisplay(workout)}
               badge={workout.status === 'open' ? '进行中' : '已结束'}
-              meta={`容量 ${workoutVolumeKg(workout)} kg`}
+              meta={`容量 ${workoutVolumeKg(workout, log.bodyweightKg)} kg`}
               summary={workoutExerciseSummary(workout) || '还没有动作'}
               onPress={() => onOpenWorkout(workout.id)}
               onDelete={
@@ -103,10 +105,10 @@ export default function TodayWorkoutList({
           style={styles.scrim}
           onPress={() => setChooserOpen(false)}
           accessibilityRole="button"
-          accessibilityLabel="关闭"
+          accessibilityLabel={tr('关闭')}
         >
           <Pressable style={styles.chooser} onPress={() => undefined}>
-            <Text style={styles.chooserTitle}>新建训练</Text>
+            <Text style={styles.chooserTitle}>{tr('新建训练')}</Text>
             <Pressable
               onPress={() => {
                 setChooserOpen(false);
@@ -114,10 +116,10 @@ export default function TodayWorkoutList({
               }}
               style={styles.chooserRow}
               accessibilityRole="button"
-              accessibilityLabel="自由训练"
+              accessibilityLabel={tr('自由训练')}
             >
-              <Text style={styles.chooserLabel}>自由训练</Text>
-              <Text style={styles.chooserHint}>空白课，自己加动作</Text>
+              <Text style={styles.chooserLabel}>{tr('自由训练')}</Text>
+              <Text style={styles.chooserHint}>{tr('空白课，自己加动作')}</Text>
             </Pressable>
             <Pressable
               onPress={
@@ -131,7 +133,7 @@ export default function TodayWorkoutList({
               disabled={!hasTemplates}
               style={styles.chooserRow}
               accessibilityRole="button"
-              accessibilityLabel="训练模板"
+              accessibilityLabel={tr('训练模板')}
               accessibilityState={{ disabled: !hasTemplates }}
             >
               <Text
@@ -140,10 +142,10 @@ export default function TodayWorkoutList({
                   !hasTemplates && styles.chooserOff,
                 ]}
               >
-                训练模板
+                {tr('训练模板')}
               </Text>
               <Text style={styles.chooserHint}>
-                {hasTemplates ? '套用已保存的课' : '还没有模板'}
+                {tr(hasTemplates ? '套用已保存的课' : '还没有模板')}
               </Text>
             </Pressable>
           </Pressable>

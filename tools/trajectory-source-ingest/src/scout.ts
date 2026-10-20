@@ -1,6 +1,7 @@
 /**
  * ASSET-SCOUT 清单（docs/exercises/asset-scout/clips.json）。
- * ingest 必须绑 scout id；不根据 status 拒绝下载。
+ * ingest 必须绑 scout id。`rejected` 不下载、不裁、不提骨。
+ * 许可文本仍不校验。
  */
 
 import { readFileSync } from "node:fs";
@@ -86,9 +87,11 @@ export interface ScoutClip {
   timeSource: ScoutTimeSource;
   /**
    * 窗内机位是否基本锁死。持续绕拍/推轨会把运镜写进 2D 骨，不能当轨迹真源。
-   * 未填 = 未检。
+   * 未填 = 未检。轻微手持仍可能当轨迹真源；明确不能提骨时设 trajectorySource=false。
    */
   cameraStability?: ScoutCameraStability;
+  /** false = 只作示范窗，不跑 PoseDump。未填 = 允许提骨（moving 仍跳过）。 */
+  trajectorySource?: boolean;
 }
 
 export interface ScoutRegistry {
@@ -289,6 +292,7 @@ function parseClip(raw: unknown, index: number): ScoutClip {
     cameraStability: isCameraStability(c.cameraStability)
       ? c.cameraStability
       : undefined,
+    trajectorySource: c.trajectorySource === false ? false : undefined,
   };
   assertScoutLookWindow(clip);
   return clip;
@@ -329,6 +333,25 @@ export function loadScoutRegistry(
     notes: typeof root.notes === "string" ? root.notes : undefined,
     clips,
   };
+}
+
+/** 作废片不进下载、裁窗、提骨。 */
+export function ingestSkipReason(clip: ScoutClip): string | null {
+  if (clip.status === "rejected") return "status=rejected";
+  return null;
+}
+
+/** PoseDump 额外跳过绕拍，以及标明只作示范窗的片。 */
+export function poseSkipReason(clip: ScoutClip): string | null {
+  const rejected = ingestSkipReason(clip);
+  if (rejected) return rejected;
+  if (clip.cameraStability === "moving") {
+    return "cameraStability=moving (not a 2D trajectory source)";
+  }
+  if (clip.trajectorySource === false) {
+    return "trajectorySource=false (demo only)";
+  }
+  return null;
 }
 
 export function requireScoutClip(scoutId: string): ScoutClip {

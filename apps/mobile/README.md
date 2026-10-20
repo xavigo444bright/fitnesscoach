@@ -6,7 +6,6 @@
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm use 24
-cd /Users/xavigo4bright/Projects/fitness-coach
 pnpm install
 pnpm --filter @fitness-coach/mobile start   # 或: pnpm --filter @fitness-coach/mobile start -- --dev-client
 ```
@@ -17,7 +16,7 @@ pnpm --filter @fitness-coach/mobile start   # 或: pnpm --filter @fitness-coach/
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm use 24
-cd apps/mobile && npx expo run:ios --device G4B
+cd apps/mobile && npx expo run:ios --device
 ```
 
 详情页 3D 示意视频：放入 `assets/demos/*.mp4`，并在 `src/demoAssets.ts` 取消对应 `require` 注释。见 `docs/exercises/demo-assets.md`。
@@ -54,7 +53,7 @@ npx expo run:android --device
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh" && nvm use 24
-cd /Users/xavigo4bright/Projects/fitness-coach/apps/mobile
+cd apps/mobile
 npx eas-cli@latest login
 npx eas-cli@latest init
 ```

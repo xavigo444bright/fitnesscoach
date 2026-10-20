@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@thinksys/react-native-mediapipe@0.0.21':
-    hash: v37bq55hayr3lksktrl3gy64ki
+    hash: zbri5swc75tzp7kuzricbmg3zq
     path: patches/@thinksys__react-native-mediapipe@0.0.21.patch
 
 importers:
@@ -16,12 +16,6 @@ importers:
       resolve:
         specifier: 1.22.12
         version: 1.22.12
-
-  apps/miniprogram:
-    devDependencies:
-      esbuild:
-        specifier: ^0.25.12
-        version: 0.25.12
 
   apps/mobile:
     dependencies:
@@ -54,7 +48,7 @@ importers:
         version: 7.18.10(@react-navigation/native@7.3.18(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-safe-area-context@5.6.2(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native-screens@4.16.0(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@thinksys/react-native-mediapipe':
         specifier: ^0.0.21
-        version: 0.0.21(patch_hash=v37bq55hayr3lksktrl3gy64ki)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+        version: 0.0.21(patch_hash=zbri5swc75tzp7kuzricbmg3zq)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       expo:
         specifier: ~54.0.35
         version: 54.0.35(@babel/core@7.29.7)(@expo/dom-webview@57.0.0)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
@@ -147,19 +141,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: 2.1.9
         version: 2.1.9(vitest@2.1.9(@types/node@26.1.0)(lightningcss@1.32.0)(terser@5.48.0))
-      typescript:
-        specifier: ^5.7.2
-        version: 5.9.3
-      vitest:
-        specifier: ^2.1.8
-        version: 2.1.9(@types/node@26.1.0)(lightningcss@1.32.0)(terser@5.48.0)
-
-  packages/pose-mp:
-    dependencies:
-      '@fitness-coach/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -5149,7 +5130,7 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
-  '@thinksys/react-native-mediapipe@0.0.21(patch_hash=v37bq55hayr3lksktrl3gy64ki)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+  '@thinksys/react-native-mediapipe@0.0.21(patch_hash=zbri5swc75tzp7kuzricbmg3zq)(react-native@0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
     dependencies:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.7)(@types/react@19.1.17)(react@19.1.0)

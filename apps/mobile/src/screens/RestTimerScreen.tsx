@@ -9,16 +9,44 @@ import {
 import { colors, fontFamily, fontSize, space } from '@fitness-coach/ui';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Audio } from 'expo-av';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RestHourglass from '../components/RestHourglass';
 import ShellButton from '../components/ShellButton';
 import type { RootStackParamList } from '../navigation/types';
 
+const REST_CHIME = require('../../assets/rest-chime.wav');
+const END_PAUSE_MS = 1100;
+
+let chime: Audio.Sound | null = null;
+
+async function playRestChime(): Promise<void> {
+  try {
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      allowsRecordingIOS: false,
+    });
+    if (chime) {
+      await chime.replayAsync();
+      return;
+    }
+    const created = await Audio.Sound.createAsync(REST_CHIME, {
+      shouldPlay: true,
+      volume: 1,
+    });
+    chime = created.sound;
+  } catch {
+    // 播不出来也结束休息
+  }
+}
+
 export default function RestTimerScreen() {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
+  const landscape = width > height;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'RestTimer'>>();
@@ -27,6 +55,16 @@ export default function RestTimerScreen() {
   const [durationSec, setDurationSec] = useState(route.params.durationSec);
   const [scrub, setScrub] = useState<number | null>(null);
   const [nowMs, setNowMs] = useState(Date.now());
+  const [ending, setEnding] = useState(false);
+  const endingRef = useRef(false);
+  const endTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shake = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    return () => {
+      if (endTimer.current) clearTimeout(endTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setNowMs(Date.now()), 250);
@@ -36,9 +74,31 @@ export default function RestTimerScreen() {
   const live = restRemainingSec(durationSec, startedAtMs.current, nowMs);
   const remaining = scrub ?? live;
 
+  useEffect(() => {
+    if (scrub != null || live > 0 || endingRef.current) return;
+    endingRef.current = true;
+    setEnding(true);
+    Animated.sequence(
+      [1, -1, 1, -1, 0.7, -0.7, 0.4, -0.4, 0].map((value) =>
+        Animated.timing(shake, {
+          toValue: value,
+          duration: 80,
+          useNativeDriver: true,
+        }),
+      ),
+    ).start();
+    void playRestChime();
+    endTimer.current = setTimeout(() => navigation.goBack(), END_PAUSE_MS);
+  }, [live, navigation, scrub, shake]);
+
   const dismiss = () => {
     navigation.goBack();
   };
+
+  const tilt = shake.interpolate({
+    inputRange: [-1, 1],
+    outputRange: ['-9deg', '9deg'],
+  });
 
   return (
     <View
@@ -51,25 +111,35 @@ export default function RestTimerScreen() {
       ]}
     >
       <Text style={styles.kicker}>组间休息</Text>
-      <View style={styles.glassBlock}>
-        <RestHourglass
-          remainingSec={remaining}
-          capacitySec={capacitySec}
-          onScrub={setScrub}
-          onCommit={(next) => {
-            setDurationSec(
-              restDurationForRemaining(startedAtMs.current, Date.now(), next),
-            );
-            setScrub(null);
+      <View style={[styles.glassBlock, landscape ? styles.glassRow : null]}>
+        <Animated.View
+          style={{
+            transform: [
+              { rotate: tilt },
+              { scale: landscape ? Math.min(1, (height - 160) / 294) : 1 },
+            ],
           }}
-        />
+        >
+          <RestHourglass
+            remainingSec={remaining}
+            capacitySec={capacitySec}
+            locked={ending}
+            onScrub={setScrub}
+            onCommit={(next) => {
+              setDurationSec(
+                restDurationForRemaining(startedAtMs.current, Date.now(), next),
+              );
+              setScrub(null);
+            }}
+          />
+        </Animated.View>
         <Text
           style={styles.seconds}
           accessibilityLabel={`剩余 ${remaining} 秒`}
         >
           {remaining}
         </Text>
-        <Text style={styles.hint}>上下滑动沙子可改时间</Text>
+        <Text style={styles.hint}>按住上下拖可改时间</Text>
       </View>
       <View style={styles.actions}>
         <View style={styles.actionHalf}>
@@ -99,6 +169,11 @@ const styles = StyleSheet.create({
   glassBlock: {
     alignItems: 'center',
     gap: space.md,
+  },
+  glassRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: space.lg,
   },
   seconds: {
     color: colors.textPrimary,

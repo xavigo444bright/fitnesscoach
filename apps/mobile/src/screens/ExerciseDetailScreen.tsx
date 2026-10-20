@@ -14,6 +14,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ExerciseDemoPlayer from '../components/ExerciseDemoPlayer';
 import ShellButton from '../components/ShellButton';
+import { useTr } from '../i18n';
 
 type Props = {
   exerciseId: string;
@@ -42,14 +43,15 @@ export default function ExerciseDetailScreen({
   onStart,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const tr = useTr();
   const entry = getCatalogEntry(exerciseId);
   if (!entry) {
     return (
       <View style={styles.root}>
         <Pressable onPress={onBack} style={styles.back}>
-          <Text style={styles.backText}>← 返回</Text>
+          <Text style={styles.backText}>← {tr('返回')}</Text>
         </Pressable>
-        <Text style={styles.bullet}>未找到该动作</Text>
+        <Text style={styles.bullet}>{tr('未找到该动作')}</Text>
       </View>
     );
   }
@@ -61,7 +63,7 @@ export default function ExerciseDetailScreen({
   return (
     <View style={styles.root}>
       <Pressable onPress={onBack} style={styles.back} accessibilityRole="button">
-        <Text style={styles.backText}>← {entry.name}</Text>
+        <Text style={styles.backText}>← {tr(entry.name)}</Text>
       </Pressable>
 
       <ScrollView
@@ -83,31 +85,31 @@ export default function ExerciseDetailScreen({
               <View style={styles.torso} />
               <View style={styles.leg} />
             </View>
-            <Text style={styles.diagramCaption}>{camera.title}</Text>
+            <Text style={styles.diagramCaption}>{tr(camera.title)}</Text>
           </View>
         )}
 
         <Text style={styles.meta}>
-          {BODY_PART_LABEL[entry.bodyPart]} · {EQUIPMENT_LABEL[entry.equipment]}{' '}
-          · {camera.title.replace('推荐机位：', '')}
+          {tr(BODY_PART_LABEL[entry.bodyPart])} · {tr(EQUIPMENT_LABEL[entry.equipment])}{' '}
+          · {tr(entry.cameraHint === 'front' ? '正面机位' : '侧面机位')}
         </Text>
 
-        <Text style={styles.section}>动作要点</Text>
+        <Text style={styles.section}>{tr('动作要点')}</Text>
         {entry.cues.map((line) => (
           <Text key={line} style={styles.bullet}>
-            · {line}
+            · {tr(line)}
           </Text>
         ))}
 
-        <Text style={[styles.section, { marginTop: space.lg }]}>摆机位</Text>
+        <Text style={[styles.section, { marginTop: space.lg }]}>{tr('摆机位')}</Text>
         {camera.tips.map((line) => (
           <Text key={line} style={styles.bullet}>
-            · {line}
+            · {tr(line)}
           </Text>
         ))}
 
         {entry.statusNote ? (
-          <Text style={styles.note}>{entry.statusNote}</Text>
+          <Text style={styles.note}>{tr(entry.statusNote)}</Text>
         ) : null}
       </ScrollView>
 

@@ -13,13 +13,20 @@ export type LogCountMode = "reps" | "timed";
 
 export type LogSetKind = "reps" | "timed";
 
+/** 一组一个重量，或左右分开记。缺省 single。 */
+export type LoadMode = "single" | "sides";
+
 export interface LogSet {
   id: string;
   kind: LogSetKind;
   /** 次数；timed 组可空 */
   reps?: number;
-  /** 公斤；未填则该组不进容量。容量和比大小都用这个。 */
+  /** 公斤；未填则该组不进外加负荷。自重动作另按档案自重计入。 */
   weightKg?: number;
+  /** 左右分记时的左侧公斤。与 weightRightKg 任一大于 0 时，不再用 weightKg。 */
+  weightLeftKg?: number;
+  /** 左右分记时的右侧公斤。 */
+  weightRightKg?: number;
   /** 这一组输入时用的单位。缺省 kg。成就按这个显示，不跟全局偏好。 */
   weightUnit?: WeightUnit;
   /** 计时动作有效秒 */
@@ -36,6 +43,8 @@ export interface LogSlot {
   id: string;
   exercise: LogExerciseRef;
   countMode: LogCountMode;
+  /** 左右分记。缺省 single，旧数据无此字段。 */
+  loadMode?: LoadMode;
   sets: LogSet[];
 }
 
@@ -60,12 +69,15 @@ export type TemplateSetDraft = {
   kind: LogSetKind;
   reps?: number;
   weightKg?: number;
+  weightLeftKg?: number;
+  weightRightKg?: number;
   durationSec?: number;
 };
 
 export type WorkoutTemplateSlot = {
   exercise: LogExerciseRef;
   countMode: LogCountMode;
+  loadMode?: LoadMode;
   sets: TemplateSetDraft[];
 };
 

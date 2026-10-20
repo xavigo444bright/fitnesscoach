@@ -6,7 +6,9 @@ import {
   plankDriveDeg,
   pullupWorkingElbowAngle,
   rdlHipAngle,
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   lateralRaiseDriveDeg,
   shoulderRaiseDriveDeg,
 } from "../phase.js";
@@ -138,13 +140,15 @@ describe("batch ghost keyframes", () => {
       meanVisibleElbowAngle(INCLINE_PUSHUP_GHOST_KEYFRAMES.stand.pose)!,
     ).toBeGreaterThan(160);
     expect(
-      dbFlyDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.bottom.pose)!,
-    ).toBeLessThan(dbFlyDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.stand.pose)!);
+      cableCrossoverDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.bottom.pose)!,
+    ).toBeLessThan(
+      cableCrossoverDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.stand.pose)!,
+    );
     expect(
-      dbFlyDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.bottom.pose)!,
+      cableCrossoverDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.bottom.pose)!,
     ).toBeLessThan(80);
     expect(
-      dbFlyDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.stand.pose)!,
+      cableCrossoverDriveDeg(CABLE_CROSSOVER_GHOST_KEYFRAMES.stand.pose)!,
     ).toBeGreaterThan(120);
     expect(
       meanVisibleElbowAngle(CHEST_PRESS_MACHINE_GHOST_KEYFRAMES.bottom.pose)!,
@@ -174,10 +178,12 @@ describe("batch ghost keyframes", () => {
       shoulderRaiseDriveDeg(FRONT_RAISE_GHOST_KEYFRAMES.bottom.pose)!,
     );
     expect(
-      dbFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.bottom.pose)!,
-    ).toBeLessThan(dbFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.stand.pose)!);
+      rearDeltFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.bottom.pose)!,
+    ).toBeLessThan(
+      rearDeltFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.stand.pose)!,
+    );
     expect(
-      dbFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.bottom.pose)!,
+      rearDeltFlyDriveDeg(REAR_DELT_FLY_GHOST_KEYFRAMES.bottom.pose)!,
     ).toBeLessThan(125);
     expect(
       meanVisibleElbowAngle(FACE_PULL_GHOST_KEYFRAMES.bottom.pose)!,

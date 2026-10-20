@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { buildDbFlyNearDriveMeasured, buildRdlNearHipMeasured } from "../boundary/poseTune.js";
-import { buildDbFlyPose } from "../fixtures/dbFly.js";
+import { buildArmTiltPose, buildDbFlyPose } from "../fixtures/dbFly.js";
 import { buildPushupPose } from "../fixtures/pushup.js";
 import { buildSquatPose } from "../fixtures/index.js";
 import {
@@ -22,7 +22,9 @@ import {
   DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
   DEFAULT_FACE_PULL_PHASE_CONFIG,
   DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   dbRowWorkingElbowAngle,
   meanVisibleElbowAngle,
   preferredVisibleElbowAngle,
@@ -618,6 +620,32 @@ describe("哑铃飞鸟契约与计数", () => {
       "打开不够深，手臂再打开一些",
     );
   });
+
+  it("正侧只在深度上打开仍计 1；叠点不推进", () => {
+    const stand = buildArmTiltPose({ tiltDeg: 8, inDepth: true });
+    const bottom = buildArmTiltPose({ tiltDeg: 50, inDepth: true });
+    const shallow = buildArmTiltPose({ tiltDeg: 25, inDepth: true });
+    expect(dbFlyDriveDeg(stand)!).toBeGreaterThan(155);
+    expect(dbFlyDriveDeg(bottom)!).toBeLessThan(145);
+    expect(dbFlyDriveDeg(shallow)!).toBeGreaterThanOrEqual(145);
+    expect(dbFlyDriveDeg(buildArmTiltPose({ collapsed: true }))).toBeNull();
+    const one = buildArmTiltPose({
+      tiltDeg: 50,
+      inDepth: true,
+      onlySide: "left",
+    });
+    expect(dbFlyDriveDeg(one)!).toBeLessThan(145);
+    expect(
+      countReps([...frames(stand, 6), ...frames(bottom, 6), ...frames(stand, 6)], opts)
+        .count,
+    ).toBe(1);
+    expect(
+      countReps(
+        [...frames(stand, 6), ...frames(shallow, 12), ...frames(stand, 6)],
+        opts,
+      ).count,
+    ).toBe(0);
+  });
 });
 
 describe("双杠臂屈伸契约与计数", () => {
@@ -836,7 +864,7 @@ describe("绳索夹胸契约与计数", () => {
   const opts = {
     phaseConfig: DEFAULT_CABLE_CROSSOVER_PHASE_CONFIG,
     rules: CABLE_CROSSOVER_RULES,
-    angleFn: dbFlyDriveDeg,
+    angleFn: cableCrossoverDriveDeg,
     depthRuleId: CABLE_CROSSOVER_DEPTH_RULE_ID,
     exerciseId: "cable-crossover" as const,
   };
@@ -856,8 +884,8 @@ describe("绳索夹胸契约与计数", () => {
   });
 
   it("完整开合计 1；半程 shallow", () => {
-    expect(dbFlyDriveDeg(STAND)!).toBeGreaterThan(120);
-    expect(dbFlyDriveDeg(BOTTOM)!).toBeLessThan(80);
+    expect(cableCrossoverDriveDeg(STAND)!).toBeGreaterThan(120);
+    expect(cableCrossoverDriveDeg(BOTTOM)!).toBeLessThan(80);
     const full = [
       ...frames(STAND, 6),
       ...frames(BOTTOM, 6),
@@ -878,13 +906,40 @@ describe("绳索夹胸契约与计数", () => {
     );
   });
 
+  it("正侧深度分开仍计 1；半程不计", () => {
+    const stand = buildArmTiltPose({ tiltDeg: 20, inDepth: true });
+    const bottom = buildArmTiltPose({ tiltDeg: 55, inDepth: true });
+    const shallow = buildArmTiltPose({ tiltDeg: 40, inDepth: true });
+    expect(cableCrossoverDriveDeg(stand)!).toBeGreaterThan(120);
+    expect(cableCrossoverDriveDeg(bottom)!).toBeLessThan(80);
+    expect(cableCrossoverDriveDeg(shallow)!).toBeGreaterThanOrEqual(80);
+    expect(
+      cableCrossoverDriveDeg(buildArmTiltPose({ collapsed: true })),
+    ).toBeNull();
+    expect(
+      cableCrossoverDriveDeg(
+        buildArmTiltPose({ tiltDeg: 55, inDepth: true, onlySide: "left" }),
+      ),
+    ).toBeNull();
+    expect(
+      countReps([...frames(stand, 6), ...frames(bottom, 6), ...frames(stand, 6)], opts)
+        .count,
+    ).toBe(1);
+    expect(
+      countReps(
+        [...frames(stand, 6), ...frames(shallow, 12), ...frames(stand, 6)],
+        opts,
+      ).count,
+    ).toBe(0);
+  });
+
   it("正面 PoseDump 跨 stand/bottom，完整计次 ≥1（有片才跑）", () => {
     const poses = posesFromDump(
       "../../../../media/trajectory-source/cable-crossover/cable-crossover-front-01.pose.json",
     );
     if (!poses) return;
     const degs = poses
-      .map((p) => dbFlyDriveDeg(p))
+      .map((p) => cableCrossoverDriveDeg(p))
       .filter((d): d is number => d != null);
     expect(degs.length).toBeGreaterThan(40);
     expect(Math.max(...degs)).toBeGreaterThan(120);
@@ -1321,13 +1376,13 @@ describe("哑铃前平举契约与计数", () => {
 });
 
 describe("俯身飞鸟契约与计数", () => {
-  const STAND = buildDbFlyPose({ wristIncludedDeg: 18 });
-  const BOTTOM = buildDbFlyPose({ wristIncludedDeg: 70 });
-  const SHALLOW = buildDbFlyPose({ wristIncludedDeg: 45 });
+  const STAND = buildArmTiltPose({ tiltDeg: 12 });
+  const BOTTOM = buildArmTiltPose({ tiltDeg: 70 });
+  const SHALLOW = buildArmTiltPose({ tiltDeg: 40 });
   const opts = {
     phaseConfig: DEFAULT_REAR_DELT_FLY_PHASE_CONFIG,
     rules: REAR_DELT_FLY_RULES,
-    angleFn: dbFlyDriveDeg,
+    angleFn: rearDeltFlyDriveDeg,
     depthRuleId: REAR_DELT_FLY_DEPTH_RULE_ID,
     exerciseId: "rear-delt-fly" as const,
   };
@@ -1347,8 +1402,8 @@ describe("俯身飞鸟契约与计数", () => {
   });
 
   it("完整开合计 1；半程 shallow", () => {
-    expect(dbFlyDriveDeg(STAND)!).toBeGreaterThan(155);
-    expect(dbFlyDriveDeg(BOTTOM)!).toBeLessThan(125);
+    expect(rearDeltFlyDriveDeg(STAND)!).toBeGreaterThan(155);
+    expect(rearDeltFlyDriveDeg(BOTTOM)!).toBeLessThan(125);
     const full = [
       ...frames(STAND, 6),
       ...frames(BOTTOM, 6),
@@ -1369,13 +1424,45 @@ describe("俯身飞鸟契约与计数", () => {
     );
   });
 
+  it("正侧只在深度上打开仍计 1；一只手臂够用；叠点不计", () => {
+    const stand = buildArmTiltPose({ tiltDeg: 12, inDepth: true });
+    const bottom = buildArmTiltPose({ tiltDeg: 70, inDepth: true });
+    const shallow = buildArmTiltPose({ tiltDeg: 40, inDepth: true });
+    const one = buildArmTiltPose({
+      tiltDeg: 70,
+      inDepth: true,
+      onlySide: "left",
+    });
+    expect(rearDeltFlyDriveDeg(stand)!).toBeGreaterThan(155);
+    expect(rearDeltFlyDriveDeg(bottom)!).toBeLessThan(125);
+    expect(rearDeltFlyDriveDeg(shallow)!).toBeGreaterThanOrEqual(125);
+    expect(rearDeltFlyDriveDeg(one)!).toBeLessThan(125);
+    expect(rearDeltFlyDriveDeg(buildArmTiltPose({ collapsed: true }))).toBeNull();
+    expect(
+      countReps([...frames(stand, 6), ...frames(bottom, 6), ...frames(stand, 6)], opts)
+        .count,
+    ).toBe(1);
+    expect(
+      countReps(
+        [...frames(stand, 6), ...frames(one, 6), ...frames(stand, 6)],
+        opts,
+      ).count,
+    ).toBe(1);
+    expect(
+      countReps(
+        [...frames(stand, 6), ...frames(shallow, 12), ...frames(stand, 6)],
+        opts,
+      ).count,
+    ).toBe(0);
+  });
+
   it("3/4 PoseDump 跨 stand/bottom，完整计次 ≥1（有片才跑）", () => {
     const poses = posesFromDump(
       "../../../../media/trajectory-source/rear-delt-fly/rear-delt-fly-three_quarter-01.pose.json",
     );
     if (!poses) return;
     const degs = poses
-      .map((p) => dbFlyDriveDeg(p))
+      .map((p) => rearDeltFlyDriveDeg(p))
       .filter((d): d is number => d != null);
     expect(degs.length).toBeGreaterThan(40);
     expect(Math.max(...degs)).toBeGreaterThan(155);
@@ -1563,16 +1650,18 @@ describe("驱动角", () => {
     );
   });
 
-  it("飞鸟合拢 drive 高于打开；缺一侧腕回退肘角", () => {
+  it("飞鸟合拢 drive 高于打开；缺一侧腕用该臂相对竖直", () => {
     const closed = buildDbFlyPose({ wristIncludedDeg: 18 });
     const open = buildDbFlyPose({ wristIncludedDeg: 70 });
     expect(dbFlyDriveDeg(closed)!).toBeGreaterThan(dbFlyDriveDeg(open)!);
     expect(dbFlyDriveDeg(closed)!).toBeGreaterThan(155);
     expect(dbFlyDriveDeg(open)!).toBeLessThan(145);
-    const oneArm = closed.slice();
-    oneArm[LandmarkIndex.RightWrist] = undefined;
-    oneArm[LandmarkIndex.RightElbow] = undefined;
-    expect(dbFlyDriveDeg(oneArm)).not.toBeNull();
+    const oneArm = buildArmTiltPose({
+      tiltDeg: 50,
+      inDepth: true,
+      onlySide: "left",
+    });
+    expect(dbFlyDriveDeg(oneArm)!).toBeLessThan(145);
   });
 
   it("双杠取可见度更高的一侧肘，不被远侧直臂均值带偏", () => {

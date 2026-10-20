@@ -120,20 +120,20 @@ describe("FR-100 账号目录", () => {
 
   it("登录名可以是邮箱，大小写不敏感，不发验证码", () => {
     expect(normalizeUsername("  Ada_1 ")).toBe("Ada_1");
-    expect(normalizeUsername("807756840@qq.com")).toBe("807756840@qq.com");
+    expect(normalizeUsername("user@example.com")).toBe("user@example.com");
     expect(normalizeUsername("No Space")).toBeNull();
     const made = createUsernameUser(
       { users: [] },
-      "  Ada@QQ.com ",
+      "  Ada@example.com ",
       NOW,
       ids(),
     );
     if (!made.ok) throw new Error("expected user");
-    expect(made.user.username).toBe("ada@qq.com");
-    expect(made.user.email).toBe("ada@qq.com");
-    const found = findUsernameUser(made.directory, "ADA@qq.com");
+    expect(made.user.username).toBe("ada@example.com");
+    expect(made.user.email).toBe("ada@example.com");
+    const found = findUsernameUser(made.directory, "ADA@example.com");
     expect(found?.id).toBe(made.user.id);
-    const clash = createUsernameUser(made.directory, "ada@qq.com", NOW, ids());
+    const clash = createUsernameUser(made.directory, "ada@example.com", NOW, ids());
     expect(clash.ok).toBe(false);
     expect(removeDirectoryUser(made.directory, made.user.id).users).toEqual([]);
   });

@@ -1,0 +1,19 @@
+# 若 CLI 以本目录为归档根，仍排除原生工程与依赖。
+# 单仓根目录的忽略见仓库根 .easignore。
+ios/
+android/
+node_modules/
+.expo/
+.DS_Store
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+dist/
+web-build/
+expo-env.d.ts
+*.tsbuildinfo

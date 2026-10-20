@@ -1,5 +1,6 @@
 import { colors, fontSize, space } from '@fitness-coach/ui';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 type Props = {
   title: string;
@@ -7,10 +8,11 @@ type Props = {
 };
 
 export default function EmptyPane({ title, body }: Props) {
+  const tr = useTr();
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.body}>{body}</Text>
+      <Text style={styles.title}>{tr(title)}</Text>
+      <Text style={styles.body}>{tr(body)}</Text>
     </View>
   );
 }

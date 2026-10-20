@@ -1,7 +1,13 @@
 /**
  * FR-097：把一节课存成模板，再套用生成新课。
  */
-import { addSet, addSlot, createWorkout, patchWorkout } from "./commands.js";
+import {
+  addSet,
+  addSlot,
+  createWorkout,
+  patchSlot,
+  patchWorkout,
+} from "./commands.js";
 import type {
   WorkoutLog,
   WorkoutLogIds,
@@ -37,8 +43,11 @@ export function saveWorkoutAsTemplate(
       kind: set.kind,
       reps: set.reps,
       weightKg: set.weightKg,
+      weightLeftKg: set.weightLeftKg,
+      weightRightKg: set.weightRightKg,
       durationSec: set.durationSec,
     })),
+    ...(slot.loadMode === "sides" ? { loadMode: "sides" as const } : {}),
   }));
   const template: WorkoutTemplate = {
     id: ids.nextId(),
@@ -65,6 +74,9 @@ export function applyWorkoutTemplate(
   for (const slot of template.slots) {
     const added = addSlot(out, next.workoutId, slot.exercise, ids);
     out = added.log;
+    if (slot.loadMode === "sides") {
+      out = patchSlot(out, next.workoutId, added.slotId, { loadMode: "sides" });
+    }
     for (const draft of slot.sets) {
       if (slot.countMode === "timed") {
         if (draft.durationSec == null) continue;
@@ -86,6 +98,8 @@ export function applyWorkoutTemplate(
           kind: "reps",
           reps: draft.reps,
           weightKg: draft.weightKg,
+          weightLeftKg: draft.weightLeftKg,
+          weightRightKg: draft.weightRightKg,
         },
         ids,
       ).log;

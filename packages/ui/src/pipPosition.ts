@@ -23,16 +23,30 @@ export function clampPipPosition(
   };
 }
 
-/** 默认落点：底栏之上、右侧留白。不是强制贴边，只是初次位置。 */
+export function pipSizeForScreen(
+  screenW: number,
+  screenH: number,
+  bottomReserve = layout.bottomBarHeight + 16,
+): { width: number; height: number } {
+  const available = Math.max(160, screenH - bottomReserve);
+  const scale = Math.min(1, available / layout.refPersonPipHeight);
+  return {
+    width: Math.min(screenW - 24, Math.round(layout.refPersonPipWidth * scale)),
+    height: Math.round(layout.refPersonPipHeight * scale),
+  };
+}
+
+/** 默认落点：底栏之上、右侧安全区内。不是强制贴边，只是初次位置。 */
 export function defaultPipPosition(
   screenW: number,
   screenH: number,
   pipW: number = layout.refPersonPipWidth,
   pipH: number = layout.refPersonPipHeight,
+  inset: { right?: number; bottom?: number } = {},
 ): PipPoint {
   return clampPipPosition(
-    screenW - pipW - 12,
-    screenH - pipH - layout.bottomBarHeight - 24,
+    screenW - pipW - 12 - (inset.right ?? 0),
+    screenH - pipH - layout.bottomBarHeight - 24 - (inset.bottom ?? 0),
     screenW,
     screenH,
     pipW,

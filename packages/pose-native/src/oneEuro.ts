@@ -142,6 +142,11 @@ export class PoseSmoother {
       if (lm.z != null) {
         next.z = this.channel(`${i}:z`).filter(lm.z, timestampMs);
       }
+      if (lm.wx != null && lm.wy != null && lm.wz != null) {
+        next.wx = this.channel(`${i}:wx`).filter(lm.wx, timestampMs);
+        next.wy = this.channel(`${i}:wy`).filter(lm.wy, timestampMs);
+        next.wz = this.channel(`${i}:wz`).filter(lm.wz, timestampMs);
+      }
       out[i] = next;
     }
     return out;

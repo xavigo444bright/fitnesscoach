@@ -33,6 +33,18 @@ const EXERCISES = new Set<TrajectoryExerciseId>([
   "rear-delt-fly",
   "face-pull",
   "pike-pushup",
+  "lat-pulldown",
+  "seated-row",
+  "superman",
+  "band-row",
+  "leg-press",
+  "calf-raise",
+  "goblet-squat",
+  "dead-bug",
+  "bird-dog",
+  "crunch",
+  "side-plank",
+  "hanging-knee-raise",
 ]);
 
 function isRecord(v: unknown): v is Record<string, unknown> {

@@ -171,6 +171,84 @@ export function recoverMessageByIdFor(
       "pike-line": "很好，倒 V 稳住了",
     };
   }
+  if (exerciseId === "lat-pulldown") {
+    return {
+      ...base,
+      "rep-shallow": "很好，拉得更低了",
+      "pull-depth": "很好，拉得更低了",
+    };
+  }
+  if (exerciseId === "seated-row" || exerciseId === "band-row") {
+    return {
+      ...base,
+      "rep-shallow": "很好，拉得更后了",
+      "row-depth": "很好，拉得更后了",
+    };
+  }
+  if (exerciseId === "superman") {
+    return {
+      ...base,
+      "rep-shallow": "很好，抬得更高了",
+      "lift-height": "很好，抬得更高了",
+    };
+  }
+  if (exerciseId === "leg-press") {
+    return {
+      ...base,
+      "rep-shallow": "很好，屈得更深了",
+      "knee-depth": "很好，屈得更深了",
+    };
+  }
+  if (exerciseId === "calf-raise") {
+    return {
+      ...base,
+      "rep-shallow": "很好，脚跟抬得更高了",
+      "ankle-rom": "很好，脚跟抬得更高了",
+    };
+  }
+  if (exerciseId === "goblet-squat") {
+    return {
+      ...base,
+      "rep-shallow": "很好，蹲得更深了",
+      "squat-depth": "很好，蹲得更深了",
+      "torso-lean": "很好，躯干更稳了",
+    };
+  }
+  if (exerciseId === "dead-bug") {
+    return {
+      ...base,
+      "rep-shallow": "很好，腿伸开了",
+      "lumbar-contact": "很好，腰贴回去了",
+    };
+  }
+  if (exerciseId === "bird-dog") {
+    return {
+      ...base,
+      "rep-shallow": "很好，腿伸平了",
+      "hip-level": "很好，腿抬平了",
+    };
+  }
+  if (exerciseId === "crunch") {
+    return {
+      ...base,
+      "rep-shallow": "很好，卷起来了",
+      "crunch-height": "很好，卷起来了",
+    };
+  }
+  if (exerciseId === "side-plank") {
+    return {
+      ...base,
+      "rep-shallow": "很好，身体撑直了",
+      "side-line": "很好，身体一条线了",
+    };
+  }
+  if (exerciseId === "hanging-knee-raise") {
+    return {
+      ...base,
+      "rep-shallow": "很好，膝抬得更高了",
+      "knee-height": "很好，膝抬得更高了",
+    };
+  }
   return base;
 }
 

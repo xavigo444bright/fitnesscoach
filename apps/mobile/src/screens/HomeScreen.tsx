@@ -6,7 +6,6 @@ import {
   DEFAULT_HOME_SEGMENT,
   HOME_SEGMENTS,
   colors,
-  fontSize,
   layout,
   space,
 } from '@fitness-coach/ui';
@@ -21,7 +20,7 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SegmentedControl from '../components/SegmentedControl';
 import SegmentPager from '../components/SegmentPager';
@@ -65,7 +64,6 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + space.md }]}>
-      <Text style={styles.kicker}>首页</Text>
       <SegmentedControl
         items={HOME_SEGMENTS}
         value={segment}
@@ -142,10 +140,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
     paddingHorizontal: space.md,
-  },
-  kicker: {
-    color: colors.textSecondary,
-    fontSize: fontSize.caption,
-    marginBottom: space.md,
   },
 });

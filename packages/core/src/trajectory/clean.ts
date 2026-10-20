@@ -32,8 +32,12 @@ import {
   plankDriveDeg,
   pullupWorkingElbowAngle,
   pushupElbowAngle,
+  driveAngleForExercise,
+  phaseConfigForExercise,
   rdlHipAngle,
+  cableCrossoverDriveDeg,
   dbFlyDriveDeg,
+  rearDeltFlyDriveDeg,
   squatKneeAngle,
   lateralRaiseDriveDeg,
   shoulderRaiseDriveDeg,
@@ -92,9 +96,8 @@ function driveAngle(
   if (exerciseId === "dip") return preferredVisibleElbowAngle(pose);
   if (exerciseId === "rdl") return rdlHipAngle(pose);
   if (exerciseId === "pullup") return pullupWorkingElbowAngle(pose);
-  if (exerciseId === "db-fly" || exerciseId === "cable-crossover") {
-    return dbFlyDriveDeg(pose);
-  }
+  if (exerciseId === "db-fly") return dbFlyDriveDeg(pose);
+  if (exerciseId === "cable-crossover") return cableCrossoverDriveDeg(pose);
   if (exerciseId === "incline-pushup" || exerciseId === "chest-press-machine") {
     return meanVisibleElbowAngle(pose);
   }
@@ -104,9 +107,11 @@ function driveAngle(
   if (exerciseId === "front-raise") {
     return shoulderRaiseDriveDeg(pose);
   }
-  if (exerciseId === "rear-delt-fly") return dbFlyDriveDeg(pose);
+  if (exerciseId === "rear-delt-fly") return rearDeltFlyDriveDeg(pose);
   if (exerciseId === "face-pull") return meanVisibleElbowAngle(pose);
   if (exerciseId === "pike-pushup") return meanVisibleElbowAngle(pose);
+  const phaseG = driveAngleForExercise(exerciseId, pose);
+  if (phaseG !== undefined) return phaseG;
   return squatKneeAngle(pose);
 }
 
@@ -134,7 +139,7 @@ function phaseConfigFor(exerciseId: TrajectoryExerciseId): PhaseConfig {
   if (exerciseId === "rear-delt-fly") return DEFAULT_REAR_DELT_FLY_PHASE_CONFIG;
   if (exerciseId === "face-pull") return DEFAULT_FACE_PULL_PHASE_CONFIG;
   if (exerciseId === "pike-pushup") return DEFAULT_PIKE_PUSHUP_PHASE_CONFIG;
-  return DEFAULT_SQUAT_PHASE_CONFIG;
+  return phaseConfigForExercise(exerciseId) ?? DEFAULT_SQUAT_PHASE_CONFIG;
 }
 
 /** 离线提取：确认帧放宽，避免示范片尾刚站直却裁不出循环 */

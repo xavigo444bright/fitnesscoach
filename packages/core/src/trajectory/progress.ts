@@ -23,6 +23,7 @@ import {
   DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
   DEFAULT_RDL_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
+  phaseConfigForExercise,
   type PhaseConfig,
 } from "../phase.js";
 import { LandmarkIndex, type Phase, type Pose } from "../types.js";
@@ -57,7 +58,7 @@ function cfgFor(exerciseId: TrajectoryExerciseId): PhaseConfig {
   if (exerciseId === "rear-delt-fly") return DEFAULT_REAR_DELT_FLY_PHASE_CONFIG;
   if (exerciseId === "face-pull") return DEFAULT_FACE_PULL_PHASE_CONFIG;
   if (exerciseId === "pike-pushup") return DEFAULT_PIKE_PUSHUP_PHASE_CONFIG;
-  return DEFAULT_SQUAT_PHASE_CONFIG;
+  return phaseConfigForExercise(exerciseId) ?? DEFAULT_SQUAT_PHASE_CONFIG;
 }
 
 function mid(

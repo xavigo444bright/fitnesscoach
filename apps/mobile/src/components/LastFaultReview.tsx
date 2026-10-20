@@ -4,6 +4,7 @@
 import type { FaultIssue } from '@fitness-coach/render';
 import { colors, fontSize, layout, space } from '@fitness-coach/ui';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTr } from '../i18n';
 
 type Props = {
   issues: FaultIssue[];
@@ -16,6 +17,7 @@ export default function LastFaultReview({
   reviewing,
   onToggle,
 }: Props) {
+  const tr = useTr();
   if (issues.length === 0) return null;
 
   return (
@@ -24,11 +26,11 @@ export default function LastFaultReview({
         style={styles.chip}
         onPress={onToggle}
         accessibilityRole="button"
-        accessibilityLabel={reviewing ? '收起上次问题' : '查看上次问题'}
+        accessibilityLabel={tr(reviewing ? '收起上次问题' : '查看上次问题')}
         hitSlop={8}
       >
         <Text style={styles.chipText}>
-          {reviewing ? '收起上次问题' : `查看上次问题 · ${issues.length}`}
+          {tr(reviewing ? '收起上次问题' : `查看上次问题 · ${issues.length}`)}
         </Text>
       </Pressable>
       {reviewing
@@ -46,7 +48,7 @@ export default function LastFaultReview({
                 ]}
                 numberOfLines={2}
               >
-                ⚠ {iss.message}
+                ⚠ {tr(iss.message)}
               </Text>
             </View>
           ))

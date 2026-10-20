@@ -4,9 +4,13 @@
  * 活动门是统一相对下降，不按动作 id 分支。
  */
 
+import { readAttemptRegion } from "./attemptRegions.js";
 import { ghostKeyframesFor, type GhostExerciseId } from "./exercises/ghostKeyframes.js";
+import { laterGhostPoses } from "./exercises/later-keyframes.js";
+import { PULLUP_FRONT_HANG_POSES } from "./exercises/batch-keyframes.js";
 import { isCoachableId } from "./exercises/catalog.js";
 import { landmarkReliable } from "./landmarks.js";
+import { initialSquatDepthState } from "./squatDepth.js";
 import { LandmarkIndex, type Pose } from "./types.js";
 import {
   hasDemoTrajectory,
@@ -142,15 +146,43 @@ export function poseArea(pose: Pose): number {
 }
 
 function asGhostId(exerciseId: string): GhostExerciseId | null {
-  return isCoachableId(exerciseId) ? exerciseId : null;
+  if (!isCoachableId(exerciseId)) return null;
+  switch (exerciseId) {
+    case "squat":
+    case "pushup":
+    case "glute-bridge":
+    case "lunge":
+    case "plank":
+    case "db-row":
+    case "ohp":
+    case "bench-press":
+    case "rdl":
+    case "pullup":
+    case "db-fly":
+    case "dip":
+    case "incline-pushup":
+    case "cable-crossover":
+    case "chest-press-machine":
+    case "lateral-raise":
+    case "front-raise":
+    case "rear-delt-fly":
+    case "face-pull":
+    case "pike-pushup":
+      return exerciseId;
+    default:
+      return null;
+  }
 }
 
-/** Ghost 四关键帧 + 已打包示范轨迹稀疏取样。 */
+/** Ghost 四关键帧 + 已打包示范轨迹稀疏取样。后接入的动作用火柴人。 */
 export function trajectoryTemplatesFor(exerciseId: string): Pose[] {
+  const later = laterGhostPoses(exerciseId);
+  if (later) return later;
   const id = asGhostId(exerciseId);
   if (!id) return [];
   const kf = ghostKeyframesFor(id);
   const templates: Pose[] = [kf.stand, kf.descend_mid, kf.bottom, kf.ascend_mid];
+  if (id === "pullup") templates.push(...PULLUP_FRONT_HANG_POSES);
   for (const cam of ["side", "front"] as const) {
     if (!hasDemoTrajectory(id, cam)) continue;
     const traj = getDemoTrajectory(id, cam);
@@ -311,7 +343,22 @@ export function stepActivityGate(
  * 帧间粘住同一个人；只有另一人轨迹重合度明显更高才换。
  * pick 之后用同一套重合度更新活动门。
  */
+/** 起始区里的人行程是 0。走出起始、或已经到目标，才算在做这个动作。 */
+function strokeTravel(exerciseId: string, pose: Pose): { travel: number; readable: boolean } {
+  const obs = readAttemptRegion(exerciseId, pose, initialSquatDepthState()).obs;
+  if (!obs) return { travel: 0, readable: false };
+  if (obs.atFinish) return { travel: 1, readable: true };
+  if (!obs.atStart) {
+    return {
+      travel: Math.min(1, Math.max(obs.progress, obs.shortTravel, 0.2)),
+      readable: true,
+    };
+  }
+  return { travel: 0, readable: true };
+}
+
 export class ExerciseSubjectLock {
+  private exerciseId: string;
   private templates: Pose[];
   private centroid: Vec2 | null = null;
   private pendingKey = "";
@@ -320,6 +367,7 @@ export class ExerciseSubjectLock {
   private activity: ActivityGateState = initialActivityGateState();
 
   constructor(exerciseId: string) {
+    this.exerciseId = exerciseId;
     this.templates = trajectoryTemplatesFor(exerciseId);
   }
 
@@ -349,8 +397,13 @@ export class ExerciseSubjectLock {
       return null;
     }
 
+    const travel = new Map<Scored, { travel: number; readable: boolean }>();
+    for (const s of scored) travel.set(s, strokeTravel(this.exerciseId, s.pose));
     const best = scored.reduce((a, b) => (a.score >= b.score ? a : b));
-    let chosen: Scored = best;
+    const mover = scored.reduce((a, b) =>
+      (travel.get(a)?.travel ?? 0) >= (travel.get(b)?.travel ?? 0) ? a : b,
+    );
+    const seed = (travel.get(mover)?.travel ?? 0) >= 0.2 ? mover : best;
 
     if (this.centroid) {
       let locked: Scored | null = null;
@@ -363,49 +416,64 @@ export class ExerciseSubjectLock {
         }
       }
       if (locked && lockedDist <= SUBJECT_LOCK_RADIUS) {
-        const samePerson = locked === best;
-        if (
-          !samePerson &&
-          best.score >= locked.score + SUBJECT_SWITCH_MARGIN
-        ) {
-          const key = `${best.centroid.x.toFixed(3)},${best.centroid.y.toFixed(3)}`;
+        const overlapGap = best.overlap - locked.overlap;
+        const canSeparate = overlapGap >= 0.08;
+        const wantOverlap =
+          canSeparate &&
+          locked !== best &&
+          best.score >= locked.score + SUBJECT_SWITCH_MARGIN;
+        const wantTravel =
+          !canSeparate &&
+          locked !== mover &&
+          (travel.get(mover)?.travel ?? 0) >= 0.2 &&
+          (travel.get(locked)?.travel ?? 0) < 0.05;
+        const challenger = wantTravel ? mover : best;
+        if (wantOverlap || wantTravel) {
+          const key = `${challenger.centroid.x.toFixed(3)},${challenger.centroid.y.toFixed(3)}`;
           if (this.pendingKey === key) this.pendingCount += 1;
           else {
             this.pendingKey = key;
             this.pendingCount = 1;
           }
           if (this.pendingCount >= SUBJECT_SWITCH_FRAMES) {
-            this.centroid = best.centroid;
+            this.centroid = challenger.centroid;
             this.pendingKey = "";
             this.pendingCount = 0;
             this.switched = true;
-            chosen = best;
-            this.observe(chosen.overlap);
-            return chosen.pose;
+            this.observe(challenger.overlap, travel.get(challenger)?.readable === true);
+            return challenger.pose;
           }
         } else {
           this.pendingKey = "";
           this.pendingCount = 0;
         }
         this.centroid = locked.centroid;
-        chosen = locked;
-        this.observe(chosen.overlap);
-        return chosen.pose;
+        this.observe(locked.overlap, travel.get(locked)?.readable === true);
+        return locked.pose;
       }
     }
 
-    this.centroid = best.centroid;
+    this.centroid = seed.centroid;
     this.pendingKey = "";
     this.pendingCount = 0;
-    this.observe(best.overlap);
-    return best.pose;
+    this.observe(seed.overlap, travel.get(seed)?.readable === true);
+    return seed.pose;
   }
 
-  private observe(overlap: number): void {
+  private observe(overlap: number, strokeReadable: boolean): void {
+    if (this.templates.length === 0) {
+      this.activity = {
+        ...this.activity,
+        frames: this.activity.frames + 1,
+        engineOn: strokeReadable,
+        latchedOff: !strokeReadable,
+      };
+      return;
+    }
     this.activity = stepActivityGate(
       this.activity,
       overlap,
-      this.templates.length > 0,
+      true,
     );
   }
 }

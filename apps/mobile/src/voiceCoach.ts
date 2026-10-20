@@ -4,6 +4,8 @@
  * 原生模块未编入 Dev Client 时静默降级，不崩 App。
  */
 
+import { translate, speechLanguage } from './i18n/locale';
+
 type SpeechApi = {
   stop: () => void;
   speak: (
@@ -58,8 +60,8 @@ export function speakCoach(message: string): void {
   if (!voiceEnabled || !text || !Speech) return;
   try {
     Speech.stop();
-    Speech.speak(text, {
-      language: 'zh-CN',
+    Speech.speak(translate(text), {
+      language: speechLanguage(),
       rate: 1.05,
       pitch: 1.0,
     });

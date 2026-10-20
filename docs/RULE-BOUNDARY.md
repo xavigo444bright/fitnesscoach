@@ -116,21 +116,21 @@
 
 相位：`standAbove` 155° / `bottomBelow` 115°。半程未进 `bottom` 走 shallow。对照样片 `rdl-side-01`。禁止抄样片最低约 50°（FR-088）。
 
-## 14. 引体向上参考边沿（与 pullup-rules.md 0.1.0 一致）
+## 14. 引体向上参考边沿（与 pullup-rules.md 0.2.0 一致）
 
 | 规则 | 不触发 | 触发 |
 |------|--------|------|
 | pull-depth（bottom） | 工作肘 &lt; 115° | 工作肘 ≥ 115° |
 
-相位：`standAbove` 150° / `bottomBelow` 100°。半程不计次。对照样片 `pullup-side-01`。禁止抄 2D 折叠噪声最小肘角（FR-088）。
+相位：`standAbove` 150° / `bottomBelow` 100°。半程不计次。侧面、斜侧、正面、正背后都计（规则 0.2.0）。对照样片 `pullup-side-01`。禁止抄 2D 折叠噪声最小肘角（FR-088）。
 
-## 15. 哑铃飞鸟参考边沿（与 db-fly-rules.md 0.1.0 一致）
+## 15. 哑铃飞鸟参考边沿（与 db-fly-rules.md 0.2.0 一致）
 
 | 规则 | 不触发 | 触发 |
 |------|--------|------|
 | fly-depth（bottom） | drive &lt; 150°（开合角 &gt; 30°） | drive ≥ 150°（开合角 ≤ 30°，warning） |
 
-相位：`standAbove` 155° / `bottomBelow` 145°。合拢 = stand，打开 = bottom。半程不计次。对照样片 `db-fly-three_quarter-01`（打包名 `db-fly-side-01`）。头侧可计但不打进包。禁止抄样片最大打开角（FR-088）。
+相位：`standAbove` 155° / `bottomBelow` 145°。合拢 = stand，打开 = bottom。驱动取画面开合与手臂相对竖直里更打开的那个；缺腕不用肘弯。半程不计次。对照样片 `db-fly-three_quarter-01`（打包名 `db-fly-side-01`）。禁止抄样片最大打开角（FR-088）。
 
 ## 16. 双杠臂屈伸参考边沿（与 dip-rules.md 0.1.0 一致）
 
@@ -150,13 +150,13 @@
 
 相位：`standAbove` 160° / `bottomBelow` 120°（与标准俯卧撑同量级）。撑起 = stand，胸口近支撑面 = bottom。半程不计次。对照样片 `incline-pushup-side-01`。正面可计但不打进包；肘外展为 P2。禁止抄样片最低肘角（FR-088）。
 
-## 18. 绳索夹胸参考边沿（与 cable-crossover-rules.md 0.1.0 一致）
+## 18. 绳索夹胸参考边沿（与 cable-crossover-rules.md 0.2.0 一致）
 
 | 规则 | 不触发 | 触发 |
 |------|--------|------|
 | crossover-depth（bottom） | drive &lt; 90°（开合角 &gt; 90°） | drive ≥ 90°（开合角 ≤ 90°，warning） |
 
-相位：`standAbove` 120° / `bottomBelow` 80°。交汇 = stand，打开 = bottom。半程不计次。对照样片 `cable-crossover-front-01`。禁止抄飞鸟 155/145，也禁止抄样片最大打开角（FR-088）。
+相位：`standAbove` 120° / `bottomBelow` 80°。交汇 = stand，打开 = bottom。驱动是双腕三维夹角。半程不计次。对照样片 `cable-crossover-front-01`。禁止抄飞鸟 155/145，也禁止抄样片最大打开角（FR-088）。
 
 ## 19. 坐姿推胸器参考边沿（与 chest-press-machine-rules.md 0.1.0 一致）
 
@@ -182,13 +182,13 @@
 
 相位同侧平举。肩宽 ≥0.12（偏正）时关掉。对照样片 `front-raise-side-01`。禁止抄样片最大矢状面抬角（FR-088）。
 
-## 22. 俯身飞鸟参考边沿（与 rear-delt-fly-rules.md 0.1.0 一致）
+## 22. 俯身飞鸟参考边沿（与 rear-delt-fly-rules.md 0.2.0 一致）
 
 | 规则 | 不触发 | 触发 |
 |------|--------|------|
-| fly-depth（bottom） | drive &lt; 135°（开合角 &gt; 45°） | drive ≥ 135°（warning） |
+| fly-depth（bottom） | drive &lt; 135°（相对竖直 &gt; 45°） | drive ≥ 135°（warning） |
 
-相位：`standAbove` 155° / `bottomBelow` 125°。合拢 = stand，打开 = bottom。与飞鸟同一 `dbFlyDriveDeg`。对照样片 `rear-delt-fly-three_quarter-01`（包内文件名 `rear-delt-fly-side-01.mp4`）。禁止抄样片最大打开（FR-088）。
+相位：`standAbove` 155° / `bottomBelow` 125°。下垂 = stand，打开 = bottom。驱动是手臂相对竖直（含深度），不是胸飞鸟那条。对照样片 `rear-delt-fly-three_quarter-01`（包内文件名 `rear-delt-fly-side-01.mp4`）。禁止抄样片最大打开（FR-088）。
 
 ## 23. 面拉参考边沿（与 face-pull-rules.md 0.1.0 一致）
 
@@ -206,4 +206,26 @@
 | pike-line（all） | 肩-髋-踝 ≤ 100° | 肩-髋-踝 &gt; 100°（error，摊成普通俯卧撑） |
 
 相位复用上斜：`standAbove` 160° / `bottomBelow` 120°。撑起 = stand，头近地面 = bottom。肩宽 ≥0.12 时两条都关掉。对照样片 `pike-pushup-side-01`（0:02–0:11）。禁止抄样片最低肘角（FR-088）。
+
+## 25. Phase G 边沿（已接线，真机未验）
+
+与各自 `*-rules.md` 0.1.0 一致。半程未进 `bottom` 不计次。禁止抄样片单帧（FR-088）。
+
+| 动作 | 规则 | 不触发 | 触发 | 相位 stand / bottom |
+|------|------|--------|------|---------------------|
+| 高位下拉 | pull-depth | 工作肘 &lt; 115° | ≥ 115° | 145° / 105° |
+| 坐姿划船 | row-depth | 工作肘 &lt; 110° | ≥ 110° | 130° / 95° |
+| 超人式 | lift-height | drive &lt; 164° | ≥ 164° | 168° / 152° |
+| 弹力带划船 | row-depth | 工作肘 &lt; 115° | ≥ 115° | 130° / 100° |
+| 腿举 | knee-depth | 工作膝 &lt; 120° | ≥ 120° | 155° / 105° |
+| 提踵 | ankle-rom | drive &lt; 76° | ≥ 76° | 85° / 60° |
+| 高脚杯深蹲 | squat-depth | 工作膝 &lt; 110° | ≥ 110° | 155° / 100° |
+| 高脚杯深蹲 | torso-lean | 前倾 ≤ 55° | &gt; 55° | 同上，仅 stand |
+| 死虫式 | lumbar-contact | 髋抬起 ≤ 23° | &gt; 23° | drive 70° / 35° |
+| 鸟狗式 | hip-level | 偏离 ≤ 26° | &gt; 26° | drive 65° / 40° |
+| 卷腹 | crunch-height | drive &lt; 158° | ≥ 158° | 165° / 148° |
+| 侧平板 | side-line | 一线 ≥ 158° | &lt; 158° | drive 22° 进入 bottom |
+| 悬垂提膝 | knee-height | 髋角 &lt; 120° | ≥ 120° | 155° / 105° |
+
+侧面不计次：提踵的正面对称、高脚杯膝内扣、悬垂提膝的正面摆浪。高位下拉侧面也计次（规则 0.2.0，阈值仍是上表）。侧平板没有侧面规格。弹力带用 3/4 片当侧面。鸟狗 3/4 不补。
 

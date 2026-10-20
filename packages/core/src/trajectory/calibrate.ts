@@ -25,6 +25,7 @@ import {
   DEFAULT_PIKE_PUSHUP_PHASE_CONFIG,
   DEFAULT_RDL_PHASE_CONFIG,
   DEFAULT_SQUAT_PHASE_CONFIG,
+  phaseConfigForExercise,
   type PhaseConfig,
 } from "../phase.js";
 import type { DemoTrajectory, TrajectoryExerciseId } from "./types.js";
@@ -127,6 +128,13 @@ export function driveDegStats(trajectory: DemoTrajectory): DriveDegStats {
 function currentConfig(
   exerciseId: TrajectoryExerciseId,
 ): Pick<PhaseConfig, "standAboveDeg" | "bottomBelowDeg"> {
+  const phaseG = phaseConfigForExercise(exerciseId);
+  if (phaseG) {
+    return {
+      standAboveDeg: phaseG.standAboveDeg,
+      bottomBelowDeg: phaseG.bottomBelowDeg,
+    };
+  }
   const c =
     exerciseId === "pushup"
       ? DEFAULT_PUSHUP_PHASE_CONFIG

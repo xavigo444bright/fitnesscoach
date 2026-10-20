@@ -14,14 +14,17 @@ import {
   formatClipPlaybackRate,
   layout,
   nextClipPlaybackRate,
+  pipSizeForScreen,
 } from '@fitness-coach/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sampleClipFileName } from '../sampleClips';
 import DraggablePip from './DraggablePip';
 import ExercisePoseIcon from './ExercisePoseIcon';
 import PipClipPane from './PipClipPane';
 import ReferencePersonPip from './ReferencePersonPip';
+import { useTr } from '../i18n';
 
 export type DemoWindowMode = 'clip' | 'bones';
 
@@ -50,10 +53,16 @@ export default function ReferenceDemoWindow({
     () => sampleClipFileName(exerciseId, cameraHint),
     [exerciseId, cameraHint],
   );
-  const fileStem = fileName?.replace(/\.mp4$/i, '') ?? '';
   const [mode, setMode] = useState<DemoWindowMode>(fileName ? 'clip' : 'bones');
   const [clipPlaying, setClipPlaying] = useState(true);
   const [clipRate, setClipRate] = useState(DEFAULT_CLIP_PLAYBACK_RATE);
+  const insets = useSafeAreaInsets();
+  const tr = useTr();
+  const pip = pipSizeForScreen(
+    screenW,
+    screenH,
+    layout.bottomBarHeight + insets.bottom,
+  );
   const displayMode: DemoWindowMode = forceClip && fileName ? 'clip' : mode;
   const showClip = displayMode === 'clip';
   const showBones = displayMode === 'bones';
@@ -65,6 +74,8 @@ export default function ReferenceDemoWindow({
     <DraggablePip
       screenW={screenW}
       screenH={screenH}
+      insetRight={insets.right}
+      insetBottom={insets.bottom}
       collapsed={collapsed}
     >
       {collapsed ? (
@@ -72,13 +83,13 @@ export default function ReferenceDemoWindow({
           style={styles.tab}
           onPress={() => setCollapsed(false)}
           accessibilityRole="button"
-          accessibilityLabel="拉开示范窗"
+          accessibilityLabel={tr('拉开示范窗')}
           hitSlop={4}
         >
           <ExercisePoseIcon catalogId={exerciseId} size={28} />
         </Pressable>
       ) : (
-        <View style={styles.frame}>
+        <View style={[styles.frame, { width: pip.width, height: pip.height }]}>
           <View
             style={showClip ? styles.clipLayer : styles.clipLayerHidden}
             pointerEvents="none"
@@ -106,27 +117,20 @@ export default function ReferenceDemoWindow({
               style={styles.tapZone}
               onPress={() => setClipPlaying((prev) => !prev)}
               accessibilityRole="button"
-              accessibilityLabel={clipPlaying ? '暂停原片' : '播放原片'}
+              accessibilityLabel={tr(clipPlaying ? '暂停原片' : '播放原片')}
             >
               {clipPlaying ? null : (
                 <View style={styles.pauseBadge} pointerEvents="none">
-                  <Text style={styles.pauseBadgeText}>播放</Text>
+                  <Text style={styles.pauseBadgeText}>{tr('播放')}</Text>
                 </View>
               )}
             </Pressable>
           ) : null}
           <View style={styles.chrome} pointerEvents="box-none">
             <View style={styles.topRow} pointerEvents="box-none">
-              <View>
-                <Text style={styles.title} pointerEvents="none">
-                  {showClip ? '原片' : '示范'}
-                </Text>
-                {showClip && fileStem ? (
-                  <Text style={styles.fileHint} pointerEvents="none">
-                    {fileStem}
-                  </Text>
-                ) : null}
-              </View>
+              <Text style={styles.title} pointerEvents="none">
+                {tr(showClip ? '原片' : '示范')}
+              </Text>
               <View style={styles.topActions}>
                 {showClip ? (
                   <Pressable
@@ -145,10 +149,10 @@ export default function ReferenceDemoWindow({
                   style={styles.collapseBtn}
                   onPress={() => setCollapsed(true)}
                   accessibilityRole="button"
-                  accessibilityLabel="收起示范窗"
+                  accessibilityLabel={tr('收起示范窗')}
                   hitSlop={6}
                 >
-                  <Text style={styles.collapseBtnText}>收起</Text>
+                  <Text style={styles.collapseBtnText}>{tr('收起')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -160,7 +164,7 @@ export default function ReferenceDemoWindow({
                 ]}
                 onPress={() => setMode('clip')}
                 accessibilityRole="button"
-                accessibilityLabel="轮播参考原片"
+                accessibilityLabel={tr('轮播参考原片')}
                 accessibilityState={{ selected: showClip }}
               >
                 <Text
@@ -169,7 +173,7 @@ export default function ReferenceDemoWindow({
                     showClip ? styles.modeChipTextOn : null,
                   ]}
                 >
-                  样片
+                  {tr('样片')}
                 </Text>
               </Pressable>
               <Pressable
@@ -182,7 +186,7 @@ export default function ReferenceDemoWindow({
                   if (!forceClip) setMode('bones');
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="示范骨加二维骨"
+                accessibilityLabel={tr('示范骨加二维骨')}
                 accessibilityState={{ selected: showBones, disabled: forceClip }}
               >
                 <Text
@@ -191,7 +195,7 @@ export default function ReferenceDemoWindow({
                     showBones ? styles.modeChipTextOn : null,
                   ]}
                 >
-                  骨骼
+                  {tr('骨骼')}
                 </Text>
               </Pressable>
             </View>
@@ -201,9 +205,6 @@ export default function ReferenceDemoWindow({
     </DraggablePip>
   );
 }
-
-const PIP_W = layout.refPersonPipWidth;
-const PIP_H = layout.refPersonPipHeight;
 
 const styles = StyleSheet.create({
   tab: {
@@ -217,8 +218,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   frame: {
-    width: PIP_W,
-    height: PIP_H,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: 'rgba(15, 23, 42, 0.55)',
@@ -269,13 +268,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.82)',
     fontSize: 11,
     fontWeight: '700',
-  },
-  fileHint: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 9,
-    fontWeight: '600',
-    marginTop: 1,
-    maxWidth: 88,
   },
   topActions: {
     flexDirection: 'row',

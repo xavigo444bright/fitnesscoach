@@ -2,6 +2,7 @@
  * PG-003 训练准备（FR-022）
  * 摄像头预览 + 站位文案；点开始即进训练（无 3-2-1）。
  */
+import { Ionicons } from '@expo/vector-icons';
 import { colors, fontSize, layout, space } from '@fitness-coach/ui';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { StatusBar } from 'expo-status-bar';
@@ -13,7 +14,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import PlacementGuide from '../components/PlacementGuide';
+import { useTr } from '../i18n';
 import {
   getSessionCameraPrefs,
   setSessionFacing,
@@ -29,6 +32,8 @@ export default function PrepareScreen({ onReady, onBack }: Props) {
   const [permission, requestPermission] = useCameraPermissions();
 
   const initial = getSessionCameraPrefs();
+  const insets = useSafeAreaInsets();
+  const tr = useTr();
   const [facing, setFacing] = useState<CameraFacing>(initial.facing);
 
   const onFlip = () => {
@@ -49,13 +54,13 @@ export default function PrepareScreen({ onReady, onBack }: Props) {
   if (!permission.granted) {
     return (
       <View style={styles.center}>
-        <Text style={styles.title}>需要摄像头权限</Text>
-        <Text style={styles.hint}>准备页需预览机位与站位框</Text>
+        <Text style={styles.title}>{tr('需要摄像头权限')}</Text>
+        <Text style={styles.hint}>{tr('准备页需预览机位与站位框')}</Text>
         <Pressable style={styles.button} onPress={() => void requestPermission()}>
-          <Text style={styles.buttonText}>允许使用摄像头</Text>
+          <Text style={styles.buttonText}>{tr('允许使用摄像头')}</Text>
         </Pressable>
         <Pressable onPress={onBack}>
-          <Text style={styles.link}>返回</Text>
+          <Text style={styles.link}>{tr('返回')}</Text>
         </Pressable>
         <StatusBar style="light" />
       </View>
@@ -67,30 +72,45 @@ export default function PrepareScreen({ onReady, onBack }: Props) {
       <CameraView style={StyleSheet.absoluteFill} facing={facing} />
       <PlacementGuide
         visible
-        hint="整幅画面都可用，髋膝踝入画即可"
+        hint={tr('整幅画面都可用，髋膝踝入画即可')}
       />
 
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { top: insets.top + 8, left: Math.max(16, insets.left) }]}>
         <Pressable onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backText}>← 返回</Text>
+          <Text style={styles.backText}>← {tr('返回')}</Text>
         </Pressable>
       </View>
 
-      <View style={styles.topActions} pointerEvents="box-none">
+      <View
+        style={[
+          styles.topActions,
+          { top: insets.top + 8, right: Math.max(12, insets.right) },
+        ]}
+        pointerEvents="box-none"
+      >
         <Pressable
           style={styles.actionBtn}
           onPress={onFlip}
           accessibilityRole="button"
-          accessibilityLabel="切换摄像头"
+          accessibilityLabel={tr('切换摄像头')}
           hitSlop={8}
         >
-          <Text style={styles.actionBtnText}>翻转</Text>
+          <Ionicons name="camera-reverse-outline" size={18} color="#fff" />
         </Pressable>
       </View>
 
-      <View style={styles.bottom}>
+      <View
+        style={[
+          styles.bottom,
+          {
+            left: Math.max(16, insets.left),
+            right: Math.max(16, insets.right),
+            bottom: Math.max(16, insets.bottom),
+          },
+        ]}
+      >
         <Pressable style={styles.button} onPress={onReady}>
-          <Text style={styles.buttonText}>开始训练</Text>
+          <Text style={styles.buttonText}>{tr('开始训练')}</Text>
         </Pressable>
       </View>
       <StatusBar style="light" />
@@ -124,8 +144,6 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    top: 52,
-    left: space.md,
     zIndex: 20,
   },
   backBtn: {
@@ -139,38 +157,24 @@ const styles = StyleSheet.create({
   },
   topActions: {
     position: 'absolute',
-    top: 52,
-    right: 12,
     zIndex: 120,
     elevation: 120,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-end',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
     gap: 8,
-    maxWidth: 220,
   },
   actionBtn: {
-    minHeight: 44,
-    minWidth: 56,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.72)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actionBtnText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-  },
   bottom: {
     position: 'absolute',
-    left: space.md,
-    right: space.md,
-    bottom: 40,
     alignItems: 'center',
     zIndex: 20,
   },

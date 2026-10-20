@@ -6,6 +6,7 @@ import { colors, fontSize, layout, motion, radius, space } from '@fitness-coach/
 import { useEffect, useRef } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTr } from '../i18n';
 
 type Props = RepCounterProps;
 
@@ -15,6 +16,7 @@ export default function RepCounter({
   endLabel = '结束',
   caption = 'Rep',
 }: Props) {
+  const tr = useTr();
   const insets = useSafeAreaInsets();
   const scale = useRef(new Animated.Value(1)).current;
   const prevCount = useRef(count);
@@ -39,7 +41,7 @@ export default function RepCounter({
       ]}
     >
       <View style={styles.repChip}>
-        <Text style={styles.caption}>{caption}</Text>
+        <Text style={styles.caption}>{tr(caption)}</Text>
         <View style={styles.countSlot}>
           <Animated.Text
             style={[
@@ -61,9 +63,9 @@ export default function RepCounter({
           style={styles.endBtn}
           onPress={onEnd}
           accessibilityRole="button"
-          accessibilityLabel={endLabel}
+          accessibilityLabel={tr(endLabel)}
         >
-          <Text style={styles.endLabel}>{endLabel}</Text>
+          <Text style={styles.endLabel}>{tr(endLabel)}</Text>
         </Pressable>
       ) : null}
     </View>

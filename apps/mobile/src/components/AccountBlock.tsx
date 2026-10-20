@@ -7,18 +7,20 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { deleteLocalAccount, signOutToGuest } from '../accountStorage';
 import AuthMethodList from './AuthMethodList';
 import ShellButton from './ShellButton';
+import { useTr } from '../i18n';
 
 type Props = {
   account: LocalAccount;
 };
 
 export default function AccountBlock({ account }: Props) {
+  const tr = useTr();
   const guest = account.kind === 'guest';
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>账号</Text>
-      <Text style={styles.status}>{accountDisplayName(account)}</Text>
+      <Text style={styles.title}>{tr('账号')}</Text>
+      <Text style={styles.status}>{tr(accountDisplayName(account))}</Text>
       {guest ? (
         <AuthMethodList />
       ) : (
@@ -35,12 +37,14 @@ export default function AccountBlock({ account }: Props) {
             variant="ghost"
             onPress={() => {
               Alert.alert(
-                '删除账号',
-                '这台手机上的登录名和密码会被清掉。训练记录还留在手机里。若用过 Apple 登录，可在系统设置里撤销本 App。',
+                tr('删除账号'),
+                tr(
+                  '这台手机上的登录名和密码会被清掉。训练记录还留在手机里。若用过 Apple 登录，可在系统设置里撤销本 App。',
+                ),
                 [
-                  { text: '取消', style: 'cancel' },
+                  { text: tr('取消'), style: 'cancel' },
                   {
-                    text: '删除',
+                    text: tr('删除'),
                     style: 'destructive',
                     onPress: () => {
                       void deleteLocalAccount();

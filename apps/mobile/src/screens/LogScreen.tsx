@@ -30,13 +30,17 @@ import {
 } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import {
+  Keyboard,
+  Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  type KeyboardEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { peekAccount, subscribeAccount } from '../accountStorage';
@@ -48,6 +52,13 @@ import SegmentPager from '../components/SegmentPager';
 import ShellButton from '../components/ShellButton';
 import WorkoutCalendar from '../components/WorkoutCalendar';
 import WorkoutModuleCard from '../components/WorkoutModuleCard';
+import { scrollIntoKeyboard } from '../keyboardField';
+import {
+  setLanguagePreference,
+  systemLanguage,
+  useLanguagePreference,
+  useTr,
+} from '../i18n';
 import { tabBarContentPadding } from '../navigation/chrome';
 import type { MainTabParamList, RootStackParamList } from '../navigation/types';
 import {
@@ -65,6 +76,7 @@ type LogNavigation = CompositeNavigationProp<
 
 export default function LogScreen() {
   const insets = useSafeAreaInsets();
+  const tr = useTr();
   const navigation = useNavigation<LogNavigation>();
   const [segment, setSegment] = useState<LogSegment>(DEFAULT_LOG_SEGMENT);
   const [log, setLog] = useState(peekWorkoutLog);
@@ -81,7 +93,7 @@ export default function LogScreen() {
         { paddingTop: insets.top + space.md, paddingBottom: bottomPad },
       ]}
     >
-      <Text style={styles.kicker}>记录</Text>
+      <Text style={styles.kicker}>{tr('记录')}</Text>
       <SegmentedControl
         items={LOG_SEGMENTS}
         value={segment}
@@ -200,7 +212,7 @@ function HistoryPane({
           <WorkoutModuleCard
             key={workout.id}
             title={workoutTitleDisplay(workout)}
-            meta={`${calendarDayLabel(workout.endedAt ?? workout.startedAt)} · 容量 ${workoutVolumeKg(workout)} kg`}
+            meta={`${calendarDayLabel(workout.endedAt ?? workout.startedAt)} · 容量 ${workoutVolumeKg(workout, log.bodyweightKg)} kg`}
             summary={workoutExerciseSummary(workout) || '没有动作'}
             onPress={() => onOpenWorkout(workout.id)}
             onDelete={() => {
@@ -224,28 +236,101 @@ function MeBodyPane({
   bodyweightKg?: number;
   onSave: (kg: number | undefined) => void;
 }) {
+  const tr = useTr();
+  const preference = useLanguagePreference();
   const [text, setText] = useState(
     bodyweightKg != null ? String(bodyweightKg) : '',
   );
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
+  const inputRef = useRef<TextInput>(null);
+  const keyboardHeight = useRef(0);
   useEffect(() => {
     setText(bodyweightKg != null ? String(bodyweightKg) : '');
   }, [bodyweightKg]);
+  useEffect(() => {
+    const show =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hide =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const onShow = (event: KeyboardEvent) => {
+      keyboardHeight.current = event.endCoordinates?.height ?? 0;
+      scrollIntoKeyboard(
+        inputRef.current,
+        keyboardHeight.current,
+        scrollY,
+        scrollRef.current,
+      );
+    };
+    const onHide = () => {
+      keyboardHeight.current = 0;
+    };
+    const showSub = Keyboard.addListener(show, onShow);
+    const hideSub = Keyboard.addListener(hide, onHide);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      keyboardShouldPersistTaps="handled"
-      automaticallyAdjustKeyboardInsets
-      contentContainerStyle={{ paddingBottom: space.xl }}
-    >
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        keyboardShouldPersistTaps="handled"
+        onScroll={(event) => {
+          scrollY.current = event.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
+        contentContainerStyle={{ paddingBottom: space.xl }}
+      >
       {account ? <AccountBlock account={account} /> : null}
       <PrBoard log={log} />
-      <Text style={styles.meTitle}>身体数据</Text>
-      <Text style={styles.meHint}>自重会带到训练页小格。</Text>
-      <Text style={styles.fieldLabel}>自重 kg</Text>
+      <Text style={styles.meTitle}>{tr('语言')}</Text>
+      <View style={styles.langRow}>
+        {(systemLanguage() === 'zh'
+          ? ([
+              ['zh', '中文'],
+              ['en', 'English'],
+            ] as const)
+          : ([
+              ['en', 'English'],
+              ['zh', '中文'],
+            ] as const)
+        ).map(([key, label]) => {
+          const on = (preference === 'system' ? systemLanguage() : preference) === key;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => {
+                void setLanguagePreference(key);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              style={[styles.langChip, on && styles.langChipOn]}
+            >
+              <Text style={[styles.langLabel, on && styles.langLabelOn]}>
+                {tr(label)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <Text style={styles.meTitle}>{tr('身体数据')}</Text>
+      <Text style={styles.meHint}>{tr('自重会带到训练页小格。')}</Text>
+      <Text style={styles.fieldLabel}>{tr('自重 kg')}</Text>
       <TextInput
+        ref={inputRef}
         value={text}
         onChangeText={setText}
+        onFocus={() =>
+          scrollIntoKeyboard(
+            inputRef.current,
+            keyboardHeight.current,
+            scrollY,
+            scrollRef.current,
+          )
+        }
         onEndEditing={() => {
           const shown = bodyweightKg != null ? String(bodyweightKg) : '';
           if (text === shown) return;
@@ -261,7 +346,7 @@ function MeBodyPane({
         placeholderTextColor={colors.tabInactive}
         keyboardType="decimal-pad"
         style={styles.input}
-        accessibilityLabel="自重公斤"
+        accessibilityLabel={tr('自重公斤')}
       />
     </ScrollView>
   );
@@ -289,6 +374,31 @@ const styles = StyleSheet.create({
     fontSize: fontSize.caption,
     lineHeight: 20,
     marginBottom: space.lg,
+  },
+  langRow: {
+    flexDirection: 'row',
+    gap: space.sm,
+    marginBottom: space.xl,
+  },
+  langChip: {
+    minHeight: layout.touchMin,
+    paddingHorizontal: space.md,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'center',
+  },
+  langChipOn: {
+    backgroundColor: colors.cta,
+    borderColor: colors.cta,
+  },
+  langLabel: {
+    color: colors.textPrimary,
+    fontSize: fontSize.body,
+    fontWeight: '600',
+  },
+  langLabelOn: {
+    color: colors.onCta,
   },
   fieldLabel: {
     color: colors.textSecondary,

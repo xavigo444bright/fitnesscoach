@@ -63,21 +63,8 @@ export const EQUIPMENT_LABEL: Record<Equipment, string> = {
   other: "其他",
 };
 
-/** 下一波升级：已在 catalog 的 12 条（Phase G）。Phase H 新 id 见 expansion-queue.json。 */
-export const COACHABLE_UPGRADE_QUEUE: string[] = [
-  "lat-pulldown",
-  "seated-row",
-  "superman",
-  "band-row",
-  "leg-press",
-  "calf-raise",
-  "goblet-squat",
-  "dead-bug",
-  "bird-dog",
-  "crunch",
-  "side-plank",
-  "hanging-knee-raise",
-];
+/** Phase G 已接线。下一波新 id 见 expansion-queue.json（Phase H）。 */
+export const COACHABLE_UPGRADE_QUEUE: string[] = [];
 
 export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
   // —— 胸 ——
@@ -293,7 +280,7 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     cues: [
       "肩下沉启动，拉至下巴过杆",
       "控制下放，少借摆浪",
-      "手机侧面摆放，看清肩、肘",
+      "肩、肘入画即可",
     ],
   },
   {
@@ -301,10 +288,14 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     name: "高位下拉",
     bodyPart: "back",
     equipment: "machine",
-    cameraHint: "side",
-    tier: "catalog",
-    cues: ["杆拉至上胸", "肘向下向后"],
-    statusNote: "即将支持教练",
+    cameraHint: "front",
+    tier: "coachable",
+    activeMuscles: ["chest", "upperArm"],
+    cues: [
+      "杆拉至上胸，肘向下向后",
+      "少借躯干后仰",
+      "肩、肘入画即可",
+    ],
   },
   {
     id: "seated-row",
@@ -312,9 +303,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "back",
     equipment: "machine",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["躯干直立", "拉至腹侧，肩胛夹紧"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["chest", "upperArm"],
+    cues: [
+      "躯干直立，肘收到髋侧",
+      "少借躯干前后摆",
+      "手机侧面摆放，看清肩、肘、髋",
+    ],
   },
   {
     id: "superman",
@@ -322,9 +317,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "back",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["俯卧抬胸与腿", "腰勿过度反弓"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["chest", "pelvis"],
+    cues: [
+      "俯卧，胸和腿一起抬离垫子",
+      "抬到能离开垫面即可，不必抄示范幅度",
+      "手机侧面摆放，看清肩、髋、膝",
+    ],
   },
   {
     id: "band-row",
@@ -332,9 +331,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "back",
     equipment: "band",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["站姿或坐姿后拉", "肩胛主动后缩"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["chest", "upperArm"],
+    cues: [
+      "锚点在身前，肘收到身侧",
+      "少借躯干后仰",
+      "手机斜侧 3/4 当侧面，看清肩、肘",
+    ],
   },
 
   // —— 下肢 ——
@@ -401,9 +404,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "legs",
     equipment: "machine",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["腰贴靠垫", "膝勿内扣", "勿完全锁死"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis", "thigh"],
+    cues: [
+      "腰贴靠垫，膝再屈到约平行",
+      "不要只做半程",
+      "手机侧面或斜侧摆放，看清髋、膝、踝",
+    ],
   },
   {
     id: "calf-raise",
@@ -411,9 +418,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "legs",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["脚掌前部发力", "顶峰稍停", "控制下落"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["thigh"],
+    cues: [
+      "站立抬脚跟，不必先把脚跟踩到台阶下",
+      "控制下落",
+      "手机侧面摆放，看清膝、踝、脚尖",
+    ],
   },
   {
     id: "goblet-squat",
@@ -421,9 +432,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "legs",
     equipment: "dumbbell",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["哑铃贴胸", "肘在膝内", "蹲深可控"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis", "thigh"],
+    cues: [
+      "铃贴胸，蹲到膝角进入底部",
+      "躯干不要折得太前",
+      "手机侧面摆放，看清肩、髋、膝、踝",
+    ],
   },
 
   // —— 核心 ——
@@ -447,9 +462,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "core",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["腰贴地", "对侧手脚伸展", "呼气时稳定"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis"],
+    cues: [
+      "对侧手脚伸出去再收回，左右各算一次",
+      "腰离开垫子就把腰压回去",
+      "手机侧面摆放，看清肩、髋、膝",
+    ],
   },
   {
     id: "bird-dog",
@@ -457,9 +476,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "core",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["四点支撑", "对侧手脚伸直", "髋不旋转"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis"],
+    cues: [
+      "对侧手脚向后伸，抬平即可",
+      "髋别翻、腿别踢太高",
+      "手机侧面摆放，看清肩、髋、膝",
+    ],
   },
   {
     id: "crunch",
@@ -467,9 +490,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "core",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["下背贴地", "肩胛离地即可", "勿猛拉脖"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis"],
+    cues: [
+      "下背贴地，肩胛离地即可",
+      "不必坐起来",
+      "手机侧面摆放，看清肩、髋",
+    ],
   },
   {
     id: "side-plank",
@@ -477,9 +504,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "core",
     equipment: "bodyweight",
     cameraHint: "front",
-    tier: "catalog",
-    cues: ["身体侧向一条线", "髋不上不下"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis"],
+    cues: [
+      "身体撑成一条线，髋不要掉下去",
+      "撑稳按秒计，不是次数",
+      "手机斜对身体正面，看清肩、髋、踝",
+    ],
   },
   {
     id: "hanging-knee-raise",
@@ -487,9 +518,13 @@ export const EXERCISE_CATALOG: ExerciseCatalogEntry[] = [
     bodyPart: "core",
     equipment: "bodyweight",
     cameraHint: "side",
-    tier: "catalog",
-    cues: ["肩下沉稳定", "膝向胸提起", "少借摆"],
-    statusNote: "即将支持教练",
+    tier: "coachable",
+    activeMuscles: ["pelvis"],
+    cues: [
+      "屈膝向胸口抬到髋的高度",
+      "少借摆浪",
+      "手机侧面摆放，看清肩、髋、膝",
+    ],
   },
 ];
 
@@ -525,7 +560,19 @@ export type CoachableExerciseId =
   | "front-raise"
   | "rear-delt-fly"
   | "face-pull"
-  | "pike-pushup";
+  | "pike-pushup"
+  | "lat-pulldown"
+  | "seated-row"
+  | "superman"
+  | "band-row"
+  | "leg-press"
+  | "calf-raise"
+  | "goblet-squat"
+  | "dead-bug"
+  | "bird-dog"
+  | "crunch"
+  | "side-plank"
+  | "hanging-knee-raise";
 
 export function isCoachableId(id: string): id is CoachableExerciseId {
   const e = getCatalogEntry(id);
@@ -550,12 +597,25 @@ export function isCoachableId(id: string): id is CoachableExerciseId {
       id === "front-raise" ||
       id === "rear-delt-fly" ||
       id === "face-pull" ||
-      id === "pike-pushup")
+      id === "pike-pushup" ||
+      id === "lat-pulldown" ||
+      id === "seated-row" ||
+      id === "superman" ||
+      id === "band-row" ||
+      id === "leg-press" ||
+      id === "calf-raise" ||
+      id === "goblet-squat" ||
+      id === "dead-bug" ||
+      id === "bird-dog" ||
+      id === "crunch" ||
+      id === "side-plank" ||
+      id === "hanging-knee-raise")
   );
 }
 
 /**
- * 侧面仍画两侧臂：卧推等两臂都在杠/手柄上，不像深蹲远侧会叠成网。
+ * 侧面仍画两侧臂：卧推、前平举、高位下拉、引体等两臂都在干活，不像深蹲远侧会叠成网。
+ * 远侧肘腕是否真的画上，仍由画骨层按可见度、以及有没有贴在近侧上决定。
  */
 export function overlayKeepsBothArmsOnSide(exerciseId: string): boolean {
   return (
@@ -566,7 +626,10 @@ export function overlayKeepsBothArmsOnSide(exerciseId: string): boolean {
     exerciseId === "dip" ||
     exerciseId === "incline-pushup" ||
     exerciseId === "pike-pushup" ||
-    exerciseId === "cable-crossover"
+    exerciseId === "cable-crossover" ||
+    exerciseId === "front-raise" ||
+    exerciseId === "lat-pulldown" ||
+    exerciseId === "pullup"
   );
 }
 

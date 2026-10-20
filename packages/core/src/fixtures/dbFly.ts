@@ -55,3 +55,60 @@ export function buildDbFlyPose(opts: { wristIncludedDeg: number }): Pose {
   pose[LandmarkIndex.RightAnkle] = lm({ x: 0.54, y: 0.9 });
   return pose;
 }
+
+/**
+ * 手臂相对竖直。tiltDeg 0 = 下垂，90 = 水平。
+ * inDepth：水平分量在 z，画面里双肩双腕叠在一起（正侧面朝镜头打开）。
+ */
+export function buildArmTiltPose(opts: {
+  tiltDeg?: number;
+  inDepth?: boolean;
+  onlySide?: "left" | "right";
+  collapsed?: boolean;
+}): Pose {
+  const tilt = Math.min(90, Math.max(0, opts.tiltDeg ?? 0));
+  const rad = (tilt * Math.PI) / 180;
+  const arm = 0.22;
+  const down = arm * Math.cos(rad);
+  const horiz = arm * Math.sin(rad);
+  const y0 = 0.4;
+  const ls: Landmark = opts.inDepth
+    ? { x: 0.5, y: y0, z: 0, visibility: 1 }
+    : { x: 0.42, y: y0, z: 0, visibility: 1 };
+  const rs: Landmark = opts.inDepth
+    ? { x: 0.5, y: y0, z: 0, visibility: 1 }
+    : { x: 0.58, y: y0, z: 0, visibility: 1 };
+  const along = (shoulder: Landmark, sign: number, scale: number): Landmark => {
+    if (opts.collapsed) {
+      return { x: shoulder.x, y: shoulder.y, z: shoulder.z, visibility: 1 };
+    }
+    if (opts.inDepth) {
+      return {
+        x: shoulder.x,
+        y: shoulder.y + down * scale,
+        z: (shoulder.z ?? 0) + sign * horiz * scale,
+        visibility: 1,
+      };
+    }
+    return {
+      x: shoulder.x + sign * horiz * scale,
+      y: shoulder.y + down * scale,
+      z: 0,
+      visibility: 1,
+    };
+  };
+  const pose: Pose = [];
+  pose[LandmarkIndex.LeftShoulder] = ls;
+  pose[LandmarkIndex.RightShoulder] = rs;
+  if (opts.onlySide !== "right") {
+    pose[LandmarkIndex.LeftElbow] = along(ls, -1, 0.55);
+    pose[LandmarkIndex.LeftWrist] = along(ls, -1, 1);
+  }
+  if (opts.onlySide !== "left") {
+    pose[LandmarkIndex.RightElbow] = along(rs, 1, 0.55);
+    pose[LandmarkIndex.RightWrist] = along(rs, 1, 1);
+  }
+  pose[LandmarkIndex.LeftHip] = { x: 0.48, y: 0.62, visibility: 1 };
+  pose[LandmarkIndex.RightHip] = { x: 0.52, y: 0.62, visibility: 1 };
+  return pose;
+}
