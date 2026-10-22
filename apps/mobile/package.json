@@ -48,7 +48,8 @@
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "check:figure": "node --experimental-strip-types --import ./scripts/register-ts.mjs ./scripts/check-procedural-figure.ts",
-    "check:reference": "node --experimental-strip-types --import ./scripts/register-ts.mjs ./scripts/check-reference-layers.ts"
+    "check:reference": "node --experimental-strip-types --import ./scripts/register-ts.mjs ./scripts/check-reference-layers.ts",
+    "check:android-release": "node --experimental-strip-types --import ./scripts/register-ts.mjs ./scripts/check-android-release.ts"
   },
   "private": true
 }

@@ -34,6 +34,9 @@ apps/server/data/
 .cursor/
 .claude/
 .pnpm-store/
+packages/core/src/countLoop/
+tools/count-loop/
+docs/session-compression*.md
 
 media/
 docs/promo/

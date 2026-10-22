@@ -117,6 +117,7 @@ import { useTr } from '../i18n';
 import {
   beginScreenRecordVisit,
   consumeScreenRecordExit,
+  SCREEN_RECORD_AVAILABLE,
   SCREEN_RECORD_LIMIT_MS,
   showSavedOnDeviceToast,
   startScreenRecording,
@@ -1177,6 +1178,7 @@ export default function DevPoseScreen({
 
   useFocusEffect(
     useCallback(() => {
+      if (!SCREEN_RECORD_AVAILABLE) return;
       beginScreenRecordVisit();
       return () => {
         void (async () => {
@@ -1407,19 +1409,21 @@ export default function DevPoseScreen({
             color="#fff"
           />
         </Pressable>
-        <Pressable
-          style={styles.actionBtn}
-          onPress={onToggleRecord}
-          accessibilityRole="button"
-          accessibilityLabel={tr(recording ? '停止录制' : '录制')}
-          hitSlop={8}
-        >
-          {recording ? (
-            <View style={styles.recDot} />
-          ) : (
-            <Ionicons name="radio-button-on-outline" size={18} color="#fff" />
-          )}
-        </Pressable>
+        {SCREEN_RECORD_AVAILABLE ? (
+          <Pressable
+            style={styles.actionBtn}
+            onPress={onToggleRecord}
+            accessibilityRole="button"
+            accessibilityLabel={tr(recording ? '停止录制' : '录制')}
+            hitSlop={8}
+          >
+            {recording ? (
+              <View style={styles.recDot} />
+            ) : (
+              <Ionicons name="radio-button-on-outline" size={18} color="#fff" />
+            )}
+          </Pressable>
+        ) : null}
       </View>
 
       {showReference ? (

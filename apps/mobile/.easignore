@@ -17,3 +17,5 @@ dist/
 web-build/
 expo-env.d.ts
 *.tsbuildinfo
+../../packages/core/src/countLoop/
+../../tools/count-loop/

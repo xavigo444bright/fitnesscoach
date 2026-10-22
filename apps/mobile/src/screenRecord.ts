@@ -1,5 +1,8 @@
-import { NativeModules } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import { translate } from './i18n/locale';
+import { isScreenRecordingSupported } from './screenRecordSupport';
+
+export const SCREEN_RECORD_AVAILABLE = isScreenRecordingSupported(Platform.OS);
 
 /** 调试页一条录屏最长 3 分钟。到点只停录制。 */
 export const SCREEN_RECORD_LIMIT_MS = 180_000;
@@ -55,6 +58,7 @@ export function consumeScreenRecordExit(): boolean {
 }
 
 export async function startScreenRecording(): Promise<boolean> {
+  if (!SCREEN_RECORD_AVAILABLE) return false;
   if (active || inFlight || starting) return false;
   const native = recorder();
   if (!native) {
