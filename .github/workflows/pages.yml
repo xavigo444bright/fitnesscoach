@@ -1,0 +1,65 @@
+# Publish the Android download page plus the APK on github.io.
+# github.com is often blocked in China; github.io is reachable, so the
+# button must be a same-origin file, not a Release tag page.
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - docs/index.html
+      - docs/download.html
+      - .github/workflows/pages.yml
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docs
+          sparse-checkout-cone-mode: true
+
+      - name: Stage site
+        env:
+          APK_NAME: FitnessCoach-2.1.apk
+          APK_URL: https://github.com/xavigo444bright/fitnesscoach/releases/download/v2.1/FitnessCoach-2.1.apk
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp docs/index.html _site/index.html
+          cp docs/download.html _site/download.html
+          touch _site/.nojekyll
+          curl -L --fail --retry 3 --retry-delay 2 -o "_site/${APK_NAME}" "${APK_URL}"
+          size=$(wc -c < "_site/${APK_NAME}")
+          echo "apk bytes=${size}"
+          test "${size}" -gt 100000000
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

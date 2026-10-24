@@ -37,6 +37,9 @@ docs/session-compression*.md
 # 账号服务本机用户库（不进 git）
 apps/server/data/
 
+# Pages 上的 APK 由 Actions 从 Release 拉取，禁止进 git（单文件 >100MB）
+docs/*.apk
+
 # 示范片源（体积大，本地提轨迹用；目录保留 README）
 # 注意：gitignore 不支持 {a,b} 花括号展开，须逐后缀写
 media/trajectory-source/**/*.mp4
@@ -62,5 +65,6 @@ tools/trajectory-source-ingest/.venv/
 tools/trajectory-extract/models/
 
 # Local package store / MediaPipe task dump
+tmp/
 .pnpm-store/
 tools/trajectory-extract/pose_landmarker_lite.task
