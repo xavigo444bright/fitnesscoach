@@ -39,8 +39,8 @@ jobs:
 
       - name: Stage site
         env:
-          APK_NAME: FitnessCoach-2.1.apk
-          APK_URL: https://github.com/xavigo444bright/fitnesscoach/releases/download/v2.1/FitnessCoach-2.1.apk
+          APK_NAME: FitnessCoach-3.0.apk
+          APK_URL: https://github.com/xavigo444bright/fitnesscoach/releases/download/v3.0/FitnessCoach-3.0.apk
         run: |
           set -euo pipefail
           mkdir -p _site
